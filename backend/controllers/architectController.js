@@ -3,8 +3,8 @@ const catchAsyncErrors = require("../middleware/catchAsyncError");
 const Architect = require("../models/architectModel")
 
 exports.totalarchitect = catchAsyncErrors(async(req, res, next)=>{
-   
-    const architects = await Architect.find();
+    const filter = req.user.role === "admin" ? {} : { createdBy: req.user._id };
+    const architects = await Architect.find(filter);
 
     res.status(200).json({
         archlength:architects.length,
@@ -19,8 +19,10 @@ exports.createArchitect = catchAsyncErrors(async(req, res, next)=>{
         ...t,
         date : t.date.substr(0,10)
     }
-    console.log(t);
-    const architect = await Architect.create(t)
+    const architect = await Architect.create({
+        ...t,
+        createdBy: req.user._id
+    })
     console.log(architect);
     res.status(200).json({
         architect,
@@ -29,10 +31,12 @@ exports.createArchitect = catchAsyncErrors(async(req, res, next)=>{
 })
 
 exports.getArchitect = catchAsyncErrors(async(req, res, next)=>{
-    
-    let t = req.params.id;
+    const filter = req.user.role === "admin" ? { _id: req.params.id } : { _id: req.params.id, createdBy: req.user._id };
+    const architect = await Architect.findOne(filter)
 
-    const architect = await Architect.findById(t)
+    if (!architect) {
+        return next(new ErrorHander("Architect not found", 404));
+    }
 
     res.status(200).json({
         architect,
@@ -41,18 +45,16 @@ exports.getArchitect = catchAsyncErrors(async(req, res, next)=>{
 })
 
 exports.updateArchitect = catchAsyncErrors(async(req, res, next)=>{
-    
-    let t = req.params.id;
-    let body = req.body
-
-    const architect = await Architect.findByIdAndUpdate(t,body,{
+    const filter = req.user.role === "admin" ? { _id: req.params.id } : { _id: req.params.id, createdBy: req.user._id };
+    const architect = await Architect.findOneAndUpdate(filter,req.body,{
         new:true,
         runValidators:true,
         useFindAndModify:false
- 
     });
-    await architect.save();
 
+    if (!architect) {
+        return next(new ErrorHander("Architect not found", 404));
+    }
     res.status(200).json({
         architect,
         success:true
@@ -60,10 +62,7 @@ exports.updateArchitect = catchAsyncErrors(async(req, res, next)=>{
 })
 
 exports.deleteArchitect = catchAsyncErrors(async(req, res, next)=>{
-    
-    let t = req.params.id;
-
-    const architect = await Architect.findOneAndDelete({mobileno:t});
+    const architect = await Architect.findOneAndDelete({mobileno:req.params.id});
 
     res.status(200).json({
         architect,
@@ -72,8 +71,9 @@ exports.deleteArchitect = catchAsyncErrors(async(req, res, next)=>{
 })
 
 exports.getAllArchitect = catchAsyncErrors(async(req, res, next)=>{
-
-    const architects = await Architect.find();
+    // Admin sees all architects; users see only their own
+    const filter = req.user.role === "admin" ? {} : { createdBy: req.user._id };
+    const architects = await Architect.find(filter);
 
     res.status(200).json({
         architects,

@@ -145,7 +145,7 @@ const SalesmanCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
                     <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} value={formData.mobileno} name="mobileno" placeholder='Mobile Number' />
 
                     <label htmlFor='email'>Email</label>
-                    <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} value={FormData.email} name="email" placeholder='email' />
+                    <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} value={formData.email} name="email" placeholder='email' />
 
                     <label htmlFor='AddressLine1'>Address</label>
                     <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} value={formData.address} name="address" placeholder='address' />

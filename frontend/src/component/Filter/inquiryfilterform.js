@@ -118,23 +118,28 @@ const InquiryFilterForm = ({ modalHandler2, setIsOpen2, parentCallback }) => {
             <h1 className={Styles.heading}>Filter Details</h1>
 
             <div className={Styles.personalDetails}>
-
-
                 <div className={Styles.personalDetails2}>
+                    <div className={Styles.filterRow}>
+                        <div className={Styles.filterField}>
+                            <label htmlFor='name'>Start Date</label>
+                            <input className={Styles.inputTag} type="date" name="startdate" value={formData.startdate} onChange={(e) => formHandler(e)} placeholder='Start Date' />
+                        </div>
+                        <div className={Styles.filterField}>
+                            <label htmlFor='name'>End Date</label>
+                            <input className={Styles.inputTag} type="date" name="enddate" value={formData.enddate} onChange={(e) => formHandler(e)} placeholder='End Date' />
+                        </div>
+                    </div>
 
-                    <label htmlFor='name'>Start Date</label>
-                    <input className={Styles.inputTag} type="date" name="startdate" value={formData.startdate} onChange={(e) => formHandler(e)} placeholder='Start Date' />
-
-                    <label htmlFor='name'>End Date</label>
-                    <input className={Styles.inputTag} type="date" name="enddate" value={formData.enddate} onChange={(e) => formHandler(e)} placeholder='End Date' />
-
-                    
-                    <label>Branches</label>
-                   
-                    <Select className={Styles.inputTag} options={Branches} value={selectedBranch} onChange={Branchchangehandler}/>
-                    <label>Salesmen</label>
-                    <Select className={Styles.inputTag} options={Salesmen} onChange={Salesmenchangehandler} value={selectedSalesmen}/>
-                   
+                    <div className={Styles.filterRow}>
+                        <div className={Styles.filterField}>
+                            <label>Branches</label>
+                            <Select className={Styles.inputTag} options={Branches} value={selectedBranch} onChange={Branchchangehandler}/>
+                        </div>
+                        <div className={Styles.filterField}>
+                            <label>Salesmen</label>
+                            <Select className={Styles.inputTag} options={Salesmen} onChange={Salesmenchangehandler} value={selectedSalesmen}/>
+                        </div>
+                    </div>
                 </div> 
             </div>
 

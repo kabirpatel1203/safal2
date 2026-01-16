@@ -25,6 +25,11 @@ const taskSchema = new mongoose.Schema({
     pmcTag: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "PMC"
+    },
+    createdBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true
     }
 });
 

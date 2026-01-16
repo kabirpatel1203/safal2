@@ -31,7 +31,11 @@ const mistrySchema = new mongoose.Schema({
     branches:[
         {branchname:String}
     ],
-    salesmen:[{name:String}]
+    salesmen:[{name:String}],
+    createdBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
+    }
 
 });
 

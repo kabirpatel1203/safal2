@@ -48,7 +48,11 @@ const salesmanSchema = new mongoose.Schema({
     // pmcNumber:Number,
     branches:[
         {branchname:String}
-    ]
+    ],
+    createdBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
+    }
 });
 
 

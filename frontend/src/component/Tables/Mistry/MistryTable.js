@@ -311,7 +311,13 @@ const MistryTable = ({ modalHandler, refresh, isOpen }) => {
   const customStyles = {
     control: base => ({
       ...base,
-      minHeight: 55
+      minHeight: 44,
+      borderRadius: 999,
+      borderColor: 'rgba(148,163,184,0.7)',
+      boxShadow: '0 0 0 1px rgba(148,163,184,0.25)',
+      '&:hover': {
+        borderColor: '#2563eb'
+      }
     }),
     dropdownIndicator: base => ({
       ...base,
@@ -340,52 +346,90 @@ const MistryTable = ({ modalHandler, refresh, isOpen }) => {
       <div className={Styles.table}>
         <div className={Styles.header}>
           <h3>All Mistry</h3>
-
-          <div className={Styles.buttonContainer}>
-            <img className={Styles.addImg} src={Add} alt="add" />
-            <p className={Styles.buttonText} onClick={modalHandler}>
-              Add Mistry
-            </p>
-          </div>
-        </div>
-        <div className={Styles.Yellow}>
-
-          <div className={Styles.DateRangeContainer}>
-            {/* <label>Branch</label> */}
-            <label>Salesman Filter</label>
-            <Select styles={customStyles} onChange={(e) => handlesalesman(e)} options={salesman} />
-            <label>Branch Filter</label>
-            <Select styles={customStyles} onChange={(e) => handlebranch(e)} options={branches} />
-            {/* <Select styles={customStyles} onChange={(e) => handlebranch(e)} options={branches} /> */}
-            <TextField
-              className={Styles.InputDate}
-              id="date"
-              label="Start Date"
-              type="date"
-              // defaultValue="2017-05-24"
-              onChange={(e) => startDateHandler(e)}
-              sx={{ width: 180, margin: 1 }}
-              InputLabelProps={{
-                shrink: true,
-              }}
-            />
-            <TextField
-              className={Styles.InputDate}
-              id="date"
-              label="End Date"
-              type="date"
-              onChange={(e) => endDateHandler(e)}
-              // defaultValue="2017-05-24"
-              sx={{ width: 180, margin: 1 }}
-              InputLabelProps={{
-                shrink: true,
-              }}
-            />
-            <button className={Styles.SubmitButton} onClick={(e) => submitDateRangeHandler(e)} type="submit"> Submit </button>
           </div>
 
-        </div>
-        {(mistry && user.role === "admin") &&
+          <div className={Styles.Yellow}>
+            <div className={Styles.DateRangeContainer}>
+              <label>Salesman Filter</label>
+              <Select styles={customStyles} onChange={(e) => handlesalesman(e)} options={salesman} />
+              <label>Branch Filter</label>
+              <Select styles={customStyles} onChange={(e) => handlebranch(e)} options={branches} />
+              <TextField
+                className={Styles.InputDate}
+                id="start-date"
+                label="Start Date"
+                type="date"
+                onChange={(e) => startDateHandler(e)}
+                variant="outlined"
+                size="small"
+                sx={{
+                  width: 180,
+                  margin: 1,
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 999,
+                    backgroundColor: '#ffffff',
+                    '& fieldset': {
+                      borderColor: 'rgba(148,163,184,0.7)',
+                    },
+                    '&:hover fieldset': {
+                      borderColor: '#2563eb',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#2563eb',
+                      boxShadow: '0 0 0 1px rgba(37,99,235,0.18)',
+                    },
+                  },
+                  '& .MuiInputBase-input': {
+                    padding: '10px 14px',
+                  },
+                  '& .MuiInputLabel-root': {
+                    fontSize: 13,
+                  },
+                }}
+                InputLabelProps={{
+                  shrink: true,
+                }}
+              />
+              <TextField
+                className={Styles.InputDate}
+                id="end-date"
+                label="End Date"
+                type="date"
+                onChange={(e) => endDateHandler(e)}
+                variant="outlined"
+                size="small"
+                sx={{
+                  width: 180,
+                  margin: 1,
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 999,
+                    backgroundColor: '#ffffff',
+                    '& fieldset': {
+                      borderColor: 'rgba(148,163,184,0.7)',
+                    },
+                    '&:hover fieldset': {
+                      borderColor: '#2563eb',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#2563eb',
+                      boxShadow: '0 0 0 1px rgba(37,99,235,0.18)',
+                    },
+                  },
+                  '& .MuiInputBase-input': {
+                    padding: '10px 14px',
+                  },
+                  '& .MuiInputLabel-root': {
+                    fontSize: 13,
+                  },
+                }}
+                InputLabelProps={{
+                  shrink: true,
+                }}
+              />
+              <button className={Styles.SubmitButton} onClick={(e) => submitDateRangeHandler(e)} type="submit"> Submit </button>
+            </div>
+          </div>
+        {mistry &&
           <MaterialReactTable
             displayColumnDefOptions={{
               'mrt-row-actions': {
@@ -449,23 +493,49 @@ const MistryTable = ({ modalHandler, refresh, isOpen }) => {
             )}
             renderTopToolbarCustomActions={({ table }) => (
               <Box
-                sx={{ display: 'flex', gap: '1rem', p: '0.5rem', flexWrap: 'wrap' }}
+                sx={{
+                  display: 'flex',
+                  gap: '1rem',
+                  p: '0.5rem',
+                  flexWrap: 'wrap',
+                  justifyContent: 'center',
+                  width: '100%',
+                }}
               >
                 <Button
                   disabled={table.getPrePaginationRowModel().rows.length === 0}
-
                   onClick={() =>
                     handleExportRows(table.getPrePaginationRowModel().rows)
                   }
                   startIcon={<FileDownloadIcon />}
                   variant="contained"
-                >Export All Rows</Button>
-                <Button
-                  className={Styles.bu}
                   color="primary"
+                  sx={{
+                    backgroundColor: 'rgba(37,99,235,0.08)',
+                    color: '#1d4ed8',
+                    boxShadow: 'none',
+                    '&:hover': {
+                      backgroundColor: 'rgba(37,99,235,0.16)',
+                      boxShadow: 'none',
+                    },
+                  }}
+                >
+                  Export All Rows
+                </Button>
+                <Button
                   onClick={handleExportData}
                   startIcon={<FileDownloadIcon />}
                   variant="contained"
+                  color="primary"
+                  sx={{
+                    backgroundColor: 'rgba(37,99,235,0.08)',
+                    color: '#1d4ed8',
+                    boxShadow: 'none',
+                    '&:hover': {
+                      backgroundColor: 'rgba(37,99,235,0.16)',
+                      boxShadow: 'none',
+                    },
+                  }}
                 >
                   Export All Data
                 </Button>

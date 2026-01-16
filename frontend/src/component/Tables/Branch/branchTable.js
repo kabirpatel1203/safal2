@@ -172,23 +172,49 @@ const BranchTable = ({ modalHandler, refresh ,isOpen}) => {
                         )}
                         renderTopToolbarCustomActions={({ table }) => (
                             <Box
-                                sx={{ display: 'flex', gap: '1rem', p: '0.5rem', flexWrap: 'wrap' }}
+                                sx={{
+                                    display: 'flex',
+                                    gap: '1rem',
+                                    p: '0.5rem',
+                                    flexWrap: 'wrap',
+                                    justifyContent: 'center',
+                                    width: '100%',
+                                }}
                             >
                                 <Button
                                     disabled={table.getPrePaginationRowModel().rows.length === 0}
-
                                     onClick={() =>
                                         handleExportRows(table.getPrePaginationRowModel().rows)
                                     }
                                     startIcon={<FileDownloadIcon />}
                                     variant="contained"
-                                >Export All Rows</Button>
-                                <Button
-                                    className={Styles.bu}
                                     color="primary"
+                                    sx={{
+                                        backgroundColor: 'rgba(37,99,235,0.08)',
+                                        color: '#1d4ed8',
+                                        boxShadow: 'none',
+                                        '&:hover': {
+                                            backgroundColor: 'rgba(37,99,235,0.16)',
+                                            boxShadow: 'none',
+                                        },
+                                    }}
+                                >
+                                    Export All Rows
+                                </Button>
+                                <Button
                                     onClick={handleExportData}
                                     startIcon={<FileDownloadIcon />}
                                     variant="contained"
+                                    color="primary"
+                                    sx={{
+                                        backgroundColor: 'rgba(37,99,235,0.08)',
+                                        color: '#1d4ed8',
+                                        boxShadow: 'none',
+                                        '&:hover': {
+                                            backgroundColor: 'rgba(37,99,235,0.16)',
+                                            boxShadow: 'none',
+                                        },
+                                    }}
                                 >
                                     Export All Data
                                 </Button>

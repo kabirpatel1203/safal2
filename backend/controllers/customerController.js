@@ -4,8 +4,8 @@ const Customer = require("../models/customerModel")
 
 
 exports.totalCustomer = catchAsyncErrors(async (req, res, next) => {
-
-    const customers = await Customer.find();
+    const filter = req.user.role === "admin" ? {} : { createdBy: req.user._id };
+    const customers = await Customer.find(filter);
 
     res.status(200).json({
         custlength: customers.length,
@@ -14,7 +14,8 @@ exports.totalCustomer = catchAsyncErrors(async (req, res, next) => {
 })
 
 exports.totalOrderValue = catchAsyncErrors(async (req, res, next) => {
-    const customers = await Customer.find();
+    const filter = req.user.role === "admin" ? {} : { createdBy: req.user._id };
+    const customers = await Customer.find(filter);
     var total = 0
     customers.map((item) => {
         total = total + item.orderValue
@@ -27,10 +28,10 @@ exports.totalOrderValue = catchAsyncErrors(async (req, res, next) => {
 })
 
 exports.createCustomer = catchAsyncErrors(async (req, res, next) => {
-    const t = req.body;
-    // console.log(req.body);
-
-    const cust = await Customer.create(t);
+    const cust = await Customer.create({
+        ...req.body,
+        createdBy: req.user._id
+    });
     console.log(cust);
     res.status(200).json({
         cust,
@@ -39,10 +40,12 @@ exports.createCustomer = catchAsyncErrors(async (req, res, next) => {
 })
 
 exports.getCustomer = catchAsyncErrors(async (req, res, next) => {
+    const filter = req.user.role === "admin" ? { _id: req.params.id } : { _id: req.params.id, createdBy: req.user._id };
+    const customer = await Customer.findOne(filter)
 
-    let t = req.params.id;
-
-    const customer = await Customer.findById(t)
+    if (!customer) {
+        return next(new ErrorHander("Customer not found", 404));
+    }
 
     res.status(200).json({
         customer,
@@ -51,18 +54,16 @@ exports.getCustomer = catchAsyncErrors(async (req, res, next) => {
 })
 
 exports.updateCustomer = catchAsyncErrors(async (req, res, next) => {
-
-    let t = req.params.id;
-    let body = req.body
-    console.log(t)
-    const customer = await Customer.findByIdAndUpdate(t, body, {
+    const filter = req.user.role === "admin" ? { _id: req.params.id } : { _id: req.params.id, createdBy: req.user._id };
+    const customer = await Customer.findOneAndUpdate(filter, req.body, {
         new: true,
         runValidators: true,
         useFindAndModify: false
-
     });
-    await customer.save();
 
+    if (!customer) {
+        return next(new ErrorHander("Customer not found", 404));
+    }
     res.status(200).json({
         customer,
         success: true
@@ -70,10 +71,7 @@ exports.updateCustomer = catchAsyncErrors(async (req, res, next) => {
 })
 
 exports.deleteCustomer = catchAsyncErrors(async (req, res, next) => {
-
-    let t = req.params.id;
-
-    const customer = await Customer.findOneAndDelete({mobileno:t});
+    const customer = await Customer.findOneAndDelete({ mobileno: req.params.id });
 
     res.status(200).json({
         customer,
@@ -82,8 +80,8 @@ exports.deleteCustomer = catchAsyncErrors(async (req, res, next) => {
 })
 
 exports.getAllCustomer = catchAsyncErrors(async (req, res, next) => {
-
-    const customers = await Customer.find()
+    const filter = req.user.role === "admin" ? {} : { createdBy: req.user._id };
+    const customers = await Customer.find(filter)
 
     res.status(200).json({
         customers,

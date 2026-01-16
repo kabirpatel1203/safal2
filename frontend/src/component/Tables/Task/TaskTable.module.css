@@ -1,83 +1,74 @@
 .container {
-    /* border: 2px solid green; */
-    height: 80vh;
-    background-color: #f0f0f0;
-  }
-  
-  .container {
-    /* border: 2px solid green; */
-    height: 82vh;
-    background-color: #f0f0f0;
-    display: flex;
-  }
-  .Yellow {
-    display: flex;
-    justify-content: center;
-  }
-  
-  .table {
-    /* border: 1px solid yellowgreen; */
-    width: 100%;
-    background: #ffffff;
-    border: 1px solid #ebebeb;
-    border-radius: 8px;
-    margin: 10px;
-  }
-  
-  .filter {
-    border: 1px solid blue;
-    width: 25%;
-    background-color: #ffffff;
-    border: 1px solid #ebebeb;
-    border-radius: 8px;
-    margin: 10px;
-    display: none;
-  }
-  
-  .header {
-    display: flex;
-    justify-content: space-between;
-    margin: 20px 20px;
-  }
-  .addImg {
-    margin: 0px 10px;
-  }
-  
-  .buttonText {
-    color: #646363;
-    font-weight: 700;
-  }
-  
-  .header:hover {
-    cursor: pointer;
-  }
-  
-  .buttonContainer {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    float: left;
-  }
-  
-  .DateRangeContainer {
-    /* border: 2px solid red; */
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-  }
-  
-  .InputDate {
-    border: 1px solid grey;
-    padding: 5px 20px;
-    margin-left: 10px;
-  }
-  
-  .SubmitButton {
-    padding: 5px 20px;
-    margin: 10px 20px;
-    background-color: #005ea1;
-    color: white;
-    border: none;
-    border-radius: 8px;
-  }
+  height: 82vh;
+  display: flex;
+  background: transparent;
+}
+
+.Yellow {
+  padding: 6px 18px 12px;
+  background: rgba(226, 232, 240, 0.6);
+  border-radius: 999px;
+}
+
+.table {
+  width: 100%;
+  margin: 12px 10px 8px;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+}
+
+.filter {
+  border: 1px solid var(--color-border-subtle);
+  width: 25%;
+  background-color: var(--color-surface);
+  border-radius: 8px;
+  margin: 10px;
+  display: none;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px 10px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.3);
+}
+.addImg {
+  margin: 0 8px 0 0;
+}
+
+.buttonText {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.buttonContainer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.DateRangeContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.InputDate {
+  min-width: 190px;
+}
+
+.SubmitButton {
+  padding: 8px 18px;
+  margin-left: 4px;
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 999px;
+  font-size: 0.88rem;
+  font-weight: 500;
+}
   

@@ -5,7 +5,8 @@ const Mistry = require("../models/mistryModel")
 
 exports.totalMistry = catchAsyncErrors(async(req, res, next)=>{
    
-    const mistry = await Mistry.find();
+    const filter = req.user.role === "admin" ? {} : { createdBy: req.user._id };
+    const mistry = await Mistry.find(filter);
 
     res.status(200).json({
         mistrylength:mistry.length,
@@ -15,10 +16,10 @@ exports.totalMistry = catchAsyncErrors(async(req, res, next)=>{
 
 
 exports.createMistry = catchAsyncErrors(async(req, res, next)=>{
-    const t = req.body;
-    console.log(req.body);
-
-    const mistry = await Mistry.create(t)
+    const mistry = await Mistry.create({
+        ...req.body,
+        createdBy: req.user._id
+    })
 
     res.status(200).json({
         mistry,
@@ -27,10 +28,13 @@ exports.createMistry = catchAsyncErrors(async(req, res, next)=>{
 })
 
 exports.getMistry = catchAsyncErrors(async(req, res, next)=>{
-    
-    let t = req.params.id;
+    const filter = req.user.role === "admin" ? { _id: req.params.id } : { _id: req.params.id, createdBy: req.user._id };
 
-    const mistry = await Mistry.findById(t)
+    const mistry = await Mistry.findOne(filter)
+
+    if (!mistry) {
+        return next(new ErrorHander("Mistry not found", 404));
+    }
 
     res.status(200).json({
         mistry,
@@ -40,17 +44,18 @@ exports.getMistry = catchAsyncErrors(async(req, res, next)=>{
 
 
 exports.updateMistry = catchAsyncErrors(async(req, res, next)=>{
-    
-    let t = req.params.id;
-    let body = req.body
+    const filter = req.user.role === "admin" ? { _id: req.params.id } : { _id: req.params.id, createdBy: req.user._id };
 
-    const mistry = await Mistry.findByIdAndUpdate(t,body,{
+    const mistry = await Mistry.findOneAndUpdate(filter,req.body,{
         new:true,
         runValidators:true,
         useFindAndModify:false
  
     });
-    await mistry.save();
+
+    if (!mistry) {
+        return next(new ErrorHander("Mistry not found", 404));
+    }
 
     res.status(200).json({
         mistry,
@@ -59,10 +64,7 @@ exports.updateMistry = catchAsyncErrors(async(req, res, next)=>{
 })
 
 exports.deleteMistry = catchAsyncErrors(async(req, res, next)=>{
-    
-    let t = req.params.id;
-
-    const mistery = await Mistry.findOneAndDelete({mobileno:t});
+    const mistery = await Mistry.findOneAndDelete({mobileno:req.params.id});
 
     res.status(200).json({
         mistery,
@@ -71,8 +73,9 @@ exports.deleteMistry = catchAsyncErrors(async(req, res, next)=>{
 })
 
 exports.getAllMistry = catchAsyncErrors(async(req, res, next)=>{
-
-    const mistries = await Mistry.find()
+    // Admin sees all mistries; users see only their own
+    const filter = req.user.role === "admin" ? {} : { createdBy: req.user._id };
+    const mistries = await Mistry.find(filter)
 
     res.status(200).json({
         mistries,

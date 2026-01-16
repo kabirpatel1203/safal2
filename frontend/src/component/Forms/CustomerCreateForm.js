@@ -246,6 +246,9 @@ const CustomerCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
 
           {/* <label htmlFor='name'>Sales Person</label>
           <input className={Styles.inputTag} name="salesPerson" value={formData.salesPerson} onChange={(e) => formHandler(e)} placeholder='Sales Person' /> */}
+        </div>
+        
+        <div className={Styles.personalDetails3}>
           <label>Branches</label>
           <ReactSelect lassName={Styles.inputTag}
             options={Branches}

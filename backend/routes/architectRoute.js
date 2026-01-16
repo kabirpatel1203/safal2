@@ -7,7 +7,7 @@ router.route("/create").post(isAuthenticatedUser, createArchitect);
 router.route("/getall").get(isAuthenticatedUser, getAllArchitect);
 router.route("/get/:id").get(isAuthenticatedUser, getArchitect);
 router.route("/update/:id").put(isAuthenticatedUser, updateArchitect);
-router.route("/delete/:id").delete(isAuthenticatedUser, deleteArchitect);
+router.route("/delete/:id").delete(isAuthenticatedUser, authorizeRoles("admin"), deleteArchitect);
 router.route("/totalarchitects").get(isAuthenticatedUser, totalarchitect);
 
 module.exports = router

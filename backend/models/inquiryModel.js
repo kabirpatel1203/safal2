@@ -47,7 +47,12 @@ const inquirySchema = new mongoose.Schema({
         { branchname: String }
     ],
     salesmen: [{ name: String }],
-    remarks:String
+    remarks:String,
+    createdBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true
+    }
 
 });
 

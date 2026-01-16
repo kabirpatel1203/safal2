@@ -146,7 +146,7 @@ pauseOnHover
                     <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} value={formData.mobileno} name="mobileno" placeholder='Mobile Number' />
 
                     <label htmlFor='email'>Email</label>
-                    <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} value={FormData.email} name="email" placeholder='email' />
+                    <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} value={formData.email} name="email" placeholder='email' />
 
                     <label htmlFor='AddressLine1'>Address</label>
                     <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} value={formData.address} name="address" placeholder='address' />
@@ -172,9 +172,9 @@ pauseOnHover
 
                     <label htmlFor='companyName'>Company Name</label>
                     <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} value={formData.companyName} name="companyName" placeholder='Company Name' />
-
-                    {/* <label htmlFor='salesMan'>Sales Man </label>
-                    <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} value={formData.salesMan} name="salesMan" placeholder='Company Name' /> */}
+                </div>
+                
+                <div className={Styles.personalDetails3}>
                     <label>Branches</label>
                     <ReactSelect lassName={Styles.inputTag}
                         options={Branches}

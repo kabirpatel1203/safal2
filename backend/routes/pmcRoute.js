@@ -7,7 +7,7 @@ router.route("/create").post(isAuthenticatedUser, createPMC);
 router.route("/getall").get(isAuthenticatedUser, getAllPMC);
 router.route("/get/:id").get(isAuthenticatedUser, getPMC);
 router.route("/update/:id").put(isAuthenticatedUser, updatePMC);
-router.route("/delete/:id").delete(isAuthenticatedUser, deletePMC);
+router.route("/delete/:id").delete(isAuthenticatedUser, authorizeRoles("admin"), deletePMC);
 router.route("/totalPMC").get(isAuthenticatedUser, totalPMC);
 
 module.exports = router

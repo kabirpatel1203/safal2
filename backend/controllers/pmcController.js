@@ -5,7 +5,8 @@ const PMC = require("../models/pmcModel")
 
 exports.totalPMC = catchAsyncErrors(async(req, res, next)=>{
    
-    const pmc = await PMC.find();
+    const filter = req.user.role === "admin" ? {} : { createdBy: req.user._id };
+    const pmc = await PMC.find(filter);
 
     res.status(200).json({
         pmclength:pmc.length,
@@ -15,10 +16,10 @@ exports.totalPMC = catchAsyncErrors(async(req, res, next)=>{
 
 
 exports.createPMC = catchAsyncErrors(async(req, res, next)=>{
-    const t = req.body;
-    console.log(req.body);
-
-    const pmc = await PMC.create(t)
+    const pmc = await PMC.create({
+        ...req.body,
+        createdBy: req.user._id
+    })
 
     res.status(200).json({
         pmc,
@@ -27,10 +28,13 @@ exports.createPMC = catchAsyncErrors(async(req, res, next)=>{
 })
 
 exports.getPMC = catchAsyncErrors(async(req, res, next)=>{
-    
-    let t = req.params.id;
+    const filter = req.user.role === "admin" ? { _id: req.params.id } : { _id: req.params.id, createdBy: req.user._id };
 
-    const pmc = await PMC.findById(t)
+    const pmc = await PMC.findOne(filter)
+
+    if (!pmc) {
+        return next(new ErrorHander("PMC not found", 404));
+    }
 
     res.status(200).json({
         pmc,
@@ -40,17 +44,18 @@ exports.getPMC = catchAsyncErrors(async(req, res, next)=>{
 
 
 exports.updatePMC = catchAsyncErrors(async(req, res, next)=>{
-    
-    let t = req.params.id;
-    let body = req.body
+    const filter = req.user.role === "admin" ? { _id: req.params.id } : { _id: req.params.id, createdBy: req.user._id };
 
-    const pmc = await PMC.findByIdAndUpdate(t,body,{
+    const pmc = await PMC.findOneAndUpdate(filter,req.body,{
         new:true,
         runValidators:true,
         useFindAndModify:false
  
     });
-    await pmc.save();
+
+    if (!pmc) {
+        return next(new ErrorHander("PMC not found", 404));
+    }
 
     res.status(200).json({
         pmc,
@@ -59,10 +64,7 @@ exports.updatePMC = catchAsyncErrors(async(req, res, next)=>{
 })
 
 exports.deletePMC = catchAsyncErrors(async(req, res, next)=>{
-    
-    let t = req.params.id;
-
-    const pmc = await PMC.findByIdAndDelete(t);
+    const pmc = await PMC.findByIdAndDelete(req.params.id);
 
     res.status(200).json({
         pmc,
@@ -71,8 +73,9 @@ exports.deletePMC = catchAsyncErrors(async(req, res, next)=>{
 })
 
 exports.getAllPMC = catchAsyncErrors(async(req, res, next)=>{
-
-    const pmcs = await PMC.find()
+    // Admin sees all PMCs; users see only their own
+    const filter = req.user.role === "admin" ? {} : { createdBy: req.user._id };
+    const pmcs = await PMC.find(filter)
 
     res.status(200).json({
         pmcs,

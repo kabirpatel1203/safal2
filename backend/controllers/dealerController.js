@@ -5,7 +5,8 @@ const Dealer = require("../models/dealerModel")
 
 exports.totalDealer = catchAsyncErrors(async(req, res, next)=>{
    
-    const dealers = await Dealer.find();
+    const filter = req.user.role === "admin" ? {} : { createdBy: req.user._id };
+    const dealers = await Dealer.find(filter);
 
     res.status(200).json({
         dealerlength:dealers.length,
@@ -15,10 +16,10 @@ exports.totalDealer = catchAsyncErrors(async(req, res, next)=>{
 
 
 exports.createDealer = catchAsyncErrors(async(req, res, next)=>{
-    const t = req.body;
-    console.log(req.body);
-
-    const d = await Dealer.create(t)
+    const d = await Dealer.create({
+        ...req.body,
+        createdBy: req.user._id
+    })
 
     res.status(200).json({
         d,
@@ -27,10 +28,13 @@ exports.createDealer = catchAsyncErrors(async(req, res, next)=>{
 })
 
 exports.getDealer = catchAsyncErrors(async(req, res, next)=>{
-    
-    let t = req.params.id;
+    const filter = req.user.role === "admin" ? { _id: req.params.id } : { _id: req.params.id, createdBy: req.user._id };
 
-    const dealer = await Dealer.findById(t)
+    const dealer = await Dealer.findOne(filter)
+
+    if (!dealer) {
+        return next(new ErrorHander("Dealer not found", 404));
+    }
 
     res.status(200).json({
         dealer,
@@ -39,17 +43,17 @@ exports.getDealer = catchAsyncErrors(async(req, res, next)=>{
 })
 
 exports.updateDealer = catchAsyncErrors(async(req, res, next)=>{
-    
-    let t = req.params.id;
-    let body = req.body
+    const filter = req.user.role === "admin" ? { _id: req.params.id } : { _id: req.params.id, createdBy: req.user._id };
 
-    const dealer = await Dealer.findByIdAndUpdate(t,body,{
+    const dealer = await Dealer.findOneAndUpdate(filter,req.body,{
         new:true,
         runValidators:true,
         useFindAndModify:false
- 
     });
-    await dealer.save();
+
+    if (!dealer) {
+        return next(new ErrorHander("Dealer not found", 404));
+    }
 
     res.status(200).json({
         dealer,
@@ -58,10 +62,7 @@ exports.updateDealer = catchAsyncErrors(async(req, res, next)=>{
 })
 
 exports.deleteDealer = catchAsyncErrors(async(req, res, next)=>{
-    
-    let t = req.params.id;
-
-    const dealer = await Dealer.findByIdAndDelete(t);
+    const dealer = await Dealer.findByIdAndDelete(req.params.id);
 
     res.status(200).json({
         dealer,
@@ -70,8 +71,10 @@ exports.deleteDealer = catchAsyncErrors(async(req, res, next)=>{
 })
 
 exports.getAllDealer = catchAsyncErrors(async(req, res, next)=>{
-
-    const dealers = await Dealer.find()
+    // All users can see all dealers (shared master data)
+        // Admin sees all dealers; users see only their own
+        const filter = req.user.role === "admin" ? {} : { createdBy: req.user._id };
+    const dealers = await Dealer.find(filter)
 
     res.status(200).json({
         dealers,

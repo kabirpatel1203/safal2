@@ -6,7 +6,6 @@ import CustomerStat from '../../Assets/Stats/CustomerStats1.svg'
 import HealthStat from '../../Assets/Stats/HealthStats.svg'
 import axios from 'axios'
 import Navigation from './Navigation'
-import Logo from './Logo'
 import { IconButton } from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu';
 import Box from "@mui/material/Box";
@@ -88,21 +87,14 @@ const StatBox = ({ name, username, refresh }) => {
   return (
     <>
       <nav className={Styles.nav}>
-        <IconButton className={Styles.IconButton} >
-          <MenuIcon className={Styles.toggle} style={{ color: "whitesmoke" }} fontSize='large' onClick={toggleDrawer(true)} />
+        <IconButton className={Styles.IconButton} onClick={toggleDrawer(true)}>
+          <MenuIcon className={Styles.toggle} fontSize='medium' />
         </IconButton>
         {/* {name}</h1> */}
         <h4 className={Styles.LogoText}>Safal Marketing</h4>
         <div className={Styles.user}>
-          <AccountCircleIcon fontSize='large' />
-          {name === "Architect" && <p>Total Architect : {totalarchitect}</p>}
-          {name === "Mistry" && <p>Total Mistry : {totalmistry}</p>}
-          {name === "PMC" && <p>Total PMC : {totalPMC}</p>}
-          {name === "Customer" && <p>Total Customer : {totalcustomers}</p>}
-          {name === "Dealer" && <p>Total Customer : {totalcustomers}</p>}
-          {name === "Branch" && <p>Total Branches : {totalbranches}</p>}
-          {name === "Task" && <p>Total Tasks : {totaltasks}</p>}
-          {/* {username} */}
+          <AccountCircleIcon fontSize='medium' className={Styles.userIcon} />
+          {username && <span className={Styles.userName}>{username}</span>}
         </div>
       </nav>
       <div className={Styles.container}>
@@ -121,7 +113,6 @@ const StatBox = ({ name, username, refresh }) => {
             <IconButton sx={{ mb: 2 }}>
               <CloseIcon onClick={toggleDrawer(false)} />
             </IconButton>
-            <Logo />
             <Navigation />
           </Box>
         </Drawer>

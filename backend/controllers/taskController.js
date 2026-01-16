@@ -3,7 +3,8 @@ const catchAsyncErrors = require("../middleware/catchAsyncError");
 const Task = require("../models/taskModel")
 
 exports.totalTask = catchAsyncErrors(async (req, res, next) => {
-    const tasks = await Task.find().populate("salesmanId mistryTag architectTag dealerTag pmcTag");
+    const filter = req.user.role === "admin" ? {} : { createdBy: req.user._id };
+    const tasks = await Task.find(filter).populate("salesmanId mistryTag architectTag dealerTag pmcTag");
 
     res.status(200).json({
         tasks,
@@ -19,7 +20,7 @@ exports.createTask = async (req, res) => {
         }
         if (!pmcTag && !mistryTag && !architectTag && !dealerTag)
             return res.status(500).json({ success: false, message: "Please select a tag" });
-        let task = await Task.create({ date, remarks, salesmanId, mistryTag, architectTag, dealerTag, pmcTag })
+        let task = await Task.create({ date, remarks, salesmanId, mistryTag, architectTag, dealerTag, pmcTag, createdBy: req.user._id })
         task = await task.populate("salesmanId");
         console.log(task);
         res.status(200).json({
@@ -32,8 +33,12 @@ exports.createTask = async (req, res) => {
 };
 
 exports.getTask = catchAsyncErrors(async (req, res, next) => {
-    let t = req.params.id;
-    const task = await Task.findById(t)
+    const filter = req.user.role === "admin" ? { _id: req.params.id } : { _id: req.params.id, createdBy: req.user._id };
+    const task = await Task.findOne(filter)
+
+    if (!task) {
+        return next(new ErrorHander("Task not found", 404));
+    }
 
     res.status(200).json({
         task,
@@ -42,15 +47,16 @@ exports.getTask = catchAsyncErrors(async (req, res, next) => {
 })
 
 exports.updateTask = catchAsyncErrors(async (req, res, next) => {
-    let t = req.params.id;
-    let body = req.body
-    // console.log(t)
-    const task = await Task.findByIdAndUpdate(t, body, {
+    const filter = req.user.role === "admin" ? { _id: req.params.id } : { _id: req.params.id, createdBy: req.user._id };
+    const task = await Task.findOneAndUpdate(filter, req.body, {
         new: true,
         runValidators: true,
         useFindAndModify: false
     });
-    await task.save();
+
+    if (!task) {
+        return next(new ErrorHander("Task not found", 404));
+    }
     // console.log(task);
     res.status(200).json({
         task,
@@ -59,8 +65,7 @@ exports.updateTask = catchAsyncErrors(async (req, res, next) => {
 })
 
 exports.deleteTask = catchAsyncErrors(async (req, res, next) => {
-    let t = req.params.id;
-    const task = await Task.findByIdAndDelete(t);
+    const task = await Task.findByIdAndDelete(req.params.id);
     res.status(200).json({
         message: "Task Deleted",
         success: true

@@ -1,36 +1,29 @@
 .container{
-    /* border: 2px solid green; */
-    height: 80vh;
-    background-color: #F0F0F0;
-}
-
-.container{
-    /* border: 2px solid green; */
     height: 82vh;
-    background-color: #F0F0F0;
     display: flex;
+    background: transparent;
 }
 .Yellow{
     display: flex;
     justify-content: center;
-
+    padding: 6px 18px 12px;
+    background: rgba(226, 232, 240, 0.6);
+    border-radius: 999px;
 }
 
 .table{
-    /* border: 1px solid yellowgreen; */
     width: 100%;
-    background: #FFFFFF;
-    border: 1px solid #EBEBEB;
-    border-radius: 8px;
     margin:10px;
-    
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-subtle);
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
 }
 
 .filter{
-    border: 1px solid blue;
+    border: 1px solid var(--color-border-subtle);
     width: 25%;
-    background-color: #FFFFFF;
-    border: 1px solid #EBEBEB;
+    background-color: var(--color-surface);
     border-radius: 8px;
     margin: 10px;
     display: none;
@@ -39,47 +32,43 @@
 .header{
     display: flex;
     justify-content: space-between;
-    margin: 20px 20px;
+    align-items: center;
+    padding: 14px 18px 10px;
+    border-bottom: 1px solid rgba(148,163,184,0.3);
 }
 .addImg{
-    margin: 0px 10px;
+    margin: 0 8px 0 0;
 }
 
 .buttonText{
-    color: #646363;
-    font-weight: 700;
-
-}
-
-.header:hover{
-    cursor: pointer;
+    color: var(--color-primary);
+    font-weight: 600;
 }
 
 .buttonContainer{
     display: flex;
-    justify-content: center;
     align-items: center;
-    float: left;
+    gap: 6px;
 }
 
 .DateRangeContainer{
-    /* border: 2px solid red; */
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     align-items: center;
+    gap: 20px;
 }
 
 .InputDate{
-    border: 1px solid grey;
-    padding: 5px 20px ;
-    margin-left: 10px;
+    min-width: 190px;
 }
 
 .SubmitButton{
-    padding: 5px 20px;
-    margin: 10px 20px;
-    background-color: #005EA1;
+    padding: 8px 18px;
+    margin-left: 4px;
+    background-color: var(--color-primary);
     color: white;
     border: none;
-    border-radius: 8px;
+    border-radius: 999px;
+    font-size: 0.88rem;
+    font-weight: 500;
 }

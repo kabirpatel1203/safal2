@@ -19,7 +19,7 @@ router.route("/create").post(isAuthenticatedUser, createbranch);
 router.route("/getall").get(isAuthenticatedUser, getAllBranches);
 router.route("/get/:id").get(isAuthenticatedUser, getBranch);
 router.route("/update/:id").put(isAuthenticatedUser, updateBranch);
-router.route("/delete/:branchname").delete(isAuthenticatedUser, deleteBranch);
+router.route("/delete/:branchname").delete(isAuthenticatedUser, authorizeRoles("admin"), deleteBranch);
 router.route("/totalbranchess").get(isAuthenticatedUser, totalbranch);
 
 router.route("/customers").post(isAuthenticatedUser,getCustomerofBranch);

@@ -7,7 +7,7 @@ router.route("/create").post(isAuthenticatedUser, createDealer);
 router.route("/getall").get(isAuthenticatedUser, getAllDealer);
 router.route("/get/:id").get(isAuthenticatedUser, getDealer);
 router.route("/update/:id").put(isAuthenticatedUser, updateDealer);
-router.route("/delete/:id").delete(isAuthenticatedUser, deleteDealer);
+router.route("/delete/:id").delete(isAuthenticatedUser, authorizeRoles("admin"), deleteDealer);
 router.route("/totalDealer").get(isAuthenticatedUser, totalDealer);
 
 module.exports = router

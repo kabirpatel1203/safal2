@@ -7,7 +7,7 @@ router.route("/create").post(isAuthenticatedUser, createCustomer);
 router.route("/getall").get(isAuthenticatedUser, getAllCustomer);
 router.route("/get/:id").get(isAuthenticatedUser, getCustomer);
 router.route("/update/:id").put(isAuthenticatedUser, updateCustomer);
-router.route("/delete/:id").delete(isAuthenticatedUser, deleteCustomer);
+router.route("/delete/:id").delete(isAuthenticatedUser, authorizeRoles("admin"), deleteCustomer);
 router.route("/totalcustomers").get(isAuthenticatedUser, totalCustomer);
 router.route("/totalorder").get(isAuthenticatedUser, totalOrderValue);
 
