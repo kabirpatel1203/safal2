@@ -248,12 +248,12 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
         <div className={Styles.header}>
           <h3>All Dealer</h3>
 
-          <div className={Styles.buttonContainer}>
+          <button className={Styles.buttonContainer} onClick={modalHandler}>
             <img className={Styles.addImg} src={Add} alt="add" />
-            <p className={Styles.buttonText} onClick={modalHandler}>
+            <span className={Styles.buttonText}>
               Add Dealer
-            </p>
-          </div>
+            </span>
+          </button>
         </div>
 
         <div className={Styles.Yellow}>

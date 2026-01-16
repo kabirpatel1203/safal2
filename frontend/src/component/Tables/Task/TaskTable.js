@@ -307,12 +307,12 @@ const TaskTable = ({ modalHandler, refresh, isOpen, doRefresh }) => {
                 <div className={Styles.header}>
                     <h3>All Tasks</h3>
 
-                    <div className={Styles.buttonContainer}>
+                    <button className={Styles.buttonContainer} onClick={modalHandler}>
                         <img className={Styles.addImg} src={Add} alt="add" />
-                        <p className={Styles.buttonText} onClick={modalHandler}>
+                        <span className={Styles.buttonText}>
                             Add Task
-                        </p>
-                    </div>
+                        </span>
+                    </button>
                 </div>
                 <div className={Styles.Yellow}>
                     <div className={Styles.DateRangeContainer}>

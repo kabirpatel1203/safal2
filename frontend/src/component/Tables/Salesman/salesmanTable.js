@@ -227,12 +227,12 @@ const SalesmanTable = ({ modalHandler, refresh, isOpen }) => {
         <div className={Styles.header}>
           <h3>All Salesman</h3>
 
-          <div className={Styles.buttonContainer}>
+          <button className={Styles.buttonContainer} onClick={modalHandler}>
             <img className={Styles.addImg} src={Add} alt="add" />
-            <p className={Styles.buttonText} onClick={modalHandler}>
+            <span className={Styles.buttonText}>
               Add SalesMan
-            </p>
-          </div>
+            </span>
+          </button>
         </div>
 
 

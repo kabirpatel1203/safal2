@@ -350,13 +350,18 @@ const handleExportRows = (rows) => {
           <h3>All Inquiries</h3>
 
           <div className={Styles.buttonContainer}>
-            <img className={Styles.addImg} src={Add} alt="add" />
-            <p className={Styles.buttonText} onClick={modalHandler}>
-              Add Inquiry
-            </p>
-            <FilterAltIcon/>
-            <p className={Styles.buttonText} onClick={modalHandler2}>
-            Filter</p>
+            <button className={Styles.addButton} onClick={modalHandler}>
+              <img className={Styles.addImg} src={Add} alt="add" />
+              <span className={Styles.buttonText}>
+                Add Inquiry
+              </span>
+            </button>
+            <button className={Styles.addButton} onClick={modalHandler2}>
+              <FilterAltIcon/>
+              <span className={Styles.buttonText}>
+                Filter
+              </span>
+            </button>
           </div>
         </div>
         {/* = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate(); */}
