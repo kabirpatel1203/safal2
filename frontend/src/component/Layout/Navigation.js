@@ -1,19 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import Logo from './Logo'
 import Styles from './Navigation.module.css'
 import { useLocation } from 'react-router-dom'
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from '../../actions/userAction'
-import customer from '../../Assets/Menu/Customers-menu.svg'
-import customerSelected from '../../Assets/Menu/Customers-menu-selected.svg'
-import architect from '../../Assets/Menu/VectorArchitectMenu.svg'
-import architectSelected from '../../Assets/Menu/VectorArchitectMenu-selected.svg'
-import pmc from '../../Assets/Menu/PMCmenu.svg'
 import LogoutIcon from '@mui/icons-material/Logout';
-import pmcSelected from '../../Assets/Menu/PMCmenu-selected.svg'
-import dealer from '../../Assets/Menu/VectorDealerMenu.svg'
-import dealerSelected from '../../Assets/Menu/VectorDealerMenu-selected.svg'
 import AddLocationAltIcon from '@mui/icons-material/AddLocationAlt';
 import Man4Icon from '@mui/icons-material/Man4'; //customer
 import ArchitectureIcon from '@mui/icons-material/Architecture'; //architect
@@ -27,6 +18,7 @@ import BarChartIcon from '@mui/icons-material/BarChart';
 
 const Navigation = () => {
     const dispatch = useDispatch();
+    const { user } = useSelector(state => state.user);
     function handleclick() {
         dispatch(logout());
     }
@@ -187,10 +179,10 @@ const Navigation = () => {
                     <p>Task</p>
                 </Link>
 
-                <Link to="/graphs" className={graphspath ? ` ${Styles.item} ${Styles.selected}` : ` ${Styles.item}`}>
+                {user.role === "admin" && <Link to="/graphs" className={graphspath ? ` ${Styles.item} ${Styles.selected}` : ` ${Styles.item}`}>
                     <BarChartIcon />
                     <p>Data Graphs</p>
-                </Link>
+                </Link>}
 
                 <button className={Styles.button} onClick={handleclick}  >
                     <LogoutIcon />

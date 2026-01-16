@@ -39,6 +39,10 @@ const Graphs = () => {
   const [selectedArchitect, setSelectedArchitect] = useState(null);
   const [selectedMistry, setSelectedMistry] = useState(null);
   const [selectedBranch, setSelectedBranch] = useState(null);
+  
+  const [salesmanBranches, setSalesmanBranches] = useState([]);
+  const [architectBranches, setArchitectBranches] = useState([]);
+  const [mistryBranches, setMistryBranches] = useState([]);
 
   const [salesmanStartDate, setSalesmanStartDate] = useState("");
   const [salesmanEndDate, setSalesmanEndDate] = useState("");
@@ -194,7 +198,15 @@ const Graphs = () => {
   const fetchSalesmanData = async () => {
     try {
       const { data } = await axios.get("/api/v1/customer/getall");
-      const customers = filterCustomersByDate(data.customers, salesmanStartDate, salesmanEndDate);
+      let customers = filterCustomersByDate(data.customers, salesmanStartDate, salesmanEndDate);
+
+      // Filter by selected branches if any
+      if (salesmanBranches.length > 0) {
+        customers = customers.filter(customer => {
+          if (!customer.branches || customer.branches.length === 0) return false;
+          return customer.branches.some(b => salesmanBranches.includes(b.branchname));
+        });
+      }
 
       const salesmanRevenue = {};
       customers.forEach(customer => {
@@ -218,7 +230,15 @@ const Graphs = () => {
   const fetchArchitectData = async () => {
     try {
       const { data } = await axios.get("/api/v1/customer/getall");
-      const customers = filterCustomersByDate(data.customers, architectStartDate, architectEndDate);
+      let customers = filterCustomersByDate(data.customers, architectStartDate, architectEndDate);
+
+      // Filter by selected branches if any
+      if (architectBranches.length > 0) {
+        customers = customers.filter(customer => {
+          if (!customer.branches || customer.branches.length === 0) return false;
+          return customer.branches.some(b => architectBranches.includes(b.branchname));
+        });
+      }
 
       const architectRevenue = {};
       customers.forEach(customer => {
@@ -240,7 +260,15 @@ const Graphs = () => {
   const fetchMistryData = async () => {
     try {
       const { data } = await axios.get("/api/v1/customer/getall");
-      const customers = filterCustomersByDate(data.customers, mistryStartDate, mistryEndDate);
+      let customers = filterCustomersByDate(data.customers, mistryStartDate, mistryEndDate);
+
+      // Filter by selected branches if any
+      if (mistryBranches.length > 0) {
+        customers = customers.filter(customer => {
+          if (!customer.branches || customer.branches.length === 0) return false;
+          return customer.branches.some(b => mistryBranches.includes(b.branchname));
+        });
+      }
 
       const mistryRevenue = {};
       customers.forEach(customer => {
@@ -381,6 +409,16 @@ const Graphs = () => {
                   placeholder="Select Salesman (All by default)"
                 />
               </div>
+              <div className={Styles.filterContainer}>
+                <Select
+                  styles={customStyles}
+                  options={branches}
+                  onChange={(selected) => setSalesmanBranches(selected ? selected.map(s => s.value) : [])}
+                  isMulti
+                  isClearable
+                  placeholder="Select Branch(es) (All by default)"
+                />
+              </div>
               <div className={Styles.dateFilterContainer}>
                 <div className={Styles.dateInputGroup}>
                   <label>Start Date:</label>
@@ -439,6 +477,16 @@ const Graphs = () => {
                   placeholder="Select Architect (All by default)"
                 />
               </div>
+              <div className={Styles.filterContainer}>
+                <Select
+                  styles={customStyles}
+                  options={branches}
+                  onChange={(selected) => setArchitectBranches(selected ? selected.map(s => s.value) : [])}
+                  isMulti
+                  isClearable
+                  placeholder="Select Branch(es) (All by default)"
+                />
+              </div>
               <div className={Styles.dateFilterContainer}>
                 <div className={Styles.dateInputGroup}>
                   <label>Start Date:</label>
@@ -495,6 +543,16 @@ const Graphs = () => {
                   onChange={(selected) => setSelectedMistry(selected?.value)}
                   isClearable
                   placeholder="Select Mistry (All by default)"
+                />
+              </div>
+              <div className={Styles.filterContainer}>
+                <Select
+                  styles={customStyles}
+                  options={branches}
+                  onChange={(selected) => setMistryBranches(selected ? selected.map(s => s.value) : [])}
+                  isMulti
+                  isClearable
+                  placeholder="Select Branch(es) (All by default)"
                 />
               </div>
               <div className={Styles.dateFilterContainer}>
