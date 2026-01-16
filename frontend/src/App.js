@@ -19,6 +19,7 @@ import Inquiry from './component/Pages/Inquiry/inquiry';
 import Salesman from './component/Pages/SalesMan/salesman';
 import InquiryFilter from './component/Filter/inquiryFilter';
 import Task from './component/Pages/Task/Task';
+import Graphs from './component/Pages/Graphs/Graphs';
 
 // import SignUp from './component/Auth/Signup/signup'
 function App() {
@@ -44,6 +45,7 @@ function App() {
         <Route exact path='/salesman' element={(loading === false && isAuthenticated === true) ? <Salesman /> : <SignIn />} />
         <Route exact path='/branch' element={(loading === false && isAuthenticated === true) ? <Branch /> : <SignIn />} />
         <Route exact path='/task' element={(loading === false && isAuthenticated) ? <Task /> : <SignIn />} />
+        <Route exact path='/graphs' element={(loading === false && isAuthenticated) ? <Graphs /> : <SignIn />} />
         <Route exact path='/signin' element={<SignIn />} />
         <Route exact path="/password/forgot" element=<ForgotPassword /> />
         <Route exact path="/password/reset/:token" element=<ResetPassword /> />

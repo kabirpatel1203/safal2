@@ -17,6 +17,10 @@ const dealerSchema = new mongoose.Schema({
         type:String,
         default:""
     },
+    displaySize: {
+        type: String,
+        default: ""
+    },
     companyName:String,
     birthdate:Date,
     marriagedate:Date,

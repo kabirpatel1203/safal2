@@ -23,6 +23,7 @@ import ApartmentIcon from '@mui/icons-material/Apartment'; //PMC
 import PsychologyIcon from '@mui/icons-material/Psychology'; //Inquiry
 import ReceiptIcon from '@mui/icons-material/Receipt'; //salesman
 import TaskIcon from '@mui/icons-material/Task';
+import BarChartIcon from '@mui/icons-material/BarChart';
 
 const Navigation = () => {
     const dispatch = useDispatch();
@@ -40,6 +41,7 @@ const Navigation = () => {
     const [inquirypath, setInquirypath] = useState(false);
     const [salesmanpath, setSalesmanpath] = useState(false);
     const [taskpath, setTaskpath] = useState(false);
+    const [graphspath, setGraphspath] = useState(false);
 
     useEffect(() => {
         if (location.pathname === "/") {
@@ -107,6 +109,17 @@ const Navigation = () => {
             setInquirypath(false);
             setTaskpath(true)
         }
+        else if (location.pathname === "/graphs") {
+            setHomepath(false);
+            setArchitectpath(false);
+            setMistrypath(false);
+            setDealerpath(false);
+            setPMCpath(false);
+            setBranchpath(false);
+            setInquirypath(false);
+            setTaskpath(false);
+            setGraphspath(true)
+        }
         else {
             setHomepath(false);
             setArchitectpath(false);
@@ -172,6 +185,11 @@ const Navigation = () => {
                     {/* <img src={dealerpath ? dealerSelected : dealer} alt="customer"/> */}
                     <TaskIcon />
                     <p>Task</p>
+                </Link>
+
+                <Link to="/graphs" className={graphspath ? ` ${Styles.item} ${Styles.selected}` : ` ${Styles.item}`}>
+                    <BarChartIcon />
+                    <p>Data Graphs</p>
                 </Link>
 
                 <button className={Styles.button} onClick={handleclick}  >

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import Styles from './DealerCreateForm.module.css'
+import Styles from './CustomerCreateForm.module.css'
 import { AiFillCloseCircle } from 'react-icons/ai'
 import axios from "axios"
 import { ToastContainer, toast } from 'react-toastify'
@@ -65,9 +65,10 @@ const InquiryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
         email: data.email,
         mobileno: data.mobileno,
         address: data.address,
-        // companyName: data.companyName,
-        // birthdate: data.birthdate ? data.birthdate.substr(0, 10) : null,
-        // marriagedate: data.marriagedate ? data.marriagedate.substr(0, 10) : null,
+        area: data.area,
+        birthdate: data.birthdate ? data.birthdate.substr(0, 10) : null,
+        marriagedate: data.marriagedate ? data.marriagedate.substr(0, 10) : null,
+        orderValue: data.orderValue,
         remarks: data.remarks,
         architectTag: data.architectTag,
         architectName: data.architectName,
@@ -83,15 +84,8 @@ const InquiryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
         dealerName:data.dealerName,
         date: data.date ? data.date.substr(0, 10) : null,
         followupdate: data.followupdate ? data.followupdate.substr(0, 10) : null,
-        // followupdate: "",
         requirement: data.requirement,
         stage: data.stage,
-        // bankname: data.bankname,
-        // branchname: data.branchname,
-        // IFSCcode: data.IFSCcode,
-        // adharcard: data.adharcard,
-        // pancard: data.pancard,
-        // date: data.date ? data.date.substr(0, 10) : null,
         branches: data.branches,
         salesmen: data.salesmen,
         // name: "",
@@ -217,6 +211,10 @@ const InquiryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
             email: formData.email,
             mobileno: formData.mobileno,
             address: formData.address,
+            area: formData.area,
+            birthdate: formData.birthdate,
+            marriagedate: formData.marriagedate,
+            orderValue: formData.orderValue,
             date: formData.date,
             followupdate: formData.followupdate,
             architectTag: formData.architectTag,
@@ -243,7 +241,13 @@ const InquiryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
         try {
             const response = await axios.put(`/api/v1/inquiry/update/${id}`, data, { headers: { "Content-Type": "application/json" } });
             console.log(response);
-            // toast.success("dealer is Edited ");
+            
+            if (response.data.movedToCustomer) {
+                toast.success("Inquiry qualified and moved to Customers!");
+            } else {
+                toast.success("Inquiry updated successfully");
+            }
+            
             parentCallback();
             setIsOpen(false);
 
@@ -373,14 +377,17 @@ const InquiryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
                     <label htmlFor='number'>Email</label>
                     <input className={Styles.inputTag} name="email" value={formData.email} onChange={(e) => formHandler(e)} placeholder='Email' />
 
-                    {/* <label htmlFor='address'>Address</label>
-            <input className={Styles.inputTag} name="address" value={formData.address} onChange={(e) => formHandler(e)} placeholder='Address' />
+                    <label htmlFor='address'>Address</label>
+                    <input className={Styles.inputTag} name="address" value={formData.address} onChange={(e) => formHandler(e)} placeholder='Address' />
   
-            <label htmlFor='ordervalue'>Order Value</label>
-            <input className={Styles.inputTag} name="orderValue" value={formData.orderValue} onChange={(e) => formHandler(e)} placeholder='Order Value' />*/}
+                    <label htmlFor='area'>Area</label>
+                    <input className={Styles.inputTag} name="area" value={formData.area} onChange={(e) => formHandler(e)} placeholder='Area' />
   
-            <label htmlFor='name'>Remarks</label>
-            <input className={Styles.inputTag} name="remarks" value={formData.remarks} onChange={(e) => formHandler(e)} placeholder='Remarks' /> 
+                    <label htmlFor='ordervalue'>Order Value</label>
+                    <input className={Styles.inputTag} name="orderValue" value={formData.orderValue} onChange={(e) => formHandler(e)} placeholder='Order Value' />
+  
+                    <label htmlFor='name'>Remarks</label>
+                    <input className={Styles.inputTag} name="remarks" value={formData.remarks} onChange={(e) => formHandler(e)} placeholder='Remarks' /> 
                 </div>
 
                 <div className={Styles.personalDetails2}>
@@ -391,11 +398,12 @@ const InquiryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
                     <label htmlFor='name'>Follow up Date</label>
                     <input className={Styles.inputTag} type="date" name="followupdate" value={formData.followupdate} onChange={(e) => formHandler(e)} placeholder='Follow up Date' />
 
-                    {/* <label htmlFor='name'>Annivarsary</label>
-            <input className={Styles.inputTag} type="date" name="marriagedate" value={formData.marriagedate} onChange={(e) => formHandler(e)} placeholder='Annivarsary' /> */}
+                    <label htmlFor='birthdate'>Birth Date</label>
+                    <input className={Styles.inputTag} type="date" name="birthdate" value={formData.birthdate} onChange={(e) => formHandler(e)} placeholder='Birth Date' />
 
-                    {/* <label htmlFor='name'>Sales Person</label>
-            <input className={Styles.inputTag} name="salesPerson" value={formData.salesPerson} onChange={(e) => formHandler(e)} placeholder='Sales Person' /> */}
+                    <label htmlFor='marriagedate'>Anniversary</label>
+                    <input className={Styles.inputTag} type="date" name="marriagedate" value={formData.marriagedate} onChange={(e) => formHandler(e)} placeholder='Anniversary' />
+
                     <label>Requirements</label>
                     {/* <Select selectedValue={formData.requirement} onChange={(e) => Requirehandler(e)} defaultInputValue={initialState.requirement} options={requirement} /> */}
 

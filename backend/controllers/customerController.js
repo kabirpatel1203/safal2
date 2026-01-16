@@ -27,16 +27,9 @@ exports.totalOrderValue = catchAsyncErrors(async (req, res, next) => {
     })
 })
 
+// Direct customer creation via API is disabled in favour of the Inquiry -> Customer flow
 exports.createCustomer = catchAsyncErrors(async (req, res, next) => {
-    const cust = await Customer.create({
-        ...req.body,
-        createdBy: req.user._id
-    });
-    console.log(cust);
-    res.status(200).json({
-        cust,
-        success: true
-    })
+    return next(new ErrorHander("Direct customer creation is disabled. Please create an Inquiry and qualify it instead.", 403));
 })
 
 exports.getCustomer = catchAsyncErrors(async (req, res, next) => {

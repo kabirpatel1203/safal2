@@ -23,6 +23,10 @@ const InquiryCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
     email: "",
     mobileno: "",
     address: "",
+    area: "",
+    birthdate: "",
+    marriagedate: "",
+    orderValue: "",
     architectTag: null,
     architectName: "",
     architectNumber: "",
@@ -208,6 +212,10 @@ const InquiryCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
       email: formData.email,
       mobileno: formData.mobileno,
       address: formData.address,
+      area: formData.area,
+      birthdate: formData.birthdate,
+      marriagedate: formData.marriagedate,
+      orderValue: formData.orderValue,
       date: formData.date,
       dealerTag:formData.dealerTag,
       dealerNumber:formData.dealerNumber,
@@ -232,6 +240,13 @@ const InquiryCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
     try {
       const response = await axios.post("/api/v1/inquiry/create", data, { headers: { "Content-Type": "application/json" } });
       console.log(response);
+      
+      if (response.data.movedToCustomer) {
+        toast.success("Qualified inquiry created as Customer!");
+      } else {
+        toast.success("Inquiry created successfully");
+      }
+      
       parentCallback(true);
       setIsOpen(false);
     }
@@ -309,11 +324,14 @@ const InquiryCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
           <label htmlFor='number'>Email</label>
           <input className={Styles.inputTag} name="email" value={formData.email} onChange={(e) => formHandler(e)} placeholder='Email' />
 
-          {/* <label htmlFor='address'>Address</label>
+          <label htmlFor='address'>Address</label>
           <input className={Styles.inputTag} name="address" value={formData.address} onChange={(e) => formHandler(e)} placeholder='Address' />
 
+          <label htmlFor='area'>Area</label>
+          <input className={Styles.inputTag} name="area" value={formData.area} onChange={(e) => formHandler(e)} placeholder='Area' />
+
           <label htmlFor='ordervalue'>Order Value</label>
-          <input className={Styles.inputTag} name="orderValue" value={formData.orderValue} onChange={(e) => formHandler(e)} placeholder='Order Value' />*/}
+          <input className={Styles.inputTag} name="orderValue" value={formData.orderValue} onChange={(e) => formHandler(e)} placeholder='Order Value' />
 
           <label htmlFor='name'>Remarks</label>
           <input className={Styles.inputTag} name="remarks" value={formData.remarks} onChange={(e) => formHandler(e)} placeholder='Remarks' /> 
@@ -327,11 +345,11 @@ const InquiryCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
           <label htmlFor='name'>Follow up Date</label>
           <input className={Styles.inputTag} type="date" name="followupdate" value={formData.followupdate} onChange={(e) => formHandler(e)} placeholder='Follow up Date' />
 
-          {/* <label htmlFor='name'>Annivarsary</label>
-          <input className={Styles.inputTag} type="date" name="marriagedate" value={formData.marriagedate} onChange={(e) => formHandler(e)} placeholder='Annivarsary' /> */}
+          <label htmlFor='birthdate'>Birth Date</label>
+          <input className={Styles.inputTag} type="date" name="birthdate" value={formData.birthdate} onChange={(e) => formHandler(e)} placeholder='Birth Date' />
 
-          {/* <label htmlFor='name'>Sales Person</label>
-          <input className={Styles.inputTag} name="salesPerson" value={formData.salesPerson} onChange={(e) => formHandler(e)} placeholder='Sales Person' /> */}
+          <label htmlFor='marriagedate'>Anniversary</label>
+          <input className={Styles.inputTag} type="date" name="marriagedate" value={formData.marriagedate} onChange={(e) => formHandler(e)} placeholder='Anniversary' />
           <label>Requirements</label>
           {/* <Select selectedValue={formData.requirement} onChange={(e) => Requirehandler(e)} options={ requirement} /> */}
           <ReactSelect className={Styles.inputTag}

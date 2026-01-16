@@ -14,6 +14,7 @@ const DealerCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
         mobileno: "",
         address: "",
         area:"",
+        displaySize: "",
         companyName: "",
         birthdate: "",
         marriagedate: "",
@@ -77,6 +78,7 @@ const DealerCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
             mobileno: formData.mobileno,
             address: formData.address,
             area:formData.area,
+            displaySize: formData.displaySize,
             companyName: formData.companyName,
             birthdate: formData.birthdate,
             marriagedate: formData.marriagedate,
@@ -147,7 +149,7 @@ const DealerCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
                     <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} value={formData.mobileno} name="mobileno" placeholder='Mobile Number' />
 
                     <label htmlFor='email'>Email</label>
-                    <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} value={FormData.email} name="email" placeholder='email' />
+                    <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} value={formData.email} name="email" placeholder='email' />
 
                     <label htmlFor='AddressLine1'>Address</label>
                     <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} value={formData.address} name="address" placeholder='address' />
@@ -155,6 +157,9 @@ const DealerCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
 
                     <label htmlFor='area'>Area</label>
                     <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} value={formData.area} name="area" placeholder='area' />
+
+                    <label htmlFor='displaySize'>Display Size</label>
+                    <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} value={formData.displaySize} name="displaySize" placeholder='Display Size' />
 
 
                     <label htmlFor='AddressLine1'>Remarks</label>
@@ -218,32 +223,6 @@ const DealerCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
 
                     <label htmlFor='IFSCCode'>IFSC Code</label>
                     <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} value={formData.IFSCcode} name="IFSCcode" placeholder='IFSC Code' />
-                    <label>Branches</label>
-                    <ReactSelect lassName={Styles.inputTag}
-                        options={Branches}
-                        isMulti
-                        closeMenuOnSelect={false}
-                        hideSelectedOptions={false}
-                        components={{
-                            Option
-                        }}
-                        onChange={Branchchangehandler}
-                        allowSelectAll={true}
-                        value={selectedBranch}
-                    />
-                    <label>Salesmen</label>
-                    <ReactSelect className={Styles.inputTag}
-                        options={Salesmen}
-                        isMulti
-                        closeMenuOnSelect={false}
-                        hideSelectedOptions={false}
-                        components={{
-                            Option
-                        }}
-                        onChange={Salesmenchangehandler}
-                        allowSelectAll={true}
-                        value={selectedSalesmen}
-                    />
                 </div>
 
                 <div className={Styles.bankDetails2}>

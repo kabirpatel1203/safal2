@@ -346,9 +346,15 @@ const MistryTable = ({ modalHandler, refresh, isOpen }) => {
       <div className={Styles.table}>
         <div className={Styles.header}>
           <h3>All Mistry</h3>
+          <div className={Styles.buttonContainer}>
+            <img className={Styles.addImg} src={Add} alt="add" />
+            <p className={Styles.buttonText} onClick={modalHandler}>
+              Add Mistry
+            </p>
           </div>
+        </div>
 
-          <div className={Styles.Yellow}>
+        <div className={Styles.Yellow}>
             <div className={Styles.DateRangeContainer}>
               <label>Salesman Filter</label>
               <Select styles={customStyles} onChange={(e) => handlesalesman(e)} options={salesman} />

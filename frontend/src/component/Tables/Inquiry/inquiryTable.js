@@ -454,6 +454,26 @@ const handleExportRows = (rows) => {
                 size: 120,
               },
             }}
+
+            muiTopToolbarProps={{
+              sx: { display: 'block' },
+              zIndex: '0',
+            }}
+
+            columns={columns}
+            data={tabledata}
+            enableEditing
+            enableRowNumbers
+            rowNumberMode='original'
+            enableTopToolbar={!editModal && !isOpen}
+
+            muiTablePaginationProps={{
+              rowsPerPageOptions: [5, 10],
+              showFirstLastPageButtons: true,
+            }}
+            enableGlobalFilter={true}
+            positionActionsColumn='last'
+
             renderRowActions={({ row, table }) => (
               <Box sx={{ display: 'flex', gap: '1rem' }}>
                 <Tooltip arrow placement="left" title="Edit">
