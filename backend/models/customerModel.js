@@ -23,7 +23,15 @@ const customerSchema = new mongoose.Schema({
     marriagedate:String,
     date:Date,
     remarks:String,
+    revenue:Number,
+    rewardPoints:Number,
     orderValue:Number,
+    ordervalue:Number,
+    scale: {
+        type: String,
+        enum: ["High", "Medium", "Low"],
+        default: "Medium"
+    },
     // salesPerson:String,
     mistryTag:{
         type:mongoose.Schema.Types.ObjectId,

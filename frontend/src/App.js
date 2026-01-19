@@ -9,6 +9,7 @@ import Architect from './component/Pages/Architect/Architect';
 import Dealer from './component/Pages/Dealer/Dealer';
 import Mistry from './component/Pages/Mistry/Mistry';
 import PMC from './component/Pages/PMC/PMC';
+import OEM from './component/Pages/OEM/OEM';
 import store from './store';
 import SignIn from './component/Auth/Signin/signin';
 import Branch from './component/Pages/Branch/Branch'
@@ -37,6 +38,7 @@ function App() {
         <Route exact path='/dealer' element={(loading === false && isAuthenticated === true) ? <Dealer /> : <SignIn />} />
         <Route exact path='/mistry' element={(loading === false && isAuthenticated === true) ? <Mistry /> : <SignIn />} />
         <Route exact path='/pmc' element={(loading === false && isAuthenticated === true) ? <PMC /> : <SignIn />} />
+        <Route exact path='/oem' element={(loading === false && isAuthenticated === true) ? <OEM /> : <SignIn />} />
         <Route exact path='/inquiry' element={(loading === false && isAuthenticated === true) ? <Inquiry /> : <SignIn />} />
         <Route exact path='/inquiry/:salesman/:branch/:startdate/:enddate' element={(loading === false && isAuthenticated === true) ? <InquiryFilter /> : <SignIn />} />
         <Route exact path='/salesman' element={(loading === false && isAuthenticated === true) ? <Salesman /> : <SignIn />} />

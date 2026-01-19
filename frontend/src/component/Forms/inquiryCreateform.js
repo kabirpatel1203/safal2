@@ -12,8 +12,7 @@ const InquiryCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
   const [Mistries, setMistries] = useState([]);
   const [Dealers, setDealers] = useState([]);
   const [PMCs, setPMCs] = useState([]);
-  const [Branches, setBranches] = useState([]);
-  const [selectedBranch, setselectedBranch] = useState([]);
+  const [OEMs, setOEMs] = useState([]);
   const [selectedRequirement, setSelectedRequirement] = useState([]);
   const [isDisabled, setIsDisabled] = useState(false);
   const [Salesmen, setSalesmen] = useState([]);
@@ -26,18 +25,21 @@ const InquiryCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
     area: "",
     birthdate: "",
     marriagedate: "",
-    orderValue: "",
+    rewardPoints: "",
     architectTag: null,
     architectName: "",
     architectNumber: "",
     requirement:"",
     stage:"",
+    scale: "Medium",
     pmcTag: null,
     pmcName: "",
     pmcNumber: "",
+    oemTag: null,
+    oemName: "",
+    oemNumber: "",
     date: "",
     followupdate: "",
-    branches: [],
     salesmen: [],
     remarks:""
   }
@@ -130,25 +132,29 @@ const InquiryCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
     },
 
   ]
+  const scale = [
+    {
+      value: "High",
+      label:"High"
+    },
+    {
+      value: "Medium",
+      label:"Medium"
+    },
+    {
+      value: "Low",
+      label:"Low"
+    },
+  ]
   const [formData, setFormData] = useState(initialState)
   const { user, isAuthenticated } = useSelector((state) => state.user);
+  const isAdmin = user?.role === "admin";
   const formHandler = (e) => {
     e.preventDefault();
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
-  const getAllbranches = async () => {
-    const { data } = await axios.get("/api/v1/branch/getall");
 
-    const branches = data.branches.map((branch) => (
-      {
-        branchname: branch.branchname,
-        value: branch.branchname,
-        label: branch.branchname
-      }
-    ))
-    setBranches(branches);
-  }
   const getAllsalesmen = async () => {
     const { data } = await axios.get("/api/v1/salesman/getall");
     console.log(data.salesmans);
@@ -195,18 +201,53 @@ const InquiryCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
 
   }
 
+  const getAllOEM = async () => {
+
+    const { data } = await axios.get("/api/v1/oem/getall");
+
+    const oems = data.oems.map((oem) => ({ value: oem._id, label: `${oem.name}-${oem.mobileno}` }))
+    setOEMs(oems);
+
+
+  }
+
+  const checkDuplicateInquiry = async (mobileno) => {
+    try {
+      const { data } = await axios.get("/api/v1/inquiry/getall");
+      const isDuplicate = data.inquiries.some((inquiry) => inquiry.mobileno === mobileno);
+      return isDuplicate;
+    } catch (error) {
+      console.error("Error checking duplicate inquiry:", error);
+      return false;
+    }
+  };
+
   useEffect(() => {
     getAllArchitects();
     getAllDealer();
     getAllMistry();
     getAllPMC();
-    getAllbranches();
+    getAllOEM();
     getAllsalesmen();
   }, []);
 
   const submitHandler = async (e) => {
     e.preventDefault();
     setIsDisabled(true);
+
+    // Check for duplicate mobile number
+    if (formData.mobileno.trim() === "") {
+      toast.error("Mobile number is required");
+      setIsDisabled(false);
+      return;
+    }
+
+    const isDuplicate = await checkDuplicateInquiry(formData.mobileno);
+    if (isDuplicate) {
+      toast.error("An inquiry with this mobile number already exists. You cannot create duplicate inquiries.");
+      setIsDisabled(false);
+      return;
+    }
     let data = {
       name: formData.name,
       email: formData.email,
@@ -215,7 +256,7 @@ const InquiryCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
       area: formData.area,
       birthdate: formData.birthdate,
       marriagedate: formData.marriagedate,
-      orderValue: formData.orderValue,
+      rewardPoints: isAdmin ? formData.rewardPoints : 0,
       date: formData.date,
       dealerTag:formData.dealerTag,
       dealerNumber:formData.dealerNumber,
@@ -230,9 +271,12 @@ const InquiryCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
       pmcTag: formData.pmcTag,
       pmcName: formData.pmcName,
       pmcNumber: formData.pmcNumber,
+      oemTag: formData.oemTag,
+      oemName: formData.oemName,
+      oemNumber: formData.oemNumber,
       requirement: selectedRequirement,
       stage:formData.stage,
-      branches: selectedBranch,
+      scale:formData.scale,
       salesmen: selectedSalesmen,
       remarks:formData.remarks
     }
@@ -260,12 +304,7 @@ const InquiryCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
 
 
 
-  const Branchchangehandler = (selected) => {
 
-    setselectedBranch(selected);
-    console.log(selected);
-    setFormData({ ...formData, selectedBranch })
-  };
 
   const RequirementsChangeHandler = (selected) => {
     setSelectedRequirement(selected);
@@ -279,6 +318,9 @@ const InquiryCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
   }
   const Stagehandler = (e) => {
     setFormData({ ...formData, stage: e.value })
+  }
+  const Scalehandler = (e) => {
+    setFormData({ ...formData, scale: e.value })
   }
 
   const MistryFormHandler = (e) => {
@@ -295,6 +337,12 @@ const InquiryCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
     console.log(e.value);
     setFormData({ ...formData, pmcTag: e.value, pmcName: e.label.split('-')[0], pmcNumber: e.label.split('-')[1] })
   }
+
+  const OEMFormHandler = (e) => {
+    console.log(e.value);
+    setFormData({ ...formData, oemTag: e.value, oemName: e.label.split('-')[0], oemNumber: e.label.split('-')[1] })
+  }
+
   const Salesmenchangehandler = (selecteds) => {
 
     setselectedSalesmen(selecteds);
@@ -330,8 +378,8 @@ const InquiryCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
           <label htmlFor='area'>Area</label>
           <input className={Styles.inputTag} name="area" value={formData.area} onChange={(e) => formHandler(e)} placeholder='Area' />
 
-          <label htmlFor='ordervalue'>Order Value</label>
-          <input className={Styles.inputTag} name="orderValue" value={formData.orderValue} onChange={(e) => formHandler(e)} placeholder='Order Value' />
+          <label htmlFor='rewardpoints'>Reward Points</label>
+          <input className={Styles.inputTag} name="rewardPoints" value={formData.rewardPoints} onChange={(e) => formHandler(e)} placeholder='Reward Points' disabled={!isAdmin} />
 
           <label htmlFor='name'>Remarks</label>
           <input className={Styles.inputTag} name="remarks" value={formData.remarks} onChange={(e) => formHandler(e)} placeholder='Remarks' /> 
@@ -368,19 +416,8 @@ const InquiryCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
 
           <label>Stage</label>
           <Select selectedValue={formData.stage} onChange={(e) => Stagehandler(e)} options={ stage} />
-          <label>Branches</label>
-          <ReactSelect className={Styles.inputTag}
-            options={Branches}
-            isMulti
-            closeMenuOnSelect={false}
-            hideSelectedOptions={false} 
-            components={{
-              Option
-            }}
-            onChange={Branchchangehandler}
-            allowSelectAll={true}
-            value={selectedBranch}
-          />
+          <label>Scale</label>
+          <Select selectedValue={formData.scale} onChange={(e) => Scalehandler(e)} options={ scale} />
           <label>Salesmen</label>
           <ReactSelect className={Styles.inputTag}
             options={Salesmen}
@@ -397,7 +434,7 @@ const InquiryCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
         </div>
       </div>
 
-{user.role =="admin" &&      <div className={Styles.bankDetails}>
+      <div className={Styles.bankDetails}>
         <div className={Styles.bankDetails1}>
 
            <label htmlFor='name'>Mistry Tag</label>
@@ -405,17 +442,20 @@ const InquiryCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
 
           <label htmlFor='name'>Architect Tag</label>
           <Select selectedValue={formData.architectTag} onChange={(e) => ArchitectFormHandler(e)} options={architects} />
+
+          <label htmlFor='name'>Dealer Tag</label>
+          <Select selectedValue={formData.dealerTag} onChange={(e) => DealerFormHandler(e)} options={Dealers} />
         </div>
 
         <div className={Styles.bankDetails2}>
 
-          <label htmlFor='name'>Dealer Tag</label>
-          <Select selectedValue={formData.dealerTag} onChange={(e) => DealerFormHandler(e)} options={Dealers} />
-
           <label htmlFor='name'>PMC Tag</label>
           <Select selectedValue={formData.pmcTag} onChange={(e) => PMCFormHandler(e)} options={PMCs} />
+
+          <label htmlFor='name'>OEM Tag</label>
+          <Select selectedValue={formData.oemTag} onChange={(e) => OEMFormHandler(e)} options={OEMs} />
         </div>
-      </div>}
+      </div>
       <button disabled={isDisabled} className={isDisabled ? Styles.disable : Styles.submitButton} onClick={(e) => submitHandler(e)} type="Submit">Submit</button>
     </div>
   )

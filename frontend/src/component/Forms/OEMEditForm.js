@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import Styles from './ArchitectCreateForm.module.css'
+import Styles from './OEMCreateForm.module.css'
 import { AiFillCloseCircle } from 'react-icons/ai'
 import axios from "axios"
 import { ToastContainer, toast } from 'react-toastify'
@@ -7,11 +7,11 @@ import Option from '../DropDown/Options'
 import Select from 'react-select'
 import { default as ReactSelect } from "react-select";
 
-const PMCEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
+const OEMEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
+    console.log(`data inside OEM edit`, data);
     const [Salesmen, setSalesmen] = useState([]);
     const [selectedSalesman, setselectedSalesman] = useState(data.salesmen);
     const arr2 = selectedSalesman.map(object => {
-        console.log(object);
         return { ...object, value: object.name, label: object.name };
     })
     const getAllsalesmen = async () => {
@@ -37,31 +37,29 @@ const PMCEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
         mobileno: data.mobileno,
         address: data.address,
         area:data.area,
-        branchname: data.branchname,
-        IFSCcode: data.IFSCcode,
         companyName: data.companyName,
         birthdate: data.birthdate ? data.birthdate.substr(0, 10) : null,
         marriagedate: data.marriagedate ? data.marriagedate.substr(0, 10) : null,
         remarks: data.remarks,
         bankname: data.bankname,
+        branchname: data.branchname,
+        IFSCcode: data.IFSCcode,
         adharcard: data.adharcard,
         pancard: data.pancard,
-        salesMan: data.salesMan,
         date: data.date ? data.date.substr(0, 10) : null,
         salesmen:data.salesmen
-
     }
     let id = data._id;
     const [formData, setFormData] = useState(initialState)
     const [isDisabled, setIsDisabled] = useState(false);
-    useEffect(() => {
-        getAllsalesmen();
-    }, []);
+
     const formHandler = (e) => {
         e.preventDefault();
         setFormData({ ...formData, [e.target.name]: e.target.value })
     }
-
+    useEffect(() => {
+        getAllsalesmen();
+    }, []);
     const submitHandler = async (e) => {
         e.preventDefault();
         setIsDisabled(true);
@@ -71,27 +69,25 @@ const PMCEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
             mobileno: formData.mobileno,
             address: formData.address,
             area:formData.area,
-            branchname: formData.branchname,
             companyName: formData.companyName,
             birthdate: formData.birthdate,
             marriagedate: formData.marriagedate,
             remarks: formData.remarks,
             bankname: formData.bankname,
+            branchname: formData.branchname,
             adharcard: formData.adharcard,
             pancard: formData.pancard,
             date: formData.date,
             IFSCcode: formData.IFSCcode,
-            salesMan: formData.salesMan,
             salesmen:selectedSalesman
-
         }
         console.log(data)
         try {
-            const response = await axios.put(`/api/v1/pmc/update/${id}`, data, { headers: { "Content-Type": "application/json" } });
+            const response = await axios.put(`/api/v1/oem/update/${id}`, data, { headers: { "Content-Type": "application/json" } });
             console.log(response);
-            // toast.success("PMC is Edited ");
             parentCallback();
             setIsOpen(false);
+
         }
         catch (e) {
             toast.error(e.response.data.message);
@@ -100,31 +96,19 @@ const PMCEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
         }
 
     }
+    
     return (
         <div className={Styles.container}>
-            {/* <ToastContainer
-position="top-right"
-autoClose={5000}
-hideProgressBar={false}
-newestOnTop={false}
-closeOnClick
-rtl={false}
-pauseOnFocusLoss
-draggable
-pauseOnHover
-/> */}
-            {/* Same as */}
-            {/* <ToastContainer /> */}
             <div className={Styles.closebutton} onClick={modalHandler}>
                 <AiFillCloseCircle />
             </div>
-            <h1 className={Styles.heading}>PMC Details</h1>
+            <h1 className={Styles.heading}>OEM Details</h1>
             <div className={Styles.personalDetails}>
 
                 <div className={Styles.personalDetails1}>
 
                     <label htmlFor='name'>Name</label>
-                    <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.name} value={formData.name} name="name" placeholder='Architect Name' />
+                    <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.name} value={formData.name} name="name" placeholder='OEM Name' />
 
                     <label htmlFor='mobileno'>Mobile Number</label>
                     <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.mobileno} value={formData.mobileno} name="mobileno" placeholder='Mobile Number' />
@@ -133,11 +117,12 @@ pauseOnHover
                     <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.email} value={FormData.email} name="email" placeholder='email' />
 
                     <label htmlFor='AddressLine1'>Address</label>
-                    <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.address} value={formData.address} name="address" placeholder='address' />
+                    <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.address} value={formData.address} name="address" placeholder='address Line 1' />
 
                     <label htmlFor='area'>Area</label>
                     <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.area} value={formData.area} name="area" placeholder='area' />
-                   
+
+
                     <label htmlFor='AddressLine1'>Remarks</label>
                     <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.remarks} value={formData.remarks} name="remarks" placeholder='Remarks' />
                 </div>
@@ -156,10 +141,7 @@ pauseOnHover
                     <label htmlFor='companyName'>Company Name</label>
                     <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.companyName} name="companyName" placeholder='Company Name' />
 
-                    <label htmlFor='salesMan'>Sales Man </label>
-                    <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.salesMan} value={formData.salesMan} name="salesMan" placeholder='Sales Man' />
-
-                     <label>Salesmen</label>
+                    <label>Salesmen</label>
                     <ReactSelect lassName={Styles.inputTag}
                         options={Salesmen}
                         isMulti
@@ -203,4 +185,4 @@ pauseOnHover
     )
 }
 
-export default PMCEditForm
+export default OEMEditForm

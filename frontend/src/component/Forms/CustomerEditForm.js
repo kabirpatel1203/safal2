@@ -8,8 +8,6 @@ import Select from 'react-select'
 import { default as ReactSelect } from "react-select";
 import { useSelector } from 'react-redux'
 const CustomerEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
-  const [Branches, setBranches] = useState([]);
-  const [selectedBranch, setselectedBranch] = useState(data.branches);
   const [Salesmen, setSalesmen] = useState([]);
   const [selectedSalesman, setselectedSalesman] = useState(data.salesmen);
   const arr2 = selectedSalesman.map(object => {
@@ -33,20 +31,6 @@ const CustomerEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => 
     console.log(selected);
     setFormData({ ...formData, selectedSalesman })
   };
-  const arr = selectedBranch.map(object => {
-    return { ...object, value: object.branchname, label: object.branchname };
-  })
-  const getAllbranches = async () => {
-    const { data } = await axios.get("/api/v1/branch/getall");
-    const branches = data.branches.map((branch) => (
-      {
-        branchname: branch.branchname,
-        value: branch.branchname,
-        label: branch.branchname
-      }
-    ))
-    setBranches(branches);
-  }
   const [architects, setArchitects] = useState([]);
   const [defalutArchitect, setDefaultArchitect] = useState(() => data.architectTag ? { value: data.architectTag, label: `${data.architectName}-${data.architectNumber}` } : "");
   const [defaultMistry, setDefaultMistry] = useState(() => data.mistryTag ? { value: data.mistryTag, label: `${data.mistryName}-${data.mistryNumber}` } : "");
@@ -65,7 +49,8 @@ const CustomerEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => 
     address: data.address,
     area:data.area,
     remarks: data.remarks,
-    orderValue: data.orderValue,
+    rewardPoints: data.rewardPoints,
+    scale: data.scale || "Medium",
     salesPerson: data.salesPerson,
     mistryTag: data.mistryTag,
     mistryName: data.mistryName,
@@ -82,19 +67,34 @@ const CustomerEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => 
     birthdate: data.birthdate ? data.birthdate.substr(0, 10) : null,
     marriagedate: data.marriagedate ? data.marriagedate.substr(0, 10) : null,
     date: data.date ? data.date.substr(0, 10) : null,
-    branches: data.branches,
     salesmen: data.salesmen
 
 
   }
+  const scale = [
+    {
+      value: "High",
+      label: "High"
+    },
+    {
+      value: "Medium",
+      label: "Medium"
+    },
+    {
+      value: "Low",
+      label: "Low"
+    },
+  ]
   const [formData, setFormData] = useState(initialState)
   useEffect(() => {
-    getAllbranches();
     getAllsalesmen();
   }, []);
   const formHandler = (e) => {
     e.preventDefault();
     setFormData({ ...formData, [e.target.name]: e.target.value })
+  }
+  const Scalehandler = (e) => {
+    setFormData({ ...formData, scale: e.value })
   }
 
 
@@ -112,7 +112,8 @@ const CustomerEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => 
       marriagedate: formData.marriagedate,
       remarks: formData.remarks,
       date: formData.date,
-      orderValue: formData.orderValue,
+      rewardPoints: formData.rewardPoints,
+      scale: formData.scale,
       salesPerson: formData.salesPerson,
       mistryTag: formData.mistryTag,
       mistryName: formData.mistryName,
@@ -126,7 +127,6 @@ const CustomerEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => 
       pmcTag: formData.pmcTag,
       pmcName: formData.pmcName,
       pmcNumber: formData.pmcNumber,
-      branches: selectedBranch,
       salesmen: selectedSalesman
 
 
@@ -197,12 +197,6 @@ const CustomerEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => 
   const PMCFormHandler = (e) => {
     setFormData({ ...formData, pmcTag: e.value, pmcName: e.label.split('-')[0], pmcNumber: e.label.split('-')[1] })
   }
-  const Branchchangehandler = (selected) => {
-
-    setselectedBranch(selected);
-    console.log(selected);
-    setFormData({ ...formData, selectedBranch })
-  };
   return (
     <div className={Styles.container}>
       {/* <ToastContainer
@@ -227,23 +221,26 @@ const CustomerEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => 
         <div className={Styles.personalDetails1}>
 
           <label htmlFor='name'>Customer Name</label>
-          <input className={Styles.inputTag} name="name" value={formData.name} onChange={(e) => formHandler(e)} placeholder='Customer Name' />
+          <input className={Styles.inputTag} name="name" value={formData.name} onChange={(e) => formHandler(e)} placeholder='Customer Name' disabled={user.role !== "admin"} />
 
           <label htmlFor='number'>Mobile Number</label>
-          <input className={Styles.inputTag} name="mobileno" value={formData.mobileno} onChange={(e) => formHandler(e)} placeholder='Mobile Number' />
+          <input className={Styles.inputTag} name="mobileno" value={formData.mobileno} onChange={(e) => formHandler(e)} placeholder='Mobile Number' disabled={user.role !== "admin"} />
 
           <label htmlFor='number'>Email</label>
-          <input className={Styles.inputTag} name="email" value={formData.email} onChange={(e) => formHandler(e)} placeholder='Email' />
+          <input className={Styles.inputTag} name="email" value={formData.email} onChange={(e) => formHandler(e)} placeholder='Email' disabled={user.role !== "admin"} />
 
           <label htmlFor='address'>Address</label>
-          <input className={Styles.inputTag} name="address" value={formData.address} onChange={(e) => formHandler(e)} placeholder='Address' />
+          <input className={Styles.inputTag} name="address" value={formData.address} onChange={(e) => formHandler(e)} placeholder='Address' disabled={user.role !== "admin"} />
 
           <label htmlFor='area'>area</label>
-          <input className={Styles.inputTag} name="area" value={formData.area} onChange={(e) => formHandler(e)} placeholder='area' />
+          <input className={Styles.inputTag} name="area" value={formData.area} onChange={(e) => formHandler(e)} placeholder='area' disabled={user.role !== "admin"} />
 
 
-          <label htmlFor='ordervalue'>Order Value</label>
-          <input className={Styles.inputTag} name="orderValue" value={formData.orderValue} onChange={(e) => formHandler(e)} placeholder='Order Value' />
+          <label htmlFor='rewardpoints'>Reward Points</label>
+          <input className={Styles.inputTag} name="rewardPoints" value={formData.rewardPoints} onChange={(e) => formHandler(e)} placeholder='Reward Points' disabled={user.role !== "admin"} />
+
+          <label>Scale</label>
+          <Select selectedValue={formData.scale} onChange={(e) => Scalehandler(e)} options={scale} defaultInputValue={initialState.scale} isDisabled={user.role !== "admin"} />
 
           <label htmlFor='name'>Remarks</label>
           <input className={Styles.inputTag} name="remarks" value={formData.remarks} onChange={(e) => formHandler(e)} placeholder='Remarks' />
@@ -252,29 +249,16 @@ const CustomerEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => 
         <div className={Styles.personalDetails2}>
 
           <label htmlFor='name'>Created At</label>
-          <input className={Styles.inputTag} type="date" name="date" value={formData.date} onChange={(e) => formHandler(e)} placeholder='Created At' />
+          <input className={Styles.inputTag} type="date" name="date" value={formData.date} onChange={(e) => formHandler(e)} placeholder='Created At' disabled={user.role !== "admin"} />
 
           <label htmlFor='name'>Birth Date</label>
-          <input className={Styles.inputTag} type="date" name="birthdate" value={formData.birthdate} onChange={(e) => formHandler(e)} placeholder='Birthdate' />
+          <input className={Styles.inputTag} type="date" name="birthdate" value={formData.birthdate} onChange={(e) => formHandler(e)} placeholder='Birthdate' disabled={user.role !== "admin"} />
 
           <label htmlFor='name'>Annivarsary</label>
-          <input className={Styles.inputTag} type="date" name="marriagedate" value={formData.marriagedate} onChange={(e) => formHandler(e)} placeholder='Annivarsary' />
+          <input className={Styles.inputTag} type="date" name="marriagedate" value={formData.marriagedate} onChange={(e) => formHandler(e)} placeholder='Annivarsary' disabled={user.role !== "admin"} />
 
           {/* <label htmlFor='name'>Sales Person</label>
           <input className={Styles.inputTag} name="salesPerson" value={formData.salesPerson} onChange={(e) => formHandler(e)} placeholder='Sales Person' /> */}
-          <label>Branches</label>
-          <ReactSelect lassName={Styles.inputTag}
-            options={Branches}
-            isMulti
-            closeMenuOnSelect={false}
-            hideSelectedOptions={false}
-            components={{
-              Option
-            }}
-            onChange={Branchchangehandler}
-            allowSelectAll={true}
-            value={arr}
-          />
           <label>Salesmen</label>
           <ReactSelect lassName={Styles.inputTag}
             options={Salesmen}
@@ -287,6 +271,7 @@ const CustomerEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => 
             onChange={Salesmenchangehandler}
             allowSelectAll={true}
             value={arr2}
+            isDisabled={user.role !== "admin"}
           />
         </div>
       </div>

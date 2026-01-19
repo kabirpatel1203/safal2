@@ -30,10 +30,8 @@ const InquiryTable = ({ modalHandler ,modalHandler2,refresh,isOpen}) => {
   const [editModalData, setEditModalData] = useState({});
   const [startDate, setStartDate] = useState(new Date('2022-08-01'));
   const [endDate, setEndDate] = useState(new Date());
-  const [branches, setBranches] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [salesman, setSalesman] = useState([]);
-  let [selectedBranch,setSelectedBranch] = useState(null);
   let [selectedSalesman,setSelectedSalesman] = useState(null);
   const { user, isAuthenticated } = useSelector((state) => state.user);
 
@@ -50,28 +48,9 @@ const InquiryTable = ({ modalHandler ,modalHandler2,refresh,isOpen}) => {
     setSalesman(salesmen);
   }
 
-  const fetchBranches = async () => {
-    const { data } = await axios.get("/api/v1/branch/getall");
-    
-    const branches = data.branches.map((branch) => (
-      {
-        branchname: branch.branchname,
-        value: branch.branchname,
-        label: branch.branchname
-
-      }
-    ))
-    setBranches(branches);
-  }
-
   const handlesalesman = (selected) => {
     setSelectedSalesman(selected.value);
-    fetchFilteredInquiries(selected.value,selectedBranch);
-  }
-
-  const handlebranch = (selected) => {
-    setSelectedBranch(selected.value);
-    fetchFilteredInquiries(selectedSalesman,selected.value);
+    fetchFilteredInquiries(selected.value);
   }
 
   const modifyData = (data) => {
@@ -164,10 +143,12 @@ const InquiryTable = ({ modalHandler ,modalHandler2,refresh,isOpen}) => {
         name:item.name,
         followupdate:item.followupdate,
         stage:item.stage,
+        scale:item.scale,
         mobileno:item.mobileno,
         requirement:item.requirement.map((req)=>req.requirement).join('-'),
         salesmen:item.salesmen.map((req)=>req.name).join('-'),
         remarks:item.remarks,
+        createdBy:item.createdBy?.email || 'N/A',
       }
     })
 
@@ -186,10 +167,12 @@ const InquiryTable = ({ modalHandler ,modalHandler2,refresh,isOpen}) => {
           name:item.name,
           followupdate:item.followupdate,
           stage:item.stage,
+          scale:item.scale,
           requirement:item.requirement.map((req)=>req.requirement).join('-'),
           salesmen:item.salesmen.map((req)=>req.name).join('-'),
           mobileno:item.mobileno,
-          remarks:item.remarks
+          remarks:item.remarks,
+          createdBy:item.createdBy?.email || 'N/A',
         }
       })
       const modifiedInquiries = modifyData(inquires);
@@ -206,30 +189,21 @@ const InquiryTable = ({ modalHandler ,modalHandler2,refresh,isOpen}) => {
   };
 
 
-  const fetchFilteredInquiries =async(salesman, branch) => {
+  const fetchFilteredInquiries = async (salesman) => {
 
     let filteredData = originalData.filter((item)=>{
-      let isBranch = false;
       let isSalesman = false;
-
-      if(item.branches.length === 0 && branch===null){
-        isBranch = true;
-      }
 
       if(item.salesmen.length === 0 && salesman===null){
         isSalesman = true;
       }
       
-      item.branches.forEach((branchObject)=>{
-        if(Object.values(branchObject).includes(branch) || branch===null){
-        isBranch = true;
-      }})
       item.salesmen.forEach((salesmanObj)=>{
         if(Object.values(salesmanObj).includes(salesman) || salesman===null){
-          isSalesman = true;
-        }})
+        isSalesman = true;
+      }})
 
-      if(isSalesman && isBranch){
+      if(isSalesman){
         return true
       }
     })
@@ -239,10 +213,12 @@ const InquiryTable = ({ modalHandler ,modalHandler2,refresh,isOpen}) => {
           name:item.name,
           followupdate:item.followupdate,
           stage:item.stage,
+          scale:item.scale,
           requirement:item.requirement.map((req)=>req.requirement).join('-'),
           salesmen:item.salesmen.map((req)=>req.name).join('-'),
           mobileno:item.mobileno,
-          remarks:item.remarks
+          remarks:item.remarks,
+          createdBy:item.createdBy?.email || 'N/A',
         }
       })
     setInquiries(modifyData(data));
@@ -251,14 +227,13 @@ const InquiryTable = ({ modalHandler ,modalHandler2,refresh,isOpen}) => {
 
   useEffect(() => {
     fetchInquiry();
-    fetchFilteredInquiries(selectedSalesman, selectedBranch)
-    fetchBranches();
+    fetchFilteredInquiries(selectedSalesman)
     fetchSalesmen();
     
   }, [refresh]);
 
   useEffect(()=>{
-    fetchFilteredInquiries(selectedSalesman, selectedBranch);
+    fetchFilteredInquiries(selectedSalesman);
     // submitDateRangeHandler();
   },[originalData])
 
@@ -303,28 +278,39 @@ const InquiryTable = ({ modalHandler ,modalHandler2,refresh,isOpen}) => {
     })
 };
 const columns = useMemo(
-  () => [
-    { header: 'Date', accessorKey: 'date', type: "date", dateSetting: { locale: "en-GB" }, 
-    Cell: ({cell})=>(dateformater(cell.getValue()))},
-    { header: 'Name', accessorKey: 'name' },
-    { header: 'Follow Update', accessorKey: 'followupdate', type: "date", dateSetting: { locale: "en-GB" }, Cell: ({cell})=>(dateformater(cell.getValue())) },
-    {header: 'Stage', accessorKey:'stage'},
-    {header: 'Requirement', accessorKey: 'requirement'},
-    {header: 'Salesman', accessorKey:'salesmen'},
-    { header: 'Mobile Number', accessorKey: 'mobileno' },
-    { header: 'Remarks', accessorKey: 'remarks' },
-  ],
-  [],
+  () => {
+    const baseColumns = [
+      { header: 'Date', accessorKey: 'date', type: "date", dateSetting: { locale: "en-GB" }, 
+      Cell: ({cell})=>(dateformater(cell.getValue()))},
+      { header: 'Name', accessorKey: 'name' },
+      { header: 'Follow Update', accessorKey: 'followupdate', type: "date", dateSetting: { locale: "en-GB" }, Cell: ({cell})=>(dateformater(cell.getValue())) },
+      {header: 'Stage', accessorKey:'stage'},
+      {header: 'Scale', accessorKey:'scale'},
+      {header: 'Requirement', accessorKey: 'requirement'},
+      {header: 'Salesman', accessorKey:'salesmen'},
+      { header: 'Mobile Number', accessorKey: 'mobileno' },
+      { header: 'Remarks', accessorKey: 'remarks' },
+    ];
+    
+    if (user?.role === 'admin') {
+      baseColumns.push({ header: 'Created By', accessorKey: 'createdBy' });
+    }
+    
+    return baseColumns;
+  },
+  [user],
 );
 const ops = [
   { header: 'Date', accessorKey: 'date', type: "date", dateSetting: { locale: "en-GB" }, Cell: ({cell})=>(dateformater(cell.getValue())) },
   { header: 'Name', accessorKey: 'name' },
   { header: 'Follow Update', accessorKey: 'followupdate', type: "date", dateSetting: { locale: "en-GB" },Cell: ({cell})=>(dateformater(cell.getValue()))  },
   {header: 'Stage', accessorKey:'stage'},
+  {header: 'Scale', accessorKey:'scale'},
   {header: 'Requirement', accessorKey: 'requirement'},
   {header: 'Salesman', accessorKey:'salesmen'},
   { header: 'Mobile Number', accessorKey: 'mobileno' },
   { header: 'Remarks', accessorKey: 'remarks' },
+  { header: 'Created By', accessorKey: 'createdBy' },
 ]
 const csvOptions = {
   fieldSeparator: ',',
@@ -370,9 +356,7 @@ const handleExportRows = (rows) => {
             {/* <label>Branche</label> */}
             <label>Salesman Filter</label>
             <Select styles={customStyles} onChange={(e) => handlesalesman(e)} options={salesman} />
-            <label>Branch Filter</label>
-            {/* <Select styles={customStyles} onChange={(e) => handlebranch(e)} options={branches} /> */}
-            <Select styles={customStyles} selectedValue={branches} onChange={(e) => handlebranch(e)} options={branches} />
+
             <TextField
               className={Styles.InputDate}
               id="start-date"
@@ -521,26 +505,6 @@ const handleExportRows = (rows) => {
                   width: '100%',
                 }}
               >
-                <Button
-                  disabled={table.getPrePaginationRowModel().rows.length === 0}
-                  onClick={() =>
-                    handleExportRows(table.getPrePaginationRowModel().rows)
-                  }
-                  startIcon={<FileDownloadIcon />}
-                  variant="contained"
-                  color="primary"
-                  sx={{
-                    backgroundColor: 'rgba(37,99,235,0.08)',
-                    color: '#1d4ed8',
-                    boxShadow: 'none',
-                    '&:hover': {
-                      backgroundColor: 'rgba(37,99,235,0.16)',
-                      boxShadow: 'none',
-                    },
-                  }}
-                >
-                  Export All Rows
-                </Button>
                 <Button
                   onClick={handleExportData}
                   startIcon={<FileDownloadIcon />}

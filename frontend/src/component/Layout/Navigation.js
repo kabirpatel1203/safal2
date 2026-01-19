@@ -15,6 +15,7 @@ import PsychologyIcon from '@mui/icons-material/Psychology'; //Inquiry
 import ReceiptIcon from '@mui/icons-material/Receipt'; //salesman
 import TaskIcon from '@mui/icons-material/Task';
 import BarChartIcon from '@mui/icons-material/BarChart';
+import PrecisionManufacturingIcon from '@mui/icons-material/PrecisionManufacturing'; //OEM
 
 const Navigation = () => {
     const dispatch = useDispatch();
@@ -29,11 +30,11 @@ const Navigation = () => {
     const [mistrypath, setMistrypath] = useState(false);
     const [dealerpath, setDealerpath] = useState(false);
     const [pmcpath, setPMCpath] = useState(false);
-    const [branchpath, setBranchpath] = useState(false);
     const [inquirypath, setInquirypath] = useState(false);
     const [salesmanpath, setSalesmanpath] = useState(false);
     const [taskpath, setTaskpath] = useState(false);
     const [graphspath, setGraphspath] = useState(false);
+    const [oempath, setOEMpath] = useState(false);
 
     useEffect(() => {
         if (location.pathname === "/") {
@@ -46,14 +47,12 @@ const Navigation = () => {
         else if (location.pathname === "/mistry") {
             setHomepath(false);
             setArchitectpath(false);
-            setBranchpath(false);
             setMistrypath(true);
         }
         else if (location.pathname === "/dealer") {
             setHomepath(false);
             setArchitectpath(false);
             setMistrypath(false);
-            setBranchpath(false);
             setDealerpath(true);
         }
         else if (location.pathname === "/pmc") {
@@ -61,16 +60,7 @@ const Navigation = () => {
             setArchitectpath(false);
             setMistrypath(false);
             setDealerpath(false);
-            setBranchpath(false);
             setPMCpath(true)
-        }
-        else if (location.pathname === "/branch") {
-            setHomepath(false);
-            setArchitectpath(false);
-            setMistrypath(false);
-            setDealerpath(false);
-            setPMCpath(false);
-            setBranchpath(true);
         }
         else if (location.pathname === "/inquiry") {
             setHomepath(false);
@@ -78,7 +68,6 @@ const Navigation = () => {
             setMistrypath(false);
             setDealerpath(false);
             setPMCpath(false);
-            setBranchpath(false);
             setInquirypath(true);
         }
         else if (location.pathname === "/inquiry") {
@@ -87,7 +76,6 @@ const Navigation = () => {
             setMistrypath(false);
             setDealerpath(false);
             setPMCpath(false);
-            setBranchpath(false);
             setInquirypath(false);
             setSalesmanpath(true)
         }
@@ -97,7 +85,6 @@ const Navigation = () => {
             setMistrypath(false);
             setDealerpath(false);
             setPMCpath(false);
-            setBranchpath(false);
             setInquirypath(false);
             setTaskpath(true)
         }
@@ -107,10 +94,20 @@ const Navigation = () => {
             setMistrypath(false);
             setDealerpath(false);
             setPMCpath(false);
-            setBranchpath(false);
             setInquirypath(false);
             setTaskpath(false);
             setGraphspath(true)
+        }
+        else if (location.pathname === "/oem") {
+            setHomepath(false);
+            setArchitectpath(false);
+            setMistrypath(false);
+            setDealerpath(false);
+            setPMCpath(false);
+            setInquirypath(false);
+            setTaskpath(false);
+            setGraphspath(false);
+            setOEMpath(true)
         }
         else {
             setHomepath(false);
@@ -157,11 +154,11 @@ const Navigation = () => {
                     <p>Dealer</p>
                 </Link>
 
-                <Link to="/branch" className={branchpath ? ` ${Styles.item} ${Styles.selected}` : ` ${Styles.item}`}>
-                    {/* <img src={dealerpath ? dealerSelected : dealer} alt="customer"/> */}
-                    <AddLocationAltIcon />
-                    <p>Branch</p>
+                <Link to="/oem" className={oempath ? ` ${Styles.item} ${Styles.selected}` : ` ${Styles.item}`}>
+                    <PrecisionManufacturingIcon />
+                    <p>OEM</p>
                 </Link>
+
                 <Link to="/inquiry" className={inquirypath ? ` ${Styles.item} ${Styles.selected}` : ` ${Styles.item}`}>
                     {/* <img src={dealerpath ? dealerSelected : dealer} alt="customer"/> */}
                     <PsychologyIcon />

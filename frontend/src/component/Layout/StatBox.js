@@ -28,23 +28,17 @@ const StatBox = ({ name, username, refresh }) => {
   const [totalarchitect, setTotalArchitect] = useState(0);
   const [totalmistry, setTotalMistry] = useState(0);
   const [totaldealer, setTotalDealer] = useState(0);
-  const [totalbranches, setTotalBranches] = useState(0);
   const [totalcustomers, setTotalCustomer] = useState(0);
   const [totalPMC, setTotalPMC] = useState(0);
   const [totalHealth, setTotalHealth] = useState(0);
   const [totaltasks, setTotalTask] = useState(0);
+  const [totaloem, setTotalOEM] = useState(0);
 
   const getStats = async () => {
     {
       let { data } = await axios.get("/api/v1/architect/totalarchitects");
       let { archlength } = data
       setTotalArchitect(archlength);
-    }
-    {
-      let { data } = await axios.get("/api/v1/branch/totalbranchess");
-      let { branchsize } = data
-      console.log(data);
-      setTotalBranches(branchsize);
     }
 
     {
@@ -77,9 +71,15 @@ const StatBox = ({ name, username, refresh }) => {
       setTotalTask(taskslength);
     }
 
-    let { data } = await axios.get("/api/v1/customer/totalOrder");
-    let { orderValue } = data
-    setTotalHealth(orderValue);
+    {
+      let { data } = await axios.get("/api/v1/oem/totaloems");
+      let { oemlength } = data
+      setTotalOEM(oemlength);
+    }
+
+    let { data } = await axios.get("/api/v1/customer/totalReward");
+    let { rewardPoints } = data
+    setTotalHealth(rewardPoints);
   }
   useEffect(() => {
     getStats();
@@ -164,6 +164,17 @@ const StatBox = ({ name, username, refresh }) => {
 
             <div className={Styles.imgContainer}>
               <img src={CustomerStat} alt="Architect" />
+            </div>
+          </div>}
+
+          {name === "OEM" && <div className={Styles.Box}>
+            <div className={Styles.subBox}>
+              <p>Total OEMs</p>
+              <h1>{totaloem}</h1>
+            </div>
+
+            <div className={Styles.imgContainer}>
+              <img src={MistryStat} alt="OEM" />
             </div>
           </div>}
 

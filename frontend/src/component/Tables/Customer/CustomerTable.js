@@ -40,9 +40,7 @@ const CustomerTable = ({ modalHandler, refresh, isOpen }) => {
   const [editModalData, setEditModalData] = useState({});
   const [startDate, setStartDate] = useState(new Date('2022-08-01'));
   const [endDate, setEndDate] = useState(new Date());
-  const [branches, setBranches] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  let [selectedBranch, setSelectedBranch] = useState(null);
   let [selectedSalesman, setSelectedSalesman] = useState(null);
 
   const modifyData = (data) => {
@@ -131,10 +129,13 @@ const CustomerTable = ({ modalHandler, refresh, isOpen }) => {
         address: item.address,
         area:item.area,
         mobileno: item.mobileno,
+        scale: item.scale,
         // tag:item.tag,
         mistry: item.mistryName && item.mistryNumber ? item.mistryName + ' - ' + item.mistryNumber : '',
         architect: item.architectName && item.architectNumber ? item.architectName + ' - ' + item.architectNumber : '',
-        remarks:item.remarks
+        salesmen:item.salesmen.map((req)=>req.name).join('-'),
+        remarks:item.remarks,
+        createdBy:item.createdBy?.email || 'N/A',
       }
     });
     setOriginalData(modifiedData);
@@ -142,49 +143,27 @@ const CustomerTable = ({ modalHandler, refresh, isOpen }) => {
     setTableData(newCustomers);
   }
 
-  const fetchBranches = async () => {
-    const { data } = await axios.get("/api/v1/branch/getall");
-    const branches = data.branches.map((branch) => (
-      {
-        branchname: branch.branchname,
-        value: branch.branchname,
-        label: branch.branchname
-
-      }
-    ))
-    setBranches(branches);
-  }
   const sleep = time => {
     return new Promise(resolve => setTimeout(resolve, time));
   };
 
-  const fetchFilteredCustomers = (salesman, branch) => {
+  const fetchFilteredCustomers = (salesman) => {
 
     let filteredData = originalData.filter((item) => {
-      let isBranch = false;
       let isSalesman = false;
-
-      if (item.branches.length === 0 && branch === null) {
-        isBranch = true;
-      }
 
       if (item.salesmen.length === 0 && salesman === null) {
         isSalesman = true;
       }
 
-      item.branches.forEach((branchObject) => {
-        if (Object.values(branchObject).includes(branch) || branch === null) {
-          isBranch = true;
-        }
-      })
       item.salesmen.forEach((salesmanObj) => {
         if (Object.values(salesmanObj).includes(salesman) || salesman === null) {
           isSalesman = true;
         }
       })
 
-      console.log(isBranch, isSalesman)
-      if (isSalesman && isBranch) {
+      console.log(isSalesman)
+      if (isSalesman) {
         return true
       }
     })
@@ -197,19 +176,18 @@ const CustomerTable = ({ modalHandler, refresh, isOpen }) => {
         address: item.address,
         area:item.area,
         mobileno: item.mobileno,
+        scale: item.scale,
         // tag:item.tag
         mistry: item.mistryName && item.mistryNumber ? item.mistryName + ' - ' + item.mistryNumber : '',
         architect: item.architectName && item.architectNumber ? item.architectName + ' - ' + item.architectNumber : '',
-        remarks:item.remarks
+        salesmen:item.salesmen.map((req)=>req.name).join('-'),
+        remarks:item.remarks,
+        createdBy:item.createdBy?.email || 'N/A',
       }
     })
 
     setCustomers(modifyData(data));
     setTableData(modifyData(data));
-  }
-  const handlebranch = (selected) => {
-    setSelectedBranch(selected.value);
-    fetchFilteredCustomers(selectedSalesman, selected.value);
   }
   const [salesman, setSalesman] = useState([]);
   const fetchSalesmen = async () => {
@@ -227,19 +205,18 @@ const CustomerTable = ({ modalHandler, refresh, isOpen }) => {
   }
   const handlesalesman = (selected) => {
     selectedSalesman = selected;
-    fetchFilteredCustomers(selected.value, selectedBranch);
+    fetchFilteredCustomers(selected.value);
   }
 
 
   useEffect(() => {
     fetchCustomers();
-    fetchFilteredCustomers(selectedSalesman, selectedBranch);
-    fetchBranches();
+    fetchFilteredCustomers(selectedSalesman);
     fetchSalesmen();
   }, [refresh]);
 
   useEffect(() => {
-    fetchFilteredCustomers(selectedSalesman, selectedBranch)
+    fetchFilteredCustomers(selectedSalesman)
     console.log(`SET FILTERED DATA AGAIN`)
   }, [originalData]);
 
@@ -293,21 +270,31 @@ const CustomerTable = ({ modalHandler, refresh, isOpen }) => {
     })
   };
   const columns = useMemo(
-    () => [
-      {
-        header: 'Date', accessorKey: 'date', type: "date", dateSetting: { locale: "en-GB" },
-        Cell: ({ cell }) => (dateformater(cell.getValue()))
-      },
-      { header: 'Name', accessorKey: 'name' },
-      { header: 'Address', accessorKey: 'address' },
-      { header: 'Area', accessorKey: 'area' },
-      { header: 'Mobile Number', accessorKey: 'mobileno' },
-      // { header: 'Tag', accessorKey:'tag'},
-      { header: 'Mistry Name', accessorKey: 'mistry' },
-      { header: 'Architect Name', accessorKey: 'architect' },
-      { header: 'Remarks', accessorKey: 'remarks' },
-    ],
-    [],
+    () => {
+      const baseColumns = [
+        {
+          header: 'Date', accessorKey: 'date', type: "date", dateSetting: { locale: "en-GB" },
+          Cell: ({ cell }) => (dateformater(cell.getValue()))
+        },
+        { header: 'Name', accessorKey: 'name' },
+        { header: 'Address', accessorKey: 'address' },
+        { header: 'Area', accessorKey: 'area' },
+        { header: 'Mobile Number', accessorKey: 'mobileno' },
+        { header: 'Scale', accessorKey: 'scale' },
+        // { header: 'Tag', accessorKey:'tag'},
+        { header: 'Mistry Name', accessorKey: 'mistry' },
+        { header: 'Architect Name', accessorKey: 'architect' },
+        { header: 'Salesman', accessorKey: 'salesmen' },
+        { header: 'Remarks', accessorKey: 'remarks' },
+      ];
+      
+      if (user?.role === 'admin') {
+        baseColumns.push({ header: 'Created By', accessorKey: 'createdBy' });
+      }
+      
+      return baseColumns;
+    },
+    [user],
   );
   const ops = [
     { header: 'Date', accessorKey: 'date', type: "date", dateSetting: { locale: "en-GB" }, },
@@ -315,10 +302,12 @@ const CustomerTable = ({ modalHandler, refresh, isOpen }) => {
     { header: 'Address', accessorKey: 'address' },
     { header: 'Area', accessorKey: 'area' },
     { header: 'Mobile Number', accessorKey: 'mobileno' },
+    { header: 'Scale', accessorKey: 'scale' },
     // { header: 'Tag', accessorKey:'tag'},
     { header: 'Mistry Name', accessorKey: 'mistry' },
     { header: 'Architect Name', accessorKey: 'architect' },
     { header: 'Remarks', accessorKey: 'remarks' },
+    { header: 'Created By', accessorKey: 'createdBy' },
     // { header: 'Email', accessorKey: 'Email', },
     // { header: 'Company_Name', accessorKey: 'companyName', },
     // { header: 'Birth_Date', accessorKey: 'birthdate', },
@@ -366,9 +355,7 @@ const CustomerTable = ({ modalHandler, refresh, isOpen }) => {
             {/* <label>Branche</label> */}
             <label>Salesman Filter</label>
             <Select styles={customStyles} onChange={(e) => handlesalesman(e)} options={salesman} />
-            <label>Branch Filter</label>
-            <Select styles={customStyles} onChange={(e) => handlebranch(e)} options={branches} />
-            {/* <Select styles={customStyles} selectedValue={branches} onChange={(e) => handlebranch(e)} options={branches} /> */}
+
             <TextField
               className={Styles.InputDate}
               id="start-date"
@@ -520,26 +507,6 @@ const CustomerTable = ({ modalHandler, refresh, isOpen }) => {
                 }}
               >
                 <Button
-                  disabled={table.getPrePaginationRowModel().rows.length === 0}
-                  onClick={() =>
-                    handleExportRows(table.getPrePaginationRowModel().rows)
-                  }
-                  startIcon={<FileDownloadIcon />}
-                  variant="contained"
-                  color="primary"
-                  sx={{
-                    backgroundColor: 'rgba(37,99,235,0.08)',
-                    color: '#1d4ed8',
-                    boxShadow: 'none',
-                    '&:hover': {
-                      backgroundColor: 'rgba(37,99,235,0.16)',
-                      boxShadow: 'none',
-                    },
-                  }}
-                >
-                  Export All Rows
-                </Button>
-                <Button
                   onClick={handleExportData}
                   startIcon={<FileDownloadIcon />}
                   variant="contained"
@@ -573,7 +540,7 @@ const CustomerTable = ({ modalHandler, refresh, isOpen }) => {
             { title: 'Birth Date', field: 'birthdate', hidden: 'true' },
             { title: 'Marriage Date', field: 'marriagedate', hidden: 'true' },
             { title: 'Remarks', field: 'remarks', hidden: 'true' },
-            { title: 'Order Value', field: 'orderValue', hidden: 'true' },
+            { title: 'Reward Points', field: 'rewardPoints', hidden: 'true' },
             { title: 'Sales Person', field: 'salesPerson', hidden: 'true' },
             { title: 'Tag', field: 'tag' },
 

@@ -24,32 +24,16 @@ const PMCCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
         adharcard: "",
         pancard: "",
         date: "",
-        branches: [],
         salesmen: []
 
 
     }
-    const getAllbranches = async () => {
-        const { data } = await axios.get("/api/v1/branch/getall");
-
-        const branches = data.branches.map((branch) => (
-            {
-                branchname: branch.branchname,
-                value: branch.branchname,
-                label: branch.branchname
-            }
-        ))
-        setBranches(branches);
-    }
 
     useEffect(() => {
-        getAllbranches();
         getAllsalesmen();
     }, []);
     const [formData, setFormData] = useState(initialState)
     const [isDisabled, setIsDisabled] = useState(false);
-    const [Branches, setBranches] = useState([]);
-    const [selectedBranch, setselectedBranch] = useState([]);
     const [Salesmen, setSalesmen] = useState([]);
     const [selectedSalesmen, setselectedSalesmen] = useState([]);
     const getAllsalesmen = async () => {
@@ -95,7 +79,6 @@ const PMCCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
             pancard: formData.pancard,
             date: formData.date,
             IFSCcode: formData.IFSCcode,
-            branches: selectedBranch,
             salesmen:selectedSalesmen 
 
         }
@@ -114,12 +97,6 @@ const PMCCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
         }
 
     }
-    const Branchchangehandler = (selected) => {
-
-        setselectedBranch(selected);
-        console.log(selected);
-        setFormData({ ...formData, selectedBranch })
-    };
     return (
         <div className={Styles.container}>
             <ToastContainer
@@ -177,19 +154,6 @@ const PMCCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
 
                     <label htmlFor='salesMan'>Sales Man </label>
                     <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} value={formData.salesMan} name="salesMan" placeholder='Sales Man' />
-                    <label>Branches</label>
-                    <ReactSelect lassName={Styles.inputTag}
-                        options={Branches}
-                        isMulti
-                        closeMenuOnSelect={false}
-                        hideSelectedOptions={false}
-                        components={{
-                            Option
-                        }}
-                        onChange={Branchchangehandler}
-                        allowSelectAll={true}
-                        value={selectedBranch}
-                    />
                     <label>Salesmen</label>
 
                     <ReactSelect className={Styles.inputTag}

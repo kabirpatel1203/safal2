@@ -12,6 +12,19 @@ export const dateformater = (date1) => {
     return null
   }
 
+// Convert yyyy-mm-dd to dd/mm/yyyy for display
+export const convertToDisplayFormat = (isoDate) => {
+  if (!isoDate) return '';
+  const [year, month, day] = isoDate.split('-');
+  return `${day}/${month}/${year}`;
+}
+
+// Convert dd/mm/yyyy to yyyy-mm-dd for backend
+export const convertToISOFormat = (displayDate) => {
+  if (!displayDate) return '';
+  const [day, month, year] = displayDate.split('/');
+  return `${year}-${month}-${day}`;
+}
 
   export const dateParser = (dateString) => {
     return dateTime.parse(dateString);

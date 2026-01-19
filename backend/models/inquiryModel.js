@@ -18,13 +18,21 @@ const inquirySchema = new mongoose.Schema({
     },
     birthdate: String,
     marriagedate: String,
+    revenue: Number,
+    rewardPoints: Number,
     orderValue: Number,
+    ordervalue: Number,
     date: Date,
     followupdate: Date,
     requirement: [
     {requirement:String}
     ],
     stage:String,
+    scale: {
+        type: String,
+        enum: ["High", "Medium", "Low"],
+        default: "Medium"
+    },
     architectTag: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "architect"
@@ -50,6 +58,12 @@ const inquirySchema = new mongoose.Schema({
     },
     dealerName: String,
     dealerNumber: Number,
+    oemTag: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "OEM"
+    },
+    oemName: String,
+    oemNumber: Number,
     branches: [
         { branchname: String }
     ],

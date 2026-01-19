@@ -23,44 +23,65 @@ const SalesmanCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
         adharcard: "",
         pancard: "",
         date: "",
-        // salesMan: "",
-        branches: [],
-        // salesmen:[]
-    }
-    const getAllbranches = async () => {
-        const { data } = await axios.get("/api/v1/branch/getall");
-
-        const branches = data.branches.map((branch) => (
-            {
-                branchname: branch.branchname,
-                value: branch.branchname,
-                label: branch.branchname
-            }
-        ))
-        setBranches(branches);
+        architectTag: null,
+        architectName: "",
+        architectNumber: "",
+        mistryTag: null,
+        mistryName: "",
+        mistryNumber: "",
+        dealerTag: null,
+        dealerName: "",
+        dealerNumber: "",
+        pmcTag: null,
+        pmcName: "",
+        pmcNumber: "",
+        oemTag: null,
+        oemName: "",
+        oemNumber: ""
     }
 
     useEffect(() => {
-        getAllbranches();
-        getAllsalesmen()
+        getAllArchitects();
+        getAllMistry();
+        getAllDealer();
+        getAllPMC();
+        getAllOEM();
     }, []);
     const [formData, setFormData] = useState(initialState)
     const [isDisabled, setIsDisabled] = useState(false);
-    const [Branches, setBranches] = useState([]);
-    const [selectedBranch, setselectedBranch] = useState([]);
-    const [Salesmen, setSalesmen] = useState([]);
-    const [selectedSalesmen, setselectedSalesmen] = useState([]);
-    const getAllsalesmen = async () => {
-        const { data } = await axios.get("/api/v1/salesman/getall");
-        console.log(data.salesmans);
-        const salesmen = data.salesmans.map((salesman) => (
-            {
-                name: salesman.name,
-                value: salesman.name,
-                label: salesman.name
-            }
-        ))
-        setSalesmen(salesmen);
+    const [architects, setArchitects] = useState([]);
+    const [Mistries, setMistries] = useState([]);
+    const [Dealers, setDealers] = useState([]);
+    const [PMCs, setPMCs] = useState([]);
+    const [OEMs, setOEMs] = useState([]);
+    const getAllArchitects = async () => {
+        const { data } = await axios.get("/api/v1/architect/getall");
+        const architects = data.architects.map((arch) => ({ value: arch._id, label: `${arch.name}-${arch.mobileno}` }))
+        setArchitects(architects);
+    }
+
+    const getAllMistry = async () => {
+        const { data } = await axios.get("/api/v1/mistry/getall");
+        const mistries = data.mistries.map((mistry) => ({ value: mistry._id, label: `${mistry.name}-${mistry.mobileno}` }))
+        setMistries(mistries);
+    }
+
+    const getAllDealer = async () => {
+        const { data } = await axios.get("/api/v1/dealer/getall");
+        const dealers = data.dealers.map((dealer) => ({ value: dealer._id, label: `${dealer.name}-${dealer.mobileno}` }))
+        setDealers(dealers);
+    }
+
+    const getAllPMC = async () => {
+        const { data } = await axios.get("/api/v1/pmc/getall");
+        const pmcs = data.pmcs.map((pmc) => ({ value: pmc._id, label: `${pmc.name}-${pmc.mobileno}` }))
+        setPMCs(pmcs);
+    }
+
+    const getAllOEM = async () => {
+        const { data } = await axios.get("/api/v1/oem/getall");
+        const oems = data.oems.map((oem) => ({ value: oem._id, label: `${oem.name}-${oem.mobileno}` }))
+        setOEMs(oems);
     }
     const formHandler = (e) => {
         e.preventDefault();
@@ -85,10 +106,21 @@ const SalesmanCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
             pancard: formData.pancard,
             date: formData.date,
             IFSCcode: formData.IFSCcode,
-            // salesMan: formData.salesMan,
-            branches: selectedBranch,
-            // salesmen:selectedSalesmen
-
+            architectTag: formData.architectTag,
+            architectName: formData.architectName,
+            architectNumber: formData.architectNumber,
+            mistryTag: formData.mistryTag,
+            mistryName: formData.mistryName,
+            mistryNumber: formData.mistryNumber,
+            dealerTag: formData.dealerTag,
+            dealerName: formData.dealerName,
+            dealerNumber: formData.dealerNumber,
+            pmcTag: formData.pmcTag,
+            pmcName: formData.pmcName,
+            pmcNumber: formData.pmcNumber,
+            oemTag: formData.oemTag,
+            oemName: formData.oemName,
+            oemNumber: formData.oemNumber
         }
         try {
             const response = await axios.post("/api/v1/salesman/create", data, { headers: { "Content-Type": "application/json" } });
@@ -104,12 +136,27 @@ const SalesmanCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
             setIsDisabled(false);
         }
     }
-    const Branchchangehandler = (selected) => {
 
-        setselectedBranch(selected);
-        console.log(selected);
-        setFormData({ ...formData, selectedBranch })
-    };
+    const ArchitectFormHandler = (e) => {
+        setFormData({ ...formData, architectTag: e.value, architectName: e.label.split('-')[0], architectNumber: e.label.split('-')[1] })
+    }
+
+    const MistryFormHandler = (e) => {
+        setFormData({ ...formData, mistryTag: e.value, mistryName: e.label.split('-')[0], mistryNumber: e.label.split('-')[1] })
+    }
+
+    const DealerFormHandler = (e) => {
+        setFormData({ ...formData, dealerTag: e.value, dealerName: e.label.split('-')[0], dealerNumber: e.label.split('-')[1] })
+    }
+
+    const PMCFormHandler = (e) => {
+        setFormData({ ...formData, pmcTag: e.value, pmcName: e.label.split('-')[0], pmcNumber: e.label.split('-')[1] })
+    }
+
+    const OEMFormHandler = (e) => {
+        setFormData({ ...formData, oemTag: e.value, oemName: e.label.split('-')[0], oemNumber: e.label.split('-')[1] })
+    }
+
     // const Salesmenchangehandler = (selecteds) => {
 
     //     setselectedSalesmen(selecteds);
@@ -168,21 +215,30 @@ const SalesmanCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
                     {/* <label htmlFor='companyName'>Company Name</label>
                     <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} value={formData.companyName} name="companyName" placeholder='Company Name' />
                     */}
-                    <label>Branches</label>
-                    <ReactSelect lassName={Styles.inputTag}
-                        options={Branches}
-                        isMulti
-                        closeMenuOnSelect={false}
-                        hideSelectedOptions={false}
-                        components={{
-                            Option
-                        }}
-                        onChange={Branchchangehandler}
-                        allowSelectAll={true}
-                        value={selectedBranch}
-                    />
-                    {/* <label htmlFor='salesMan'>Sales Man </label> */}
+                    {/* <label htmlFor='salesMan'>Sales Man </label> */}}
                     {/* <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} value={formData.salesMan} name="salesMan" placeholder='Company Name' /> */}
+                </div>
+            </div>
+
+            <h1 className={Styles.heading}>Category Tags</h1>
+            <div className={Styles.bankDetails}>
+                <div className={Styles.bankDetails1}>
+                    <label htmlFor='name'>Architect Tag</label>
+                    <Select selectedValue={formData.architectTag} onChange={(e) => ArchitectFormHandler(e)} options={architects} />
+
+                    <label htmlFor='name'>Mistry Tag</label>
+                    <Select selectedValue={formData.mistryTag} onChange={(e) => MistryFormHandler(e)} options={Mistries} />
+
+                    <label htmlFor='name'>Dealer Tag</label>
+                    <Select selectedValue={formData.dealerTag} onChange={(e) => DealerFormHandler(e)} options={Dealers} />
+                </div>
+
+                <div className={Styles.bankDetails2}>
+                    <label htmlFor='name'>PMC Tag</label>
+                    <Select selectedValue={formData.pmcTag} onChange={(e) => PMCFormHandler(e)} options={PMCs} />
+
+                    <label htmlFor='name'>OEM Tag</label>
+                    <Select selectedValue={formData.oemTag} onChange={(e) => OEMFormHandler(e)} options={OEMs} />
                 </div>
             </div>
 

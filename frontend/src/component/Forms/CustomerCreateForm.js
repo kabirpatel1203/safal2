@@ -12,8 +12,6 @@ const CustomerCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
   const [Mistries, setMistries] = useState([]);
   const [Dealers, setDealers] = useState([]);
   const [PMCs, setPMCs] = useState([]);
-  const [Branches, setBranches] = useState([]);
-  const [selectedBranch, setselectedBranch] = useState([]);
   const [isDisabled, setIsDisabled] = useState(false);
   const [Salesmen, setSalesmen] = useState([]);
   const [selectedSalesmen, setselectedSalesmen] = useState([]);
@@ -28,7 +26,8 @@ const CustomerCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
     birthdate: "",
     marriagedate: "",
     remarks: "",
-    orderValue: "",
+    rewardPoints: "",
+    scale: "Medium",
     salesPerson: "",
     mistryTag: null,
     mistryName: "",
@@ -43,28 +42,32 @@ const CustomerCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
     pmcName: "",
     pmcNumber: "",
     date: "",
-    branches:[],
     salesmen:[]
   }
+  const scale = [
+    {
+      value: "High",
+      label: "High"
+    },
+    {
+      value: "Medium",
+      label: "Medium"
+    },
+    {
+      value: "Low",
+      label: "Low"
+    },
+  ]
   const [formData, setFormData] = useState(initialState)
 
   const formHandler = (e) => {
     e.preventDefault();
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
-
-  const getAllbranches = async () => {
-    const { data } = await axios.get("/api/v1/branch/getall");
-
-    const branches = data.branches.map((branch) => (
-      {
-        branchname: branch.branchname,
-        value: branch.branchname,
-        label:branch.branchname
-      }
-    ))
-    setBranches(branches);
+  const Scalehandler = (e) => {
+    setFormData({ ...formData, scale: e.value })
   }
+
   const getAllsalesmen = async () => {
     const { data } = await axios.get("/api/v1/salesman/getall");
     console.log(data.salesmans);
@@ -116,7 +119,6 @@ const CustomerCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
     getAllDealer();
     getAllMistry();
     getAllPMC();
-    getAllbranches();
     getAllsalesmen();
   }, []);
 
@@ -134,7 +136,8 @@ const CustomerCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
       marriagedate: formData.marriagedate,
       remarks: formData.remarks,
       date: formData.date,
-      orderValue: formData.orderValue,
+      rewardPoints: formData.rewardPoints,
+      scale: formData.scale,
       salesPerson: formData.salesPerson,
       mistryTag: formData.mistryTag,
       mistryName: formData.mistryName,
@@ -148,7 +151,6 @@ const CustomerCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
       pmcTag: formData.pmcTag,
       pmcName: formData.pmcName,
       pmcNumber: formData.pmcNumber,
-      branches:selectedBranch,
       salesmen:selectedSalesmen
     }
     try {
@@ -167,12 +169,6 @@ const CustomerCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
   
   
   
-  const Branchchangehandler = (selected) => {
-
-    setselectedBranch(selected);
-    console.log(selected);
-    setFormData({...formData,selectedBranch})
-  };
   const ArchitectFormHandler = (e) => {
     setFormData({ ...formData, architectTag: e.value, architectName: e.label.split('-')[0], architectNumber: e.label.split('-')[1] })
   }
@@ -226,8 +222,11 @@ const CustomerCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
           <label htmlFor='area'>Area</label>
           <input className={Styles.inputTag} name="area" value={formData.area} onChange={(e) => formHandler(e)} placeholder='area' />
 
-          <label htmlFor='ordervalue'>Order Value</label>
-          <input className={Styles.inputTag} name="orderValue" value={formData.orderValue} onChange={(e) => formHandler(e)} placeholder='Order Value' />
+          <label htmlFor='rewardpoints'>Reward Points</label>
+          <input className={Styles.inputTag} name="rewardPoints" value={formData.rewardPoints} onChange={(e) => formHandler(e)} placeholder='Reward Points' />
+
+          <label>Scale</label>
+          <Select selectedValue={formData.scale} onChange={(e) => Scalehandler(e)} options={scale} />
 
           <label htmlFor='name'>Remarks</label>
           <input className={Styles.inputTag} name="remarks" value={formData.remarks} onChange={(e) => formHandler(e)} placeholder='Remarks' />
@@ -249,19 +248,6 @@ const CustomerCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
         </div>
         
         <div className={Styles.personalDetails3}>
-          <label>Branches</label>
-          <ReactSelect lassName={Styles.inputTag}
-            options={Branches}
-            isMulti
-            closeMenuOnSelect={false}
-            hideSelectedOptions={false}
-            components={{
-              Option
-            }}
-            onChange={Branchchangehandler}
-            allowSelectAll={true}
-            value={selectedBranch}
-          />
           <label>Salesmen</label>
           <ReactSelect className={Styles.inputTag}
             options={Salesmen}

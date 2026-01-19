@@ -8,8 +8,6 @@ import Select from 'react-select'
 import { default as ReactSelect } from "react-select";
 
 const DealerEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
-    const [Branches, setBranches] = useState([]);
-    const [selectedBranch, setselectedBranch] = useState(data.branches);
     const [Salesmen, setSalesmen] = useState([]);
     const [selectedSalesman, setselectedSalesman] = useState(data.salesmen);
     const arr2 = selectedSalesman.map(object => {
@@ -33,20 +31,6 @@ const DealerEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
         console.log(selected);
         setFormData({ ...formData, selectedSalesman })
     };
-    const arr = selectedBranch.map(object => {
-        return { ...object, value: object.branchname, label: object.branchname };
-    })
-    const getAllbranches = async () => {
-        const { data } = await axios.get("/api/v1/branch/getall");
-        const branches = data.branches.map((branch) => (
-            {
-                branchname: branch.branchname,
-                value: branch.branchname,
-                label: branch.branchname
-            }
-        ))
-        setBranches(branches);
-    }
     let initialState = {
         name: data.name,
         email: data.email,
@@ -63,7 +47,7 @@ const DealerEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
         adharcard: data.adharcard,
         pancard: data.pancard,
         date: data.date ? data.date.substr(0, 10) : null,
-        branches: data.branches,
+
         salesmen: data.salesmen
 
     }
@@ -76,7 +60,6 @@ const DealerEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
         setFormData({ ...formData, [e.target.name]: e.target.value })
     }
     useEffect(() => {
-        getAllbranches();
         getAllsalesmen();
     }, []);
     const submitHandler = async (e) => {
@@ -98,7 +81,7 @@ const DealerEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
             pancard: formData.pancard,
             date: formData.date,
             IFSCcode: formData.IFSCcode,
-            branches: selectedBranch,
+
             salesmen: selectedSalesman
 
         }
@@ -118,12 +101,6 @@ const DealerEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
         }
 
     }
-    const Branchchangehandler = (selected) => {
-
-        setselectedBranch(selected);
-        console.log(selected);
-        setFormData({ ...formData, selectedBranch })
-    };
     return (
         <div className={Styles.container}>
             {/* <ToastContainer
@@ -183,19 +160,7 @@ pauseOnHover
 
                     {/* <label htmlFor='salesMan'>Sales Man </label>
                     <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.salesMan} value={formData.salesMan} name="salesMan" placeholder='Sales Man' /> */}
-                    <label>Branches</label>
-                    <ReactSelect lassName={Styles.inputTag}
-                        options={Branches}
-                        isMulti
-                        closeMenuOnSelect={false}
-                        hideSelectedOptions={false}
-                        components={{
-                            Option
-                        }}
-                        onChange={Branchchangehandler}
-                        allowSelectAll={true}
-                        value={arr}
-                    />
+
                     <label>Salesmen</label>
                     <ReactSelect lassName={Styles.inputTag}
                         options={Salesmen}

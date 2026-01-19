@@ -3,6 +3,45 @@ const catchAsyncErrors = require("../middleware/catchAsyncError");
 const Inquiry = require("../models/inquiryModel")
 const Customer = require("../models/customerModel")
 
+const parseRewardValue = (rawValue) => {
+    const value = rawValue ?? 0;
+    if (value === null || value === undefined) {
+        return 0;
+    }
+    if (typeof value === "number") {
+        return value;
+    }
+    if (typeof value === "string") {
+        const sanitized = value.replace(/[^0-9.-]/g, "");
+        const parsed = Number(sanitized);
+        return Number.isNaN(parsed) ? 0 : parsed;
+    }
+    return 0;
+};
+
+const normalizeInquiryDoc = (doc) => {
+    if (!doc) {
+        return null;
+    }
+    const plain = typeof doc.toObject === "function" ? doc.toObject({ virtuals: true }) : doc;
+    const rewardValue = parseRewardValue(
+        plain.rewardPoints ??
+        plain.revenue ??
+        plain.orderValue ??
+        plain.ordervalue
+    );
+    plain.rewardPoints = rewardValue;
+    plain.revenue = rewardValue;
+    return plain;
+};
+
+const normalizeInquiriesArray = (inquiries) => {
+    if (!Array.isArray(inquiries)) {
+        return [];
+    }
+    return inquiries.map((inquiry) => normalizeInquiryDoc(inquiry));
+};
+
 
 // exports.totalInquiry = catchAsyncErrors(async (req, res, next) => {
 
@@ -21,6 +60,15 @@ exports.createInquiry = catchAsyncErrors(async (req, res, next) => {
         ...req.body,
         createdBy: req.user._id
     };
+
+    const rewardValue = parseRewardValue(
+        inquiryData.rewardPoints ??
+        inquiryData.revenue ??
+        inquiryData.orderValue ??
+        inquiryData.ordervalue
+    );
+    inquiryData.rewardPoints = rewardValue;
+    inquiryData.revenue = rewardValue;
     
     // If creating inquiry as already Qualified, move directly to Customer
     if (inquiryData.stage === "Qualified") {
@@ -38,7 +86,8 @@ exports.createInquiry = catchAsyncErrors(async (req, res, next) => {
                 area: inquiryData.area,
                 birthdate: inquiryData.birthdate,
                 marriagedate: inquiryData.marriagedate,
-                orderValue: inquiryData.orderValue,
+                revenue: rewardValue,
+                rewardPoints: rewardValue,
                 date: inquiryData.date,
                 remarks: inquiryData.remarks,
                 mistryTag: inquiryData.mistryTag,
@@ -69,7 +118,7 @@ exports.createInquiry = catchAsyncErrors(async (req, res, next) => {
     // Normal inquiry creation (not qualified)
     const inquiry = await Inquiry.create(inquiryData);
     res.status(200).json({
-        inquiry,
+        inquiry: normalizeInquiryDoc(inquiry),
         success: true
     })
 })
@@ -96,7 +145,7 @@ exports.getInquiry = catchAsyncErrors(async (req, res, next) => {
     }
 
     res.status(200).json({
-        inquiry,
+        inquiry: normalizeInquiryDoc(inquiry),
         success: true
     })
 })
@@ -122,8 +171,26 @@ exports.updateInquiry = catchAsyncErrors(async (req, res, next) => {
         return next(new ErrorHander("Inquiry not found", 404));
     }
 
+    // For non-admin users, only allow updating stage and requirement fields
+    let updateData = req.body;
+    if (req.user.role !== "admin") {
+        updateData = {
+            stage: req.body.stage,
+            requirement: req.body.requirement
+        };
+    }
+
     // Apply incoming changes and save
-    Object.assign(existingInquiry, req.body);
+    Object.assign(existingInquiry, updateData);
+    const normalizedReward = parseRewardValue(
+        existingInquiry.rewardPoints ??
+        existingInquiry.revenue ??
+        existingInquiry.orderValue ??
+        existingInquiry.ordervalue
+    );
+    existingInquiry.rewardPoints = normalizedReward;
+    existingInquiry.revenue = normalizedReward;
+
     const inquiry = await existingInquiry.save();
 
     console.log(`Inquiry stage after save: "${inquiry.stage}"`);
@@ -134,6 +201,12 @@ exports.updateInquiry = catchAsyncErrors(async (req, res, next) => {
         
         // Use mobile number as unique customer key
         let existingCustomer = await Customer.findOne({ mobileno: inquiry.mobileno });
+        const rewardValue = parseRewardValue(
+            inquiry.rewardPoints ??
+            inquiry.revenue ??
+            inquiry.orderValue ??
+            inquiry.ordervalue
+        );
 
         if (!existingCustomer) {
             console.log(`Creating new customer from inquiry ${inquiry.mobileno}`);
@@ -145,7 +218,8 @@ exports.updateInquiry = catchAsyncErrors(async (req, res, next) => {
                 area: inquiry.area,
                 birthdate: inquiry.birthdate,
                 marriagedate: inquiry.marriagedate,
-                orderValue: inquiry.orderValue,
+                revenue: rewardValue,
+                rewardPoints: rewardValue,
                 date: inquiry.date,
                 remarks: inquiry.remarks,
                 mistryTag: inquiry.mistryTag,
@@ -180,7 +254,7 @@ exports.updateInquiry = catchAsyncErrors(async (req, res, next) => {
 
     // Normal update without moving
     res.status(200).json({
-        inquiry,
+        inquiry: normalizeInquiryDoc(inquiry),
         success: true
     })
 })
@@ -190,7 +264,7 @@ exports.deleteInquiry = catchAsyncErrors(async (req, res, next) => {
     const inquiry = await Inquiry.findOneAndDelete({ mobileno: req.params.id });
 
     res.status(200).json({
-        inquiry,
+        inquiry: normalizeInquiryDoc(inquiry),
         success: true
     })
 })
@@ -199,7 +273,7 @@ exports.getAllInquiry = catchAsyncErrors(async (req, res, next) => {
     let inquiries;
     if (req.user.role === "admin") {
         // Admin sees all inquiries
-        inquiries = await Inquiry.find();
+        inquiries = await Inquiry.find().populate('createdBy', 'email name');
     } else {
         // Non-admin users see:
         // 1. Inquiries they created
@@ -209,11 +283,11 @@ exports.getAllInquiry = catchAsyncErrors(async (req, res, next) => {
                 { createdBy: req.user._id },
                 { "salesmen.name": { $regex: req.user.name, $options: "i" } }
             ]
-        });
+        }).populate('createdBy', 'email name');
     }
 
     res.status(200).json({
-        inquiries,
+        inquiries: normalizeInquiriesArray(inquiries),
         success: true
     })
 })
@@ -261,7 +335,7 @@ exports.getFilteredInquiry = catchAsyncErrors(async (req, res, next) => {
         "branches.branchname": branch
     })
     res.status(200).json({
-        inquiries,
+        inquiries: normalizeInquiriesArray(inquiries),
         success: true
     })
 })

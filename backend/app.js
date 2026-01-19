@@ -19,6 +19,7 @@ const customer = require("./routes/customerRoute")
 const salesman = require("./routes/salesmanRoute")
 const inquiry = require("./routes/inquiryRoute")
 const task = require("./routes/taskRoute")
+const oem = require("./routes/oemRoute")
 
 app.use("/api/v1", test)
 app.use("/api/v1", user)
@@ -31,6 +32,7 @@ app.use("/api/v1/customer", customer)
 app.use("/api/v1/inquiry", inquiry)
 app.use("/api/v1/salesman", salesman)
 app.use("/api/v1/task", task)
+app.use("/api/v1/oem", oem)
 
 
 app.use(express.static(path.join(__dirname, "../frontend/build")))

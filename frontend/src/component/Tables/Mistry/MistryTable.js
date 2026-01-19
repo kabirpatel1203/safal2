@@ -38,8 +38,7 @@ const MistryTable = ({ modalHandler, refresh, isOpen }) => {
   const [originalData, setOriginalData] = useState([]);
   const [startDate, setStartDate] = useState(new Date('2022-08-01'));
   const [endDate, setEndDate] = useState(new Date());
-  const [branches, setBranches] = useState([]);
-  let [selectedBranch,setSelectedBranch] = useState(null);
+
   let [selectedSalesman,setSelectedSalesman] = useState(null);
   const { user, isAuthenticated } = useSelector((state) => state.user);
 
@@ -60,7 +59,6 @@ const MistryTable = ({ modalHandler, refresh, isOpen }) => {
       { header: 'Area', accessorKey: 'area' },
       { header: 'Mobile Number', accessorKey: 'mobileno' },
       {header: 'Salesman', accessorKey:'salesmen'},
-      {header: 'BranchName', accessorKey:'branchname'},
       { header: 'Remarks', accessorKey: 'remarks' },
     ],
     [],
@@ -72,7 +70,6 @@ const MistryTable = ({ modalHandler, refresh, isOpen }) => {
     { header: 'Area', accessorKey: 'area' },
     { header: 'Mobile Number', accessorKey: 'mobileno' },
     {header: 'Salesman', accessorKey:'salesmen'},
-      {header: 'BranchName', accessorKey:'branchname'},
       { header: 'Remarks', accessorKey: 'remarks' },
     // { header: 'Email', accessorKey: 'Email', },
     // { header: 'Company_Name', accessorKey: 'companyName', },
@@ -136,7 +133,6 @@ const MistryTable = ({ modalHandler, refresh, isOpen }) => {
         area:item.area,
         mobileno:item.mobileno,
         salesmen:item.salesmen.map((req)=>req.name).join('-'),
-        branchname:item.branches.map((req)=>req.branchname).join('-'),
         remarks:item.remarks
       }
     });
@@ -144,52 +140,9 @@ const MistryTable = ({ modalHandler, refresh, isOpen }) => {
     setTableData(newMistries);
     setMistry(data.mistries);
   }
-  const fetchBranches = async () => {
-    const { data } = await axios.get("/api/v1/branch/getall");
-    // console.log(data.branches);
-    const branches = data.branches.map((branch) => (
-      {
-        branchname: branch.branchname,
-        value: branch.branchname,
-        label: branch.branchname
-
-      }
-    ))
-    setBranches(branches);
-  }
   const sleep = time => {
     return new Promise(resolve => setTimeout(resolve, time));
   };
-
-  const fetchMistryofBranch = async () => {
-    setIsLoading(true);
-    sleep(500);
-    const {data} = await axios.post("/api/v1/branch/mistry", selectedBranch, { headers: { "Content-Type": "application/json" } });
-
-    const newMistries = data.mistries.map((item)=>{
-      let formateddate = item.date ? dateformater(item.date) : ' ';
-      return {
-        date:formateddate,
-        name:item.name,
-        address:item.address,
-        area:item.area,
-        mobileno:item.mobileno,
-        salesmen:item.salesmen.map((req)=>req.name).join('-'),
-        branchname:item.branches.map((req)=>req.branchname).join('-'),
-        remarks:item.remarks
-      }
-    });
-
-    setOriginalData(data.mistries);
-    setTableData(newMistries);
-    setIsLoading(false);
-  }
-  const handlebranch = (selected) => {
-    console.log(selected);
-    // setselectedBranch(selected);
-    setSelectedBranch(selected.value);
-    fetchFilteredMistry(selectedSalesman, selected.value);
-  }
   const [salesman, setSalesman] = useState([]);
   const fetchSalesmen = async () => {
     const { data } = await axios.get("/api/v1/salesman/getall");
@@ -220,7 +173,6 @@ const MistryTable = ({ modalHandler, refresh, isOpen }) => {
         area:item.area,
         mobileno:item.mobileno,
         salesmen:item.salesmen.map((req)=>req.name).join('-'),
-        branchname:item.branches.map((req)=>req.branchname).join('-'),
         remarks:item.remarks
       }
     });
@@ -231,34 +183,25 @@ const MistryTable = ({ modalHandler, refresh, isOpen }) => {
   }
   const handlesalesman = (selected) => {
     setSelectedSalesman(selected.value)
-    fetchFilteredMistry(selected.value, selectedBranch);
+    fetchArchitectsofSalesman(selected.value);
   }
 
-  const fetchFilteredMistry =(salesman, branch) => {
+  const fetchFilteredMistry = (salesman) => {
 
     let filteredData = originalData.filter((item)=>{
-      let isBranch = false;
       let isSalesman = false;
-
-      if(item.branches.length === 0 && branch===null){
-        isBranch = true;
-      }
 
       if(item.salesmen.length === 0 && salesman===null){
         isSalesman = true;
       }
       
-      item.branches.forEach((branchObject)=>{
-        if(Object.values(branchObject).includes(branch) || branch===null){
-        isBranch = true;
-      }})
       item.salesmen.forEach((salesmanObj)=>{
         if(Object.values(salesmanObj).includes(salesman) || salesman===null){
           isSalesman = true;
         }})
 
-      console.log(isBranch, isSalesman)
-      if(isSalesman && isBranch){
+      console.log(isSalesman)
+      if(isSalesman){
         return true
       }
     })
@@ -272,7 +215,6 @@ const MistryTable = ({ modalHandler, refresh, isOpen }) => {
         area:item.area,
         mobileno:item.mobileno,
         salesmen:item.salesmen.map((req)=>req.name).join('-'),
-        branchname:item.branches.map((req)=>req.branchname).join('-'),
         remarks:item.remarks
       }
       })
@@ -282,14 +224,13 @@ const MistryTable = ({ modalHandler, refresh, isOpen }) => {
   }
 
   useEffect(() => {
-    fetchBranches();
     fetchMistry();
     fetchSalesmen();
 
   }, [refresh]);
 
   useEffect(() => {
-    fetchFilteredMistry(selectedSalesman, selectedBranch);
+    fetchFilteredMistry(selectedSalesman);
   }, [originalData]);
   
   const handleCallbackCreate = async(childData) => {
@@ -358,8 +299,7 @@ const MistryTable = ({ modalHandler, refresh, isOpen }) => {
             <div className={Styles.DateRangeContainer}>
               <label>Salesman Filter</label>
               <Select styles={customStyles} onChange={(e) => handlesalesman(e)} options={salesman} />
-              <label>Branch Filter</label>
-              <Select styles={customStyles} onChange={(e) => handlebranch(e)} options={branches} />
+
               <TextField
                 className={Styles.InputDate}
                 id="start-date"
@@ -508,26 +448,6 @@ const MistryTable = ({ modalHandler, refresh, isOpen }) => {
                   width: '100%',
                 }}
               >
-                <Button
-                  disabled={table.getPrePaginationRowModel().rows.length === 0}
-                  onClick={() =>
-                    handleExportRows(table.getPrePaginationRowModel().rows)
-                  }
-                  startIcon={<FileDownloadIcon />}
-                  variant="contained"
-                  color="primary"
-                  sx={{
-                    backgroundColor: 'rgba(37,99,235,0.08)',
-                    color: '#1d4ed8',
-                    boxShadow: 'none',
-                    '&:hover': {
-                      backgroundColor: 'rgba(37,99,235,0.16)',
-                      boxShadow: 'none',
-                    },
-                  }}
-                >
-                  Export All Rows
-                </Button>
                 <Button
                   onClick={handleExportData}
                   startIcon={<FileDownloadIcon />}

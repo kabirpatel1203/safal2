@@ -28,12 +28,12 @@ import {
   Tooltip,
 } from '@mui/material';
 import { Delete, Edit } from '@mui/icons-material';
+import { useSelector } from 'react-redux';
 const SalesmanTable = ({ modalHandler, refresh, isOpen }) => {
+  const { user } = useSelector((state) => state.user);
   const [Salesman, setSalesman] = useState([]);
   const [editModal, setEditModal] = useState(false);
   const [editModalData, setEditModalData] = useState({});
-  const [branches, setBranches] = useState([]);
-  let selectedBranch = [];
   const [isLoading, setIsLoading] = useState(false)
   const [tabledata, setTableData] = useState([])
   const [originalData, setOriginalData] = useState([]);
@@ -85,6 +85,7 @@ const SalesmanTable = ({ modalHandler, refresh, isOpen }) => {
     setOriginalData(data.salesmans);
     let data1 = data.salesmans.map((item) => {
       return {
+        _id: item._id,
         date: item.date,
         name: item.name,
         address: item.address,
@@ -94,47 +95,11 @@ const SalesmanTable = ({ modalHandler, refresh, isOpen }) => {
 
     setTableData(data1);
   }
-
-  const fetchBranches = async () => {
-    const { data } = await axios.get("/api/v1/branch/getall");
-    // console.log(data.branches);
-    const branches = data.branches.map((branch) => (
-      {
-        branchname: branch.branchname,
-        value: branch.branchname,
-        label: branch.branchname
-
-      }
-    ))
-    setBranches(branches);
-  }
   const sleep = time => {
     return new Promise(resolve => setTimeout(resolve, time));
   };
 
-  const fetchSalesmanofbranch = async () => {
-    setIsLoading(true);
-    sleep(500);
-    // let data=selectedBranch;
-    console.log(selectedBranch);
-    const response = await axios.post("/api/v1/branch/salesmen", selectedBranch, { headers: { "Content-Type": "application/json" } });
-    // const { data } = await axios.get("/api/v1/branch/architects");
-    console.log(response);
-    const newarchitects = response.data.salesmen;
-    // setArchitects(newarchitects);
-    setTableData(newarchitects);
-    setIsLoading(false);
-  }
-  const handlebranch = (selected) => {
-    console.log(selected);
-    // setselectedBranch(selected);
-    selectedBranch = selected;
-    fetchSalesmanofbranch();
-  }
-
   useEffect(() => {
-    fetchBranches();
-
     fetchSalesman();
   }, [refresh]);
   const handleCallbackCreate = (childData) => {
@@ -227,12 +192,14 @@ const SalesmanTable = ({ modalHandler, refresh, isOpen }) => {
         <div className={Styles.header}>
           <h3>All Salesman</h3>
 
-          <button className={Styles.buttonContainer} onClick={modalHandler}>
-            <img className={Styles.addImg} src={Add} alt="add" />
-            <span className={Styles.buttonText}>
-              Add SalesMan
-            </span>
-          </button>
+          {user?.role === "admin" && (
+            <button className={Styles.buttonContainer} onClick={modalHandler}>
+              <img className={Styles.addImg} src={Add} alt="add" />
+              <span className={Styles.buttonText}>
+                Add SalesMan
+              </span>
+            </button>
+          )}
         </div>
 
 
@@ -258,7 +225,7 @@ const SalesmanTable = ({ modalHandler, refresh, isOpen }) => {
             }
             columns={columns}
             data={tabledata}
-            enableEditing
+            enableEditing={user?.role === "admin"}
             enableRowNumbers
             rowNumberMode='original'
             enableTopToolbar={!editModal && !isOpen}
@@ -269,7 +236,8 @@ const SalesmanTable = ({ modalHandler, refresh, isOpen }) => {
             }}
             enableGlobalFilter={true}
             positionActionsColumn='last'
-            renderRowActions={({ row, table }) => (
+            enableRowActions={user?.role === "admin"}
+            renderRowActions={user?.role === "admin" ? ({ row, table }) => (
               <Box sx={{ display: 'flex', gap: '1rem' }}>
                 <Tooltip arrow placement="left" title="Edit">
                   <IconButton onClick={() => {
@@ -300,7 +268,7 @@ const SalesmanTable = ({ modalHandler, refresh, isOpen }) => {
                   </IconButton>
                 </Tooltip>
               </Box>
-            )}
+            ) : undefined}
             renderTopToolbarCustomActions={({ table }) => (
               <Box
                 sx={{
@@ -312,27 +280,6 @@ const SalesmanTable = ({ modalHandler, refresh, isOpen }) => {
                   width: '100%',
                 }}
               >
-                <Button
-                  disabled={table.getPrePaginationRowModel().rows.length === 0}
-
-                  onClick={() =>
-                    handleExportRows(table.getPrePaginationRowModel().rows)
-                  }
-                  startIcon={<FileDownloadIcon />}
-                  variant="contained"
-                  color="primary"
-                  sx={{
-                    backgroundColor: 'rgba(37,99,235,0.08)',
-                    color: '#1d4ed8',
-                    boxShadow: 'none',
-                    '&:hover': {
-                      backgroundColor: 'rgba(37,99,235,0.16)',
-                      boxShadow: 'none',
-                    },
-                  }}
-                >
-                  Export All Rows
-                </Button>
                 <Button
                   onClick={handleExportData}
                   startIcon={<FileDownloadIcon />}

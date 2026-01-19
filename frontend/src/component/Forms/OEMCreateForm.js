@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import Styles from './ArchitectCreateForm.module.css'
+import Styles from './OEMCreateForm.module.css'
 import { AiFillCloseCircle } from 'react-icons/ai'
 import axios from "axios"
 import { ToastContainer, toast } from 'react-toastify'
@@ -7,7 +7,7 @@ import Select from 'react-select'
 import { default as ReactSelect } from "react-select";
 import Option from '../DropDown/Options'
 
-const ArchitectCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
+const OEMCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
   let initialState = {
     name: "",
     email: "",
@@ -23,7 +23,6 @@ const ArchitectCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
     adharcard: "",
     pancard: "",
     date: "",
-    // salesMan: "",
     salesmen: []
 
   }
@@ -70,13 +69,12 @@ const ArchitectCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
       pancard: formData.pancard,
       date: formData.date,
       IFSCcode: formData.IFSCcode,
-      // salesMan: formData.salesMan,
       salesmen: selectedSalesmen
 
     }
     console.log(data)
     try {
-      const response = await axios.post("/api/v1/architect/create", data, { headers: { "Content-Type": "application/json" } });
+      const response = await axios.post("/api/v1/oem/create", data, { headers: { "Content-Type": "application/json" } });
       console.log(response);
 
       parentCallback(true);
@@ -101,13 +99,13 @@ const ArchitectCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
       <div className={Styles.closebutton} onClick={modalHandler}>
         <AiFillCloseCircle />
       </div>
-      <h1 className={Styles.heading}>Architect Details</h1>
+      <h1 className={Styles.heading}>OEM Details</h1>
       <div className={Styles.personalDetails}>
 
         <div className={Styles.personalDetails1}>
 
           <label htmlFor='name'>Name</label>
-          <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} value={formData.name} name="name" placeholder='Architect Name' />
+          <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} value={formData.name} name="name" placeholder='OEM Name' />
 
           <label htmlFor='mobileno'>Mobile Number</label>
           <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} value={formData.mobileno} name="mobileno" placeholder='Mobile Number' />
@@ -185,4 +183,4 @@ const ArchitectCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
   )
 }
 
-export default ArchitectCreateForm
+export default OEMCreateForm

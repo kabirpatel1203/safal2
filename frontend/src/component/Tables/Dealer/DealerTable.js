@@ -35,8 +35,6 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
   const [dealers, setDealers] = useState([]);
   const [editModal, setEditModal] = useState(false);
   const [editModalData, setEditModalData] = useState({});
-  const [branches, setBranches] = useState([]);
-  let selectedBranch = [];
   const [isLoading, setIsLoading] = useState(false)
   const [tabledata, setTableData] = useState([])
   const [startDate, setStartDate] = useState(new Date('2022-08-01'));
@@ -115,49 +113,21 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
 
   const fetchDealer = async () => {
     const { data } = await axios.get("/api/v1/dealer/getall");
-    setDealers(data.dealers);
-    setTableData(data.dealers);
-  }
-
-  const fetchBranches = async () => {
-    const { data } = await axios.get("/api/v1/branch/getall");
-    // console.log(data.branches);
-    const branches = data.branches.map((branch) => (
-      {
-        branchname: branch.branchname,
-        value: branch.branchname,
-        label: branch.branchname
-
+    const newdealers = data.dealers.map((item)=>{
+      return {
+        ...item,
+        salesmen:item.salesmen.map((req)=>req.name).join('-'),
       }
-    ))
-    setBranches(branches);
+    });
+    setDealers(newdealers);
+    setTableData(newdealers);
   }
+
   const sleep = time => {
     return new Promise(resolve => setTimeout(resolve, time));
   };
 
-  const fetchDEalersofBranch = async () => {
-    setIsLoading(true);
-    sleep(500);
-    // let data=selectedBranch;
-    console.log(selectedBranch);
-    const response = await axios.post("/api/v1/branch/dealer", selectedBranch, { headers: { "Content-Type": "application/json" } });
-    // const { data } = await axios.get("/api/v1/branch/architects");
-    console.log(response);
-    const newarchitects = response.data.dealer;
-    // setArchitects(newarchitects);
-    setTableData(newarchitects);
-    setIsLoading(false);
-  }
-  const handlebranch = (selected) => {
-    console.log(selected);
-    // setselectedBranch(selected);
-    selectedBranch = selected;
-    fetchDEalersofBranch();
-  }
-
   useEffect(() => {
-    fetchBranches();
     fetchSalesmen();
     fetchDealer();
   }, [refresh]);
@@ -205,7 +175,10 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
       { header: 'Date', accessorKey: 'date', type: "date", dateSetting: { locale: "en-GB" }, },
       { header: 'Name', accessorKey: 'name' },
       { header: 'Address', accessorKey: 'address' },
+      { header: 'Area', accessorKey: 'area' },
       { header: 'Mobile Number', accessorKey: 'mobileno' },
+      { header: 'Salesman', accessorKey: 'salesmen' },
+      { header: 'Remarks', accessorKey: 'remarks' },
     ],
     [],
   );
@@ -261,9 +234,7 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
             {/* <label>Branch</label> */}
             <label>Salesman Filter</label>
             <Select styles={customStyles} onChange={(e) => handlesalesman(e)} options={salesman} />
-            <label>Branch Filter</label>
-            <ReactSelect styles={customStyles} onChange={(e) => handlebranch(e)} options={branches} />
-            {/* <Select styles={customStyles} onChange={(e) => handlebranch(e)} options={branches} /> */}
+}
             <TextField
               className={Styles.InputDate}
               id="start-date"
@@ -415,26 +386,6 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
                   width: '100%',
                 }}
               >
-                <Button
-                  disabled={table.getPrePaginationRowModel().rows.length === 0}
-                  onClick={() =>
-                    handleExportRows(table.getPrePaginationRowModel().rows)
-                  }
-                  startIcon={<FileDownloadIcon />}
-                  variant="contained"
-                  color="primary"
-                  sx={{
-                    backgroundColor: 'rgba(37,99,235,0.08)',
-                    color: '#1d4ed8',
-                    boxShadow: 'none',
-                    '&:hover': {
-                      backgroundColor: 'rgba(37,99,235,0.16)',
-                      boxShadow: 'none',
-                    },
-                  }}
-                >
-                  Export All Rows
-                </Button>
                 <Button
                   onClick={handleExportData}
                   startIcon={<FileDownloadIcon />}

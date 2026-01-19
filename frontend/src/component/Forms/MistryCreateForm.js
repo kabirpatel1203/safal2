@@ -25,32 +25,16 @@ const MistryCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
         pancard: "",
         date: "",
         // salesMan: "",
-        branches: [],
         salesmen:[]
 
 
     }
-    const getAllbranches = async () => {
-        const { data } = await axios.get("/api/v1/branch/getall");
-
-        const branches = data.branches.map((branch) => (
-            {
-                branchname: branch.branchname,
-                value: branch.branchname,
-                label: branch.branchname
-            }
-        ))
-        setBranches(branches);
-    }
 
     useEffect(() => {
-        getAllbranches();
         getAllsalesmen();
     }, []);
     const [formData, setFormData] = useState(initialState)
     const [isDisabled, setIsDisabled] = useState(false);
-    const [Branches, setBranches] = useState([]);
-    const [selectedBranch, setselectedBranch] = useState([]);
     const formHandler = (e) => {
         e.preventDefault();
         setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -95,7 +79,6 @@ const MistryCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
             date: formData.date,
             IFSCcode: formData.IFSCcode,
             // salesMan: formData.salesMan,
-            branches: selectedBranch,
             salesmen:selectedSalesmen
 
         }
@@ -112,12 +95,6 @@ const MistryCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
             setIsDisabled(false);
         }
     }
-    const Branchchangehandler = (selected) => {
-
-        setselectedBranch(selected);
-        console.log(selected);
-        setFormData({ ...formData, selectedBranch })
-    };
     return (
         <div className={Styles.container}>
             {/* <ToastContainer
@@ -175,19 +152,6 @@ pauseOnHover
                 </div>
                 
                 <div className={Styles.personalDetails3}>
-                    <label>Branches</label>
-                    <ReactSelect lassName={Styles.inputTag}
-                        options={Branches}
-                        isMulti
-                        closeMenuOnSelect={false}
-                        hideSelectedOptions={false}
-                        components={{
-                            Option
-                        }}
-                        onChange={Branchchangehandler}
-                        allowSelectAll={true}
-                        value={selectedBranch}
-                    />
                     <label>Salesmen</label>
 
                     <ReactSelect className={Styles.inputTag}

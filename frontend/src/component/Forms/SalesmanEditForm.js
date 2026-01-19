@@ -8,46 +8,13 @@ import Select from 'react-select'
 import { default as ReactSelect } from "react-select";
 
 const SalesmanEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
-    const [Branches, setBranches] = useState([]);
     console.log(data);
-    const [selectedBranch, setselectedBranch] = useState(data.branches);
-    const [Salesmen, setSalesmen] = useState([]);
-    const [selectedSalesman, setselectedSalesman] = useState(data.salesmen);
-    // const arr2 = selected.salesman.map(object => {
-    //     console.log(object);
-    //     return { ...object, value: object.name, label: object.name };
-    // })
-    const getAllsalesmen = async () => {
-        const { data } = await axios.get("/api/v1/salesman/getall");
-        const salesmen = data.salesmans.map((branch) => (
-            {
-                name: branch.name,
-                value: branch.name,
-                label: branch.name
-            }
-        ))
-        setSalesmen(salesmen);
-    }
-    const Salesmenchangehandler = (selected) => {
+    const [defaultArchitect, setDefaultArchitect] = useState(() => data.architectTag ? { value: data.architectTag, label: `${data.architectName}-${data.architectNumber}` } : "");
+    const [defaultMistry, setDefaultMistry] = useState(() => data.mistryTag ? { value: data.mistryTag, label: `${data.mistryName}-${data.mistryNumber}` } : "");
+    const [defaultDealer, setDefaultDealer] = useState(() => data.dealerTag ? { value: data.dealerTag, label: `${data.dealerName}-${data.dealerNumber}` } : "");
+    const [defaultPMC, setDefaultPMC] = useState(() => data.pmcTag ? { value: data.pmcTag, label: `${data.pmcName}-${data.pmcNumber}` } : "");
+    const [defaultOEM, setDefaultOEM] = useState(() => data.oemTag ? { value: data.oemTag, label: `${data.oemName}-${data.oemNumber}` } : "");
 
-        setselectedSalesman(selected);
-
-        setFormData({ ...formData, selectedSalesman })
-    };
-    const arr = selectedBranch.map(object => {
-        return { ...object, value: object.branchname, label: object.branchname };
-    })
-    const getAllbranches = async () => {
-        const { data } = await axios.get("/api/v1/branch/getall");
-        const branches = data.branches.map((branch) => (
-            {
-                branchname: branch.branchname,
-                value: branch.branchname,
-                label: branch.branchname
-            }
-        ))
-        setBranches(branches);
-    }
     let initialState = {
         name: data.name,
         email: data.email,
@@ -58,8 +25,21 @@ const SalesmanEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => 
         remarks: data.remarks,
         marriagedate: data.marriagedate,
         date: data.date ? data.date.substr(0, 10) : null,
-        branches: data.branches,
-
+        architectTag: data.architectTag,
+        architectName: data.architectName,
+        architectNumber: data.architectNumber,
+        mistryTag: data.mistryTag,
+        mistryName: data.mistryName,
+        mistryNumber: data.mistryNumber,
+        dealerTag: data.dealerTag,
+        dealerName: data.dealerName,
+        dealerNumber: data.dealerNumber,
+        pmcTag: data.pmcTag,
+        pmcName: data.pmcName,
+        pmcNumber: data.pmcNumber,
+        oemTag: data.oemTag,
+        oemName: data.oemName,
+        oemNumber: data.oemNumber
     }
     let id = data._id;
     const [formData, setFormData] = useState(initialState)
@@ -70,8 +50,11 @@ const SalesmanEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => 
         setFormData({ ...formData, [e.target.name]: e.target.value })
     }
     useEffect(() => {
-        getAllbranches();
-        getAllsalesmen();
+        getAllArchitects();
+        getAllMistry();
+        getAllDealer();
+        getAllPMC();
+        getAllOEM();
         console.log(data);
     }, []);
     const submitHandler = async (e) => {
@@ -83,18 +66,21 @@ const SalesmanEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => 
             mobileno: formData.mobileno,
             address: formData.address,
             date: formData.date,
-            // // followupdate: formData.fdate,
-            // architectTag: formData.architectTag,
-            // architectNumber: formData.architectNumber,
-            // architectName: formData.architectName,
-            // pmcTag: formData.pmcTag,
-            // pmcName: formData.pmcName,
-            // pmcNumber: formData.pmcNumber,
-            // requirement: formData.requirement,
-            // stage: formData.stage,
-            branches: selectedBranch,
-            // salesmen: selectedSalesmen
-
+            architectTag: formData.architectTag,
+            architectName: formData.architectName,
+            architectNumber: formData.architectNumber,
+            mistryTag: formData.mistryTag,
+            mistryName: formData.mistryName,
+            mistryNumber: formData.mistryNumber,
+            dealerTag: formData.dealerTag,
+            dealerName: formData.dealerName,
+            dealerNumber: formData.dealerNumber,
+            pmcTag: formData.pmcTag,
+            pmcName: formData.pmcName,
+            pmcNumber: formData.pmcNumber,
+            oemTag: formData.oemTag,
+            oemName: formData.oemName,
+            oemNumber: formData.oemNumber
         }
         console.log(data)
         try {
@@ -112,12 +98,6 @@ const SalesmanEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => 
         }
 
     }
-    const Branchchangehandler = (selected) => {
-
-        setselectedBranch(selected);
-        console.log(selected);
-        setFormData({ ...formData, selectedBranch })
-    };
     const ArchitectFormHandler = (e) => {
         setFormData({ ...formData, architectTag: e.value, architectName: e.label.split('-')[0], architectNumber: e.label.split('-')[1] })
     }
@@ -143,6 +123,11 @@ const SalesmanEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => 
         setFormData({ ...formData, pmcTag: e.value, pmcName: e.label.split('-')[0], pmcNumber: e.label.split('-')[1] })
     }
 
+    const OEMFormHandler = (e) => {
+        console.log(e.value);
+        setFormData({ ...formData, oemTag: e.value, oemName: e.label.split('-')[0], oemNumber: e.label.split('-')[1] })
+    }
+
 
 
 
@@ -165,7 +150,7 @@ const SalesmanEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => 
     const [Mistries, setMistries] = useState([]);
     const [Dealers, setDealers] = useState([]);
     const [PMCs, setPMCs] = useState([]);
-    const [selectedSalesmen, setselectedSalesmen] = useState([]);
+    const [OEMs, setOEMs] = useState([]);
     const getAllArchitects = async () => {
 
         const { data } = await axios.get("/api/v1/architect/getall");
@@ -196,6 +181,16 @@ const SalesmanEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => 
 
         const pmcs = data.pmcs.map((pmc) => ({ value: pmc._id, label: `${pmc.name}-${pmc.mobileno}` }))
         setPMCs(pmcs);
+
+
+    }
+
+    const getAllOEM = async () => {
+
+        const { data } = await axios.get("/api/v1/oem/getall");
+
+        const oems = data.oems.map((oem) => ({ value: oem._id, label: `${oem.name}-${oem.mobileno}` }))
+        setOEMs(oems);
 
 
     }
@@ -251,21 +246,30 @@ const SalesmanEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => 
 
                     {/* <label htmlFor='companyName'>Company Name</label>
                     <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} value={formData.companyName} name="companyName" placeholder='Company Name' /> */}
-                    <label>Branches</label>
-                    <ReactSelect lassName={Styles.inputTag}
-                        options={Branches}
-                        isMulti
-                        closeMenuOnSelect={false}
-                        hideSelectedOptions={false}
-                        components={{
-                            Option
-                        }}
-                        onChange={Branchchangehandler}
-                        allowSelectAll={true}
-                        value={arr}
-                    />
-                    {/* <label htmlFor='salesMan'>Sales Man </label> */}
+                    {/* <label htmlFor='salesMan'>Sales Man </label> */}}
                     {/* <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} value={formData.salesMan} name="salesMan" placeholder='Company Name' /> */}
+                </div>
+            </div>
+
+            <h1 className={Styles.heading}>Category Tags</h1>
+            <div className={Styles.bankDetails}>
+                <div className={Styles.bankDetails1}>
+                    <label htmlFor='name'>Architect Tag</label>
+                    <Select defaultValue={defaultArchitect} selectedValue={formData.architectTag} onChange={(e) => ArchitectFormHandler(e)} options={architects} />
+
+                    <label htmlFor='name'>Mistry Tag</label>
+                    <Select defaultValue={defaultMistry} selectedValue={formData.mistryTag} onChange={(e) => MistryFormHandler(e)} options={Mistries} />
+
+                    <label htmlFor='name'>Dealer Tag</label>
+                    <Select defaultValue={defaultDealer} selectedValue={formData.dealerTag} onChange={(e) => DealerFormHandler(e)} options={Dealers} />
+                </div>
+
+                <div className={Styles.bankDetails2}>
+                    <label htmlFor='name'>PMC Tag</label>
+                    <Select defaultValue={defaultPMC} selectedValue={formData.pmcTag} onChange={(e) => PMCFormHandler(e)} options={PMCs} />
+
+                    <label htmlFor='name'>OEM Tag</label>
+                    <Select defaultValue={defaultOEM} selectedValue={formData.oemTag} onChange={(e) => OEMFormHandler(e)} options={OEMs} />
                 </div>
             </div>
 

@@ -10,8 +10,9 @@ import { useSelector } from 'react-redux'
 const TaskCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
     const [architects, setArchitects] = useState([]);
     const [Mistries, setMistries] = useState([]);
-    // const [Dealers, setDealers] = useState([]);
-    // const [PMCs, setPMCs] = useState([]);
+    const [Dealers, setDealers] = useState([]);
+    const [PMCs, setPMCs] = useState([]);
+    const [OEMs, setOEMs] = useState([]);
     const [Salesmen, setSalesmen] = useState([]);
     const [salesmanId, setSalesmanId] = useState("")
     const { user, isAuthenticated } = useSelector((state) => state.user);
@@ -22,8 +23,9 @@ const TaskCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
         salesmanId,
         mistryTag: null,
         architectTag: null,
-        // dealerTag: null,
-        // pmcTag: null,
+        dealerTag: null,
+        pmcTag: null,
+        oemTag: null,
     }
     const [formData, setFormData] = useState(initialState)
 
@@ -56,8 +58,9 @@ const TaskCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
             salesmanId: salesmanId.value,
             mistryTag: formData.mistryTag,
             architectTag: formData.architectTag,
-            // dealerTag: formData.dealerTag,
-            // pmcTag: formData.pmcTag,
+            dealerTag: formData.dealerTag,
+            pmcTag: formData.pmcTag,
+            oemTag: formData.oemTag,
         }
 
         try {
@@ -86,19 +89,26 @@ const TaskCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
         setMistries(mistries);
     }
 
-    // const getAllDealer = async () => {
-    //     const { data } = await axios.get("/api/v1/dealer/getall");
+    const getAllDealer = async () => {
+        const { data } = await axios.get("/api/v1/dealer/getall");
 
-    //     const dealers = data.dealers.map((dealer) => ({ value: dealer._id, label: `${dealer.name}-${dealer.mobileno}` }))
-    //     setDealers(dealers);
-    // }
+        const dealers = data.dealers.map((dealer) => ({ value: dealer._id, label: `${dealer.name}-${dealer.mobileno}` }))
+        setDealers(dealers);
+    }
 
-    // const getAllPMC = async () => {
-    //     const { data } = await axios.get("/api/v1/pmc/getall");
+    const getAllPMC = async () => {
+        const { data } = await axios.get("/api/v1/pmc/getall");
 
-    //     const pmcs = data.pmcs.map((pmc) => ({ value: pmc._id, label: `${pmc.name}-${pmc.mobileno}` }))
-    //     setPMCs(pmcs);
-    // }
+        const pmcs = data.pmcs.map((pmc) => ({ value: pmc._id, label: `${pmc.name}-${pmc.mobileno}` }))
+        setPMCs(pmcs);
+    }
+
+    const getAllOEM = async () => {
+        const { data } = await axios.get("/api/v1/oem/getall");
+
+        const oems = data.oems.map((oem) => ({ value: oem._id, label: `${oem.name}-${oem.mobileno}` }))
+        setOEMs(oems);
+    }
 
     const ArchitectFormHandler = (e) => {
         setFormData({ ...formData, architectTag: e.value, architectName: e.label.split('-')[0], architectNumber: e.label.split('-')[1] })
@@ -108,21 +118,26 @@ const TaskCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
         setFormData({ ...formData, mistryTag: e.value, mistryName: e.label.split('-')[0], mistryNumber: e.label.split('-')[1] })
     }
 
-    // const DealerFormHandler = (e) => {
-    //     setFormData({ ...formData, dealerTag: e.value, dealerName: e.label.split('-')[0], dealerNumber: e.label.split('-')[1] })
-    // }
+    const DealerFormHandler = (e) => {
+        setFormData({ ...formData, dealerTag: e.value, dealerName: e.label.split('-')[0], dealerNumber: e.label.split('-')[1] })
+    }
 
-    // const PMCFormHandler = (e) => {
-    //     setFormData({ ...formData, pmcTag: e.value, pmcName: e.label.split('-')[0], pmcNumber: e.label.split('-')[1] })
-    // }
+    const PMCFormHandler = (e) => {
+        setFormData({ ...formData, pmcTag: e.value, pmcName: e.label.split('-')[0], pmcNumber: e.label.split('-')[1] })
+    }
+
+    const OEMFormHandler = (e) => {
+        setFormData({ ...formData, oemTag: e.value, oemName: e.label.split('-')[0], oemNumber: e.label.split('-')[1] })
+    }
 
     useEffect(() => {
         getAllsalesmen()
 
         getAllArchitects();
-        // getAllDealer();
+        getAllDealer();
         getAllMistry();
-        // getAllPMC();
+        getAllPMC();
+        getAllOEM();
     }, []);
 
     return (
@@ -152,25 +167,28 @@ const TaskCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
                     />
                 </div>
             </div>
-            {user.role == "admin" && <div className={Styles.bankDetails}>
+            <div className={Styles.bankDetails}>
                 <div className={Styles.bankDetails1}>
+
+                    <label htmlFor='name'>Architect Tag</label>
+                    <Select selectedValue={formData.architectTag} onChange={(e) => ArchitectFormHandler(e)} options={architects} />
 
                     <label htmlFor='name'>Mistry Tag</label>
                     <Select selectedValue={formData.mistryTag} onChange={(e) => MistryFormHandler(e)} options={Mistries} />
 
-                    <label htmlFor='name'>Architect Tag</label>
-                    <Select selectedValue={formData.architectTag} onChange={(e) => ArchitectFormHandler(e)} options={architects} />
-                </div>
-
-                {/* <div className={Styles.bankDetails2}>
-
                     <label htmlFor='name'>Dealer Tag</label>
                     <Select selectedValue={formData.dealerTag} onChange={(e) => DealerFormHandler(e)} options={Dealers} />
+                </div>
+
+                <div className={Styles.bankDetails2}>
 
                     <label htmlFor='name'>PMC Tag</label>
                     <Select selectedValue={formData.pmcTag} onChange={(e) => PMCFormHandler(e)} options={PMCs} />
-                </div> */}
-            </div>}
+
+                    <label htmlFor='name'>OEM Tag</label>
+                    <Select selectedValue={formData.oemTag} onChange={(e) => OEMFormHandler(e)} options={OEMs} />
+                </div>
+            </div>
             <button disabled={isDisabled} className={isDisabled ? Styles.disable : Styles.submitButton} onClick={(e) => submitHandler(e)} type="Submit">Submit</button>
         </div>
     )

@@ -181,26 +181,6 @@ const BranchTable = ({ modalHandler, refresh ,isOpen}) => {
                                 }}
                             >
                                 <Button
-                                    disabled={table.getPrePaginationRowModel().rows.length === 0}
-                                    onClick={() =>
-                                        handleExportRows(table.getPrePaginationRowModel().rows)
-                                    }
-                                    startIcon={<FileDownloadIcon />}
-                                    variant="contained"
-                                    color="primary"
-                                    sx={{
-                                        backgroundColor: 'rgba(37,99,235,0.08)',
-                                        color: '#1d4ed8',
-                                        boxShadow: 'none',
-                                        '&:hover': {
-                                            backgroundColor: 'rgba(37,99,235,0.16)',
-                                            boxShadow: 'none',
-                                        },
-                                    }}
-                                >
-                                    Export All Rows
-                                </Button>
-                                <Button
                                     onClick={handleExportData}
                                     startIcon={<FileDownloadIcon />}
                                     variant="contained"

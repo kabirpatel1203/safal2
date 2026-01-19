@@ -38,8 +38,6 @@ const PMCTable = ({ modalHandler, refresh,isOpen }) => {
   const [originalData, setOriginalData] = useState([])
   const [startDate, setStartDate] = useState(new Date('2022-08-01'));
   const [endDate, setEndDate] = useState(new Date());
-  const [branches, setBranches] = useState([]);
-  let [selectedBranch,setSelectedBranch] = useState(null);
   let [selectedSalesman,setSelectedSalesman] = useState(null);
   const { user, isAuthenticated } = useSelector((state) => state.user);
 
@@ -75,6 +73,7 @@ const PMCTable = ({ modalHandler, refresh,isOpen }) => {
       { header: 'Address', accessorKey: 'address' },
       { header: 'area', accessorKey: 'area' },
       { header: 'Mobile Number', accessorKey: 'mobileno' },
+      { header: 'Salesman', accessorKey: 'salesmen' },
       { header: 'Remarks', accessorKey: 'remarks' },
     ],
     [],
@@ -124,45 +123,25 @@ const PMCTable = ({ modalHandler, refresh,isOpen }) => {
 
   const fetchPMC = async () => {
     const { data } = await axios.get("/api/v1/pmc/getall");
-    setPMC(data.pmcs);
-    setOriginalData(data.pmcs)
-    setTableData(data.pmcs);
-  }
-
-  const fetchBranches = async () => {
-    const { data } = await axios.get("/api/v1/branch/getall");
-    // console.log(data.branches);
-    const branches = data.branches.map((branch) => (
-      {
-        branchname: branch.branchname,
-        value: branch.branchname,
-        label: branch.branchname
-
+    const formattedData = data.pmcs.map((item) => {
+      let formateddate = item.date ? item.date : '01/01/1799';
+      return {
+        _id: item._id,
+        date: formateddate,
+        name: item.name,
+        address: item.address,
+        area: item.area,
+        mobileno: item.mobileno,
+        salesmen: item.salesmen.map((req) => req.name).join('-'),
+        remarks: item.remarks
       }
-    ))
-    setBranches(branches);
+    });
+    setPMC(formattedData);
+    setOriginalData(data.pmcs);
+    setTableData(formattedData);
   }
-  const sleep = time => {
-    return new Promise(resolve => setTimeout(resolve, time));
-  };
 
-  const fetchPMCsofBranch = async () => {
-    setIsLoading(true);
-    sleep(500);
-    // let data=selectedBranch;
-    console.log(selectedBranch);
-    const response = await axios.post("/api/v1/branch/pmc", selectedBranch, { headers: { "Content-Type": "application/json" } });
-    // const { data } = await axios.get("/api/v1/branch/architects");
-    console.log(response);
-    const newarchitects = response.data.pmc;
-    // setArchitects(newarchitects);
-    setTableData(newarchitects);
-    setIsLoading(false);
-  }
-  const handlebranch = (selected) => {
-    setSelectedBranch(selected.value)
-    fetchFilteredPMC(selectedSalesman,selected.value);
-  }
+
   const [salesman, setSalesman] = useState([]);
   const fetchSalesmen = async () => {
     const { data } = await axios.get("/api/v1/salesman/getall");
@@ -178,23 +157,18 @@ const PMCTable = ({ modalHandler, refresh,isOpen }) => {
     setSalesman(salesmen);
   }
   
-  const fetchFilteredPMC =(salesman, branch) => {
+  const fetchFilteredPMC =(salesman) => {
 
     let filteredData = originalData.filter((item)=>{
-      let isBranch = false;
       let isSalesman = false;
       
-      item.branches.forEach((branchObject)=>{
-        if(Object.values(branchObject).includes(branch) || branch===null){
-        isBranch = true;
-      }})
       item.salesmen.forEach((salesmanObj)=>{
         if(Object.values(salesmanObj).includes(salesman) || salesman===null){
           isSalesman = true;
         }})
 
-      console.log(isBranch, isSalesman)
-      if(isSalesman && isBranch){
+      console.log(isSalesman)
+      if(isSalesman){
         return true
       }
     })
@@ -202,11 +176,13 @@ const PMCTable = ({ modalHandler, refresh,isOpen }) => {
     let data = filteredData.map((item)=>{
       let formateddate = item.date ? item.date : '01/01/1799';
       return {
+        _id: item._id,
         date:formateddate,
         name:item.name,
         address:item.address,
         area:item.area,
         mobileno:item.mobileno,
+        salesmen:item.salesmen.map((req)=>req.name).join('-'),
         remarks:item.remarks
       }
       })
@@ -217,13 +193,12 @@ const PMCTable = ({ modalHandler, refresh,isOpen }) => {
   
   const handlesalesman = (selected) => {
     setSelectedSalesman(selected.value);
-    fetchFilteredPMC(selected.value, selectedBranch);
+    fetchFilteredPMC(selected.value);
   }
 
   useEffect(() => {
     fetchPMC();
     fetchSalesmen();
-    fetchBranches();
   }, [refresh]);
   const handleCallbackCreate = (childData) => {
     // console.log("Parent Invoked!!")
@@ -279,12 +254,8 @@ const PMCTable = ({ modalHandler, refresh,isOpen }) => {
 
         <div className={Styles.Yellow}>
           <div className={Styles.DateRangeContainer}>
-            {/* <label>Branch</label> */}
-            {/* <Select styles={customStyles} onChange={(e) => handlebranch(e)} options={branches} /> */}
             <label>Salesman Filter</label>
             <Select styles={customStyles} onChange={(e) => handlesalesman(e)} options={salesman} />
-            <label>Branch Filter</label>
-            <Select styles={customStyles} onChange={(e) => handlebranch(e)} options={branches} />
             <TextField
               className={Styles.InputDate}
               id="start-date"
@@ -436,26 +407,6 @@ const PMCTable = ({ modalHandler, refresh,isOpen }) => {
                   width: '100%',
                 }}
               >
-                <Button
-                  disabled={table.getPrePaginationRowModel().rows.length === 0}
-                  onClick={() =>
-                    handleExportRows(table.getPrePaginationRowModel().rows)
-                  }
-                  startIcon={<FileDownloadIcon />}
-                  variant="contained"
-                  color="primary"
-                  sx={{
-                    backgroundColor: 'rgba(37,99,235,0.08)',
-                    color: '#1d4ed8',
-                    boxShadow: 'none',
-                    '&:hover': {
-                      backgroundColor: 'rgba(37,99,235,0.16)',
-                      boxShadow: 'none',
-                    },
-                  }}
-                >
-                  Export All Rows
-                </Button>
                 <Button
                   onClick={handleExportData}
                   startIcon={<FileDownloadIcon />}

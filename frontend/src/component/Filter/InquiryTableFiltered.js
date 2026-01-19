@@ -287,7 +287,7 @@ const InquiryTableFlitered = ({ modalHandler, refresh }) => {
                         { title: 'Birth Date', field: 'birthdate', hidden: 'true' },
                         { title: 'Marriage Date', field: 'marriagedate', hidden: 'true' },
                         { title: 'Remarks', field: 'remarks', hidden: 'true' },
-                        { title: 'Order Value', field: 'orderValue', hidden: 'true' },
+                        { title: 'Reward Points', field: 'rewardPoints', hidden: 'true' },
                         { title: 'Sales Person', field: 'salesPerson', hidden: 'true' },
                         { title: 'Tag', field: 'tag' },
 

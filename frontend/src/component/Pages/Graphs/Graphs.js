@@ -33,16 +33,12 @@ const Graphs = () => {
   const [salesmen, setSalesmen] = useState([]);
   const [architects, setArchitects] = useState([]);
   const [mistries, setMistries] = useState([]);
-  const [branches, setBranches] = useState([]);
   
   const [selectedSalesman, setSelectedSalesman] = useState(null);
   const [selectedArchitect, setSelectedArchitect] = useState(null);
   const [selectedMistry, setSelectedMistry] = useState(null);
-  const [selectedBranch, setSelectedBranch] = useState(null);
   
-  const [salesmanBranches, setSalesmanBranches] = useState([]);
-  const [architectBranches, setArchitectBranches] = useState([]);
-  const [mistryBranches, setMistryBranches] = useState([]);
+  const [allCustomers, setAllCustomers] = useState([]);
 
   const [salesmanStartDate, setSalesmanStartDate] = useState("");
   const [salesmanEndDate, setSalesmanEndDate] = useState("");
@@ -50,13 +46,9 @@ const Graphs = () => {
   const [architectEndDate, setArchitectEndDate] = useState("");
   const [mistryStartDate, setMistryStartDate] = useState("");
   const [mistryEndDate, setMistryEndDate] = useState("");
-  const [branchStartDate, setBranchStartDate] = useState("");
-  const [branchEndDate, setBranchEndDate] = useState("");
-
   const [salesmanData, setSalesmanData] = useState([]);
   const [architectData, setArchitectData] = useState([]);
   const [mistryData, setMistryData] = useState([]);
-  const [branchData, setBranchData] = useState([]);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -68,24 +60,98 @@ const Graphs = () => {
     fetchAllData();
   }, []);
 
+  // Normalize reward points to a number to avoid string concatenation issues in aggregations
+  const getRewardPoints = (entry) => {
+    const raw = entry?.rewardPoints ?? entry?.revenue ?? entry?.orderValue ?? entry?.ordervalue;
+    if (raw === null || raw === undefined) {
+      return 0;
+    }
+    if (typeof raw === 'number') {
+      return raw;
+    }
+    if (typeof raw === 'string') {
+      const sanitized = raw.replace(/[^0-9.-]/g, '');
+      const parsed = Number(sanitized);
+      return Number.isNaN(parsed) ? 0 : parsed;
+    }
+    return 0;
+  };
+
+  // Fetch customers to drive reward point aggregations
+  const fetchCustomers = async () => {
+    const { data } = await axios.get("/api/v1/customer/getall");
+    return data?.customers || [];
+  };
+
+  const loadCustomers = async () => {
+    const customers = await fetchCustomers();
+    setAllCustomers(customers);
+    return customers;
+  };
+
+  const ensureCustomers = async (forceRefresh = false) => {
+    if (forceRefresh || allCustomers.length === 0) {
+      return await loadCustomers();
+    }
+    return allCustomers;
+  };
+
+  const buildSalesmanTotals = (customers) => {
+    const totals = {};
+    customers.forEach(customer => {
+      if (Array.isArray(customer.salesmen) && customer.salesmen.length > 0) {
+        customer.salesmen.forEach(s => {
+          const name = s?.name;
+          if (!name) return;
+          totals[name] = (totals[name] || 0) + getRewardPoints(customer);
+        });
+      }
+    });
+    return Object.entries(totals)
+      .map(([name, revenue]) => ({ name, revenue }))
+      .sort((a, b) => b.revenue - a.revenue);
+  };
+
+  const buildArchitectTotals = (customers) => {
+    const totals = {};
+    customers.forEach(customer => {
+      const name = customer?.architectName;
+      if (!name) return;
+      totals[name] = (totals[name] || 0) + getRewardPoints(customer);
+    });
+    return Object.entries(totals)
+      .map(([name, revenue]) => ({ name, revenue }))
+      .sort((a, b) => b.revenue - a.revenue);
+  };
+
+  const buildMistryTotals = (customers) => {
+    const totals = {};
+    customers.forEach(customer => {
+      const name = customer?.mistryName;
+      if (!name) return;
+      totals[name] = (totals[name] || 0) + getRewardPoints(customer);
+    });
+    return Object.entries(totals)
+      .map(([name, revenue]) => ({ name, revenue }))
+      .sort((a, b) => b.revenue - a.revenue);
+  };
+
+  const initializeAggregations = (customers) => {
+    setSalesmanData(buildSalesmanTotals(customers));
+    setArchitectData(buildArchitectTotals(customers));
+    setMistryData(buildMistryTotals(customers));
+  };
+
   const fetchAllData = async () => {
     try {
-      const branchesRes = await axios.get("/api/v1/branch/getall");
-      const branchOptions = branchesRes.data.branches.map((b) => ({
-        value: b.branchname,
-        label: b.branchname
-      }));
-      setBranches(branchOptions);
-
-      // Fetch revenue data first to get all actual names
-      const { data } = await axios.get("/api/v1/customer/getall");
-      const customers = data.customers;
+      // Fetch reward points data first to get all actual names
+      const customers = await loadCustomers();
 
       // Get unique salesman names from customer data
       const allSalesmen = [];
-      customers.forEach(customer => {
-        if (customer.salesmen && customer.salesmen.length > 0) {
-          customer.salesmen.forEach(s => {
+      customers.forEach(entry => {
+        if (entry.salesmen && entry.salesmen.length > 0) {
+          entry.salesmen.forEach(s => {
             if (s.name) allSalesmen.push(s.name);
           });
         }
@@ -113,7 +179,7 @@ const Graphs = () => {
       }));
       setMistries(mistryOptions);
 
-      fetchRevenueData();
+      initializeAggregations(customers);
     } catch (error) {
       console.error("Error fetching data:", error);
       toast.error("Failed to load data");
@@ -124,104 +190,19 @@ const Graphs = () => {
     if (!startDate && !endDate) return customers;
     
     return customers.filter(customer => {
-      if (!customer.date) return false;
-      const customerDate = new Date(customer.date);
+      const sourceDate = customer.date || customer.createdAt;
+      if (!sourceDate) return false;
+      const customerDate = new Date(sourceDate);
       if (startDate && customerDate < new Date(startDate)) return false;
       if (endDate && customerDate > new Date(endDate)) return false;
       return true;
     });
   };
 
-  const fetchRevenueData = async () => {
-    try {
-      const { data } = await axios.get("/api/v1/customer/getall");
-      const customers = data.customers;
-
-      const salesmanRevenue = {};
-      customers.forEach(customer => {
-        if (customer.salesmen && customer.salesmen.length > 0) {
-          customer.salesmen.forEach(s => {
-            const name = s.name;
-            if (!salesmanRevenue[name]) {
-              salesmanRevenue[name] = 0;
-            }
-            salesmanRevenue[name] += customer.orderValue || 0;
-          });
-        }
-      });
-
-      const architectRevenue = {};
-      customers.forEach(customer => {
-        if (customer.architectName) {
-          const name = customer.architectName;
-          if (!architectRevenue[name]) {
-            architectRevenue[name] = 0;
-          }
-          architectRevenue[name] += customer.orderValue || 0;
-        }
-      });
-
-      const mistryRevenue = {};
-      customers.forEach(customer => {
-        if (customer.mistryName) {
-          const name = customer.mistryName;
-          if (!mistryRevenue[name]) {
-            mistryRevenue[name] = 0;
-          }
-          mistryRevenue[name] += customer.orderValue || 0;
-        }
-      });
-
-      const branchRevenue = {};
-      customers.forEach(customer => {
-        if (customer.branches && customer.branches.length > 0) {
-          customer.branches.forEach(b => {
-            const name = b.branchname;
-            if (!branchRevenue[name]) {
-              branchRevenue[name] = 0;
-            }
-            branchRevenue[name] += customer.orderValue || 0;
-          });
-        }
-      });
-
-      setSalesmanData(Object.entries(salesmanRevenue).map(([name, revenue]) => ({ name, revenue })).sort((a, b) => b.revenue - a.revenue));
-      setArchitectData(Object.entries(architectRevenue).map(([name, revenue]) => ({ name, revenue })).sort((a, b) => b.revenue - a.revenue));
-      setMistryData(Object.entries(mistryRevenue).map(([name, revenue]) => ({ name, revenue })).sort((a, b) => b.revenue - a.revenue));
-      setBranchData(Object.entries(branchRevenue).map(([name, revenue]) => ({ name, revenue })).sort((a, b) => b.revenue - a.revenue));
-
-    } catch (error) {
-      console.error("Error fetching revenue data:", error);
-    }
-  };
-
   const fetchSalesmanData = async () => {
     try {
-      const { data } = await axios.get("/api/v1/customer/getall");
-      let customers = filterCustomersByDate(data.customers, salesmanStartDate, salesmanEndDate);
-
-      // Filter by selected branches if any
-      if (salesmanBranches.length > 0) {
-        customers = customers.filter(customer => {
-          if (!customer.branches || customer.branches.length === 0) return false;
-          return customer.branches.some(b => salesmanBranches.includes(b.branchname));
-        });
-      }
-
-      const salesmanRevenue = {};
-      customers.forEach(customer => {
-        if (customer.salesmen && customer.salesmen.length > 0) {
-          customer.salesmen.forEach(s => {
-            const name = s.name;
-            if (!salesmanRevenue[name]) {
-              salesmanRevenue[name] = 0;
-            }
-            salesmanRevenue[name] += customer.orderValue || 0;
-          });
-        }
-      });
-
-      setSalesmanData(Object.entries(salesmanRevenue).map(([name, revenue]) => ({ name, revenue })).sort((a, b) => b.revenue - a.revenue));
+      const customers = filterCustomersByDate(await ensureCustomers(true), salesmanStartDate, salesmanEndDate);
+      setSalesmanData(buildSalesmanTotals(customers));
     } catch (error) {
       console.error("Error fetching salesman data:", error);
     }
@@ -229,29 +210,8 @@ const Graphs = () => {
 
   const fetchArchitectData = async () => {
     try {
-      const { data } = await axios.get("/api/v1/customer/getall");
-      let customers = filterCustomersByDate(data.customers, architectStartDate, architectEndDate);
-
-      // Filter by selected branches if any
-      if (architectBranches.length > 0) {
-        customers = customers.filter(customer => {
-          if (!customer.branches || customer.branches.length === 0) return false;
-          return customer.branches.some(b => architectBranches.includes(b.branchname));
-        });
-      }
-
-      const architectRevenue = {};
-      customers.forEach(customer => {
-        if (customer.architectName) {
-          const name = customer.architectName;
-          if (!architectRevenue[name]) {
-            architectRevenue[name] = 0;
-          }
-          architectRevenue[name] += customer.orderValue || 0;
-        }
-      });
-
-      setArchitectData(Object.entries(architectRevenue).map(([name, revenue]) => ({ name, revenue })).sort((a, b) => b.revenue - a.revenue));
+      const customers = filterCustomersByDate(await ensureCustomers(true), architectStartDate, architectEndDate);
+      setArchitectData(buildArchitectTotals(customers));
     } catch (error) {
       console.error("Error fetching architect data:", error);
     }
@@ -259,55 +219,10 @@ const Graphs = () => {
 
   const fetchMistryData = async () => {
     try {
-      const { data } = await axios.get("/api/v1/customer/getall");
-      let customers = filterCustomersByDate(data.customers, mistryStartDate, mistryEndDate);
-
-      // Filter by selected branches if any
-      if (mistryBranches.length > 0) {
-        customers = customers.filter(customer => {
-          if (!customer.branches || customer.branches.length === 0) return false;
-          return customer.branches.some(b => mistryBranches.includes(b.branchname));
-        });
-      }
-
-      const mistryRevenue = {};
-      customers.forEach(customer => {
-        if (customer.mistryName) {
-          const name = customer.mistryName;
-          if (!mistryRevenue[name]) {
-            mistryRevenue[name] = 0;
-          }
-          mistryRevenue[name] += customer.orderValue || 0;
-        }
-      });
-
-      setMistryData(Object.entries(mistryRevenue).map(([name, revenue]) => ({ name, revenue })).sort((a, b) => b.revenue - a.revenue));
+      const customers = filterCustomersByDate(await ensureCustomers(true), mistryStartDate, mistryEndDate);
+      setMistryData(buildMistryTotals(customers));
     } catch (error) {
       console.error("Error fetching mistry data:", error);
-    }
-  };
-
-  const fetchBranchData = async () => {
-    try {
-      const { data } = await axios.get("/api/v1/customer/getall");
-      const customers = filterCustomersByDate(data.customers, branchStartDate, branchEndDate);
-
-      const branchRevenue = {};
-      customers.forEach(customer => {
-        if (customer.branches && customer.branches.length > 0) {
-          customer.branches.forEach(b => {
-            const name = b.branchname;
-            if (!branchRevenue[name]) {
-              branchRevenue[name] = 0;
-            }
-            branchRevenue[name] += customer.orderValue || 0;
-          });
-        }
-      });
-
-      setBranchData(Object.entries(branchRevenue).map(([name, revenue]) => ({ name, revenue })).sort((a, b) => b.revenue - a.revenue));
-    } catch (error) {
-      console.error("Error fetching branch data:", error);
     }
   };
 
@@ -336,8 +251,6 @@ const Graphs = () => {
         // Exact match with the name
         return item.name === selectedFilter;
       });
-      console.log('Selected filter:', selectedFilter);
-      console.log('Filtered data:', filteredData);
     } else {
       // If no filter, show only top 15
       filteredData = data.slice(0, 15);
@@ -347,8 +260,8 @@ const Graphs = () => {
       labels: filteredData.map(item => item.name),
       datasets: [
         {
-          label: 'Revenue (₹)',
-          data: filteredData.map(item => item.revenue / 1000),
+          label: 'Reward Points',
+          data: filteredData.map(item => item.revenue),
           backgroundColor: 'rgba(37, 99, 235, 0.7)',
           borderColor: 'rgba(37, 99, 235, 1)',
           borderWidth: 1,
@@ -373,7 +286,7 @@ const Graphs = () => {
         beginAtZero: true,
         ticks: {
           callback: function(value) {
-            return '₹' + value + 'K';
+            return value + ' pts';
           }
         }
       }
@@ -399,7 +312,7 @@ const Graphs = () => {
           
           <div className={Styles.contentContainer}>
             <div className={Styles.section}>
-              <h2 className={Styles.sectionTitle}>Revenue by Salesman</h2>
+              <h2 className={Styles.sectionTitle}>Reward Points by Salesman</h2>
               <div className={Styles.filterContainer}>
                 <Select
                   styles={customStyles}
@@ -407,16 +320,6 @@ const Graphs = () => {
                   onChange={(selected) => setSelectedSalesman(selected?.value)}
                   isClearable
                   placeholder="Select Salesman (All by default)"
-                />
-              </div>
-              <div className={Styles.filterContainer}>
-                <Select
-                  styles={customStyles}
-                  options={branches}
-                  onChange={(selected) => setSalesmanBranches(selected ? selected.map(s => s.value) : [])}
-                  isMulti
-                  isClearable
-                  placeholder="Select Branch(es) (All by default)"
                 />
               </div>
               <div className={Styles.dateFilterContainer}>
@@ -444,13 +347,13 @@ const Graphs = () => {
                 <Bar options={chartOptions} data={getChartData(salesmanData, selectedSalesman)} />
               </div>
               <div className={Styles.tableContainer}>
-                <h3 className={Styles.tableTitle}>Top 10 Revenue Generators</h3>
+                <h3 className={Styles.tableTitle}>Top 10 Reward Point Earners</h3>
                 <table className={Styles.table}>
                   <thead>
                     <tr>
                       <th>Rank</th>
                       <th>Salesman</th>
-                      <th>Revenue</th>
+                      <th>Reward Points</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -458,7 +361,7 @@ const Graphs = () => {
                       <tr key={index}>
                         <td>{index + 1}</td>
                         <td>{item.name}</td>
-                        <td>₹{(item.revenue / 1000).toFixed(2)}K</td>
+                        <td>{item.revenue}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -467,7 +370,7 @@ const Graphs = () => {
             </div>
 
             <div className={Styles.section}>
-              <h2 className={Styles.sectionTitle}>Revenue by Architect</h2>
+              <h2 className={Styles.sectionTitle}>Reward Points by Architect</h2>
               <div className={Styles.filterContainer}>
                 <Select
                   styles={customStyles}
@@ -475,16 +378,6 @@ const Graphs = () => {
                   onChange={(selected) => setSelectedArchitect(selected?.value)}
                   isClearable
                   placeholder="Select Architect (All by default)"
-                />
-              </div>
-              <div className={Styles.filterContainer}>
-                <Select
-                  styles={customStyles}
-                  options={branches}
-                  onChange={(selected) => setArchitectBranches(selected ? selected.map(s => s.value) : [])}
-                  isMulti
-                  isClearable
-                  placeholder="Select Branch(es) (All by default)"
                 />
               </div>
               <div className={Styles.dateFilterContainer}>
@@ -512,13 +405,13 @@ const Graphs = () => {
                 <Bar options={chartOptions} data={getChartData(architectData, selectedArchitect)} />
               </div>
               <div className={Styles.tableContainer}>
-                <h3 className={Styles.tableTitle}>Top 10 Revenue Generators</h3>
+                <h3 className={Styles.tableTitle}>Top 10 Reward Point Earners</h3>
                 <table className={Styles.table}>
                   <thead>
                     <tr>
                       <th>Rank</th>
                       <th>Architect</th>
-                      <th>Revenue</th>
+                      <th>Reward Points</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -526,7 +419,7 @@ const Graphs = () => {
                       <tr key={index}>
                         <td>{index + 1}</td>
                         <td>{item.name}</td>
-                        <td>₹{(item.revenue / 1000).toFixed(2)}K</td>
+                        <td>{item.revenue}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -535,7 +428,7 @@ const Graphs = () => {
             </div>
 
             <div className={Styles.section}>
-              <h2 className={Styles.sectionTitle}>Revenue by Mistry</h2>
+              <h2 className={Styles.sectionTitle}>Reward Points by Mistry</h2>
               <div className={Styles.filterContainer}>
                 <Select
                   styles={customStyles}
@@ -543,16 +436,6 @@ const Graphs = () => {
                   onChange={(selected) => setSelectedMistry(selected?.value)}
                   isClearable
                   placeholder="Select Mistry (All by default)"
-                />
-              </div>
-              <div className={Styles.filterContainer}>
-                <Select
-                  styles={customStyles}
-                  options={branches}
-                  onChange={(selected) => setMistryBranches(selected ? selected.map(s => s.value) : [])}
-                  isMulti
-                  isClearable
-                  placeholder="Select Branch(es) (All by default)"
                 />
               </div>
               <div className={Styles.dateFilterContainer}>
@@ -580,13 +463,13 @@ const Graphs = () => {
                 <Bar options={chartOptions} data={getChartData(mistryData, selectedMistry)} />
               </div>
               <div className={Styles.tableContainer}>
-                <h3 className={Styles.tableTitle}>Top 10 Revenue Generators</h3>
+                <h3 className={Styles.tableTitle}>Top 10 Reward Point Earners</h3>
                 <table className={Styles.table}>
                   <thead>
                     <tr>
                       <th>Rank</th>
                       <th>Mistry</th>
-                      <th>Revenue</th>
+                      <th>Reward Points</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -594,72 +477,13 @@ const Graphs = () => {
                       <tr key={index}>
                         <td>{index + 1}</td>
                         <td>{item.name}</td>
-                        <td>₹{(item.revenue / 1000).toFixed(2)}K</td>
+                        <td>{item.revenue}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
             </div>
-
-            <div className={Styles.section}>
-              <h2 className={Styles.sectionTitle}>Revenue by Branch</h2>
-              <div className={Styles.filterContainer}>
-                <Select
-                  styles={customStyles}
-                  options={branches}
-                  onChange={(selected) => setSelectedBranch(selected?.value)}
-                  isClearable
-                  placeholder="Select Branch (All by default)"
-                />
-              </div>
-              <div className={Styles.dateFilterContainer}>
-                <div className={Styles.dateInputGroup}>
-                  <label>Start Date:</label>
-                  <input
-                    type="date"
-                    value={branchStartDate}
-                    onChange={(e) => setBranchStartDate(e.target.value)}
-                    className={Styles.dateInput}
-                  />
-                </div>
-                <div className={Styles.dateInputGroup}>
-                  <label>End Date:</label>
-                  <input
-                    type="date"
-                    value={branchEndDate}
-                    onChange={(e) => setBranchEndDate(e.target.value)}
-                    className={Styles.dateInput}
-                  />
-                </div>
-                <button onClick={fetchBranchData} className={Styles.filterButton}>Apply Filter</button>
-              </div>
-              <div className={Styles.chartContainer}>
-                <Bar options={chartOptions} data={getChartData(branchData, selectedBranch)} />
-              </div>
-              <div className={Styles.tableContainer}>
-                <h3 className={Styles.tableTitle}>Top 10 Revenue Generators</h3>
-                <table className={Styles.table}>
-                  <thead>
-                    <tr>
-                      <th>Rank</th>
-                      <th>Branch</th>
-                      <th>Revenue</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {branchData.slice(0, 10).map((item, index) => (
-                      <tr key={index}>
-                        <td>{index + 1}</td>
-                        <td>{item.name}</td>
-                        <td>₹{(item.revenue / 1000).toFixed(2)}K</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
           </div>
         </div>
       </div>

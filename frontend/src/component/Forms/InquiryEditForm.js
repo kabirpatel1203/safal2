@@ -9,9 +9,7 @@ import { default as ReactSelect } from "react-select";
 import { useSelector } from 'react-redux'
 
 const InquiryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
-    const [Branches, setBranches] = useState([]);
     // console.log(data);
-    const [selectedBranch, setselectedBranch] = useState(data.branches);
     const [selectedRequirement, setSelectedRequirement] = useState(data.requirement);
     const [Salesmen, setSalesmen] = useState([]);
     const [selectedSalesman, setselectedSalesman] = useState(data.salesmen);
@@ -20,6 +18,7 @@ const InquiryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
     const [defaultMistry, setDefaultMistry] = useState(() => data.mistryTag ? { value: data.mistryTag, label: `${data.mistryName}-${data.mistryNumber}` } : "");
     const [defaultDealer, setDefaultDealer] = useState(() => data.dealerTag ? { value: data.dealerTag, label: `${data.dealerName}-${data.dealerNumber}` } : "");
     const [deafultPMC, setDefaultPMC] = useState(() => data.pmcTag ? { value: data.pmcTag, label: `${data.pmcName}-${data.pmcNumber}` } : "");
+    const [defaultOEM, setDefaultOEM] = useState(() => data.oemTag ? { value: data.oemTag, label: `${data.oemName}-${data.oemNumber}` } : "");
 
     const arr2 = selectedSalesman.map(object => {
         // console.log(object);
@@ -42,24 +41,10 @@ const InquiryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
         console.log(selected);
         setFormData({ ...formData, selectedSalesman })
     };
-    const arr = selectedBranch.map(object => {
-        return { ...object, value: object.branchname, label: object.branchname };
-    })
 
     const arr3 = selectedRequirement.map((object)=>{
         return {...object, value:object.requirement, label:object.requirement}
     })
-    const getAllbranches = async () => {
-        const { data } = await axios.get("/api/v1/branch/getall");
-        const branches = data.branches.map((branch) => (
-            {
-                branchname: branch.branchname,
-                value: branch.branchname,
-                label: branch.branchname
-            }
-        ))
-        setBranches(branches);
-    }
     let initialState = {
         name: data.name,
         email: data.email,
@@ -68,7 +53,7 @@ const InquiryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
         area: data.area,
         birthdate: data.birthdate ? data.birthdate.substr(0, 10) : null,
         marriagedate: data.marriagedate ? data.marriagedate.substr(0, 10) : null,
-        orderValue: data.orderValue,
+        rewardPoints: data.rewardPoints,
         remarks: data.remarks,
         architectTag: data.architectTag,
         architectName: data.architectName,
@@ -82,11 +67,14 @@ const InquiryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
         dealerTag:data.dealerTag,
         dealerNumber:data.dealerNumber,
         dealerName:data.dealerName,
+        oemTag:data.oemTag,
+        oemNumber:data.oemNumber,
+        oemName:data.oemName,
         date: data.date ? data.date.substr(0, 10) : null,
         followupdate: data.followupdate ? data.followupdate.substr(0, 10) : null,
         requirement: data.requirement,
         stage: data.stage,
-        branches: data.branches,
+        scale: data.scale || "Medium",
         salesmen: data.salesmen,
         // name: "",
         // email: "",
@@ -185,6 +173,20 @@ const InquiryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
         },
 
     ]
+    const scale = [
+        {
+            value: "High",
+            label: "High"
+        },
+        {
+            value: "Medium",
+            label: "Medium"
+        },
+        {
+            value: "Low",
+            label: "Low"
+        },
+    ]
     let id = data._id;
     const [formData, setFormData] = useState(initialState)
     const [isDisabled, setIsDisabled] = useState(false);
@@ -200,7 +202,7 @@ const InquiryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
         getAllDealer();
         getAllMistry();
         getAllPMC();
-        getAllbranches();
+        getAllOEM();
         getAllsalesmen();
     }, []);
     const submitHandler = async (e) => {
@@ -214,7 +216,7 @@ const InquiryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
             area: formData.area,
             birthdate: formData.birthdate,
             marriagedate: formData.marriagedate,
-            orderValue: formData.orderValue,
+            rewardPoints: formData.rewardPoints,
             date: formData.date,
             followupdate: formData.followupdate,
             architectTag: formData.architectTag,
@@ -229,10 +231,11 @@ const InquiryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
             dealerTag:formData.dealerTag,
             dealerNumber:formData.dealerNumber,
             dealerName:formData.dealerName,
+            oemTag:formData.oemTag,
+            oemNumber:formData.oemNumber,
+            oemName:formData.oemName,
             requirement: selectedRequirement,
-            stage: formData.stage,
-            branches: selectedBranch,
-            salesmen: selectedSalesman,
+            stage: formData.stage,            scale: formData.scale,            salesmen: selectedSalesman,
             remarks:formData.remarks
 
         }
@@ -259,12 +262,6 @@ const InquiryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
         }
 
     }
-    const Branchchangehandler = (selected) => {
-
-        setselectedBranch(selected);
-        console.log(selected);
-        setFormData({ ...formData, selectedBranch })
-    };
 
     const requirementChangeHandler = (selected) => {
 
@@ -281,6 +278,9 @@ const InquiryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
     const Stagehandler = (e) => {
         setFormData({ ...formData, stage: e.value })
     }
+    const Scalehandler = (e) => {
+        setFormData({ ...formData, scale: e.value })
+    }
 
     const MistryFormHandler = (e) => {
         console.log(e.value);
@@ -296,6 +296,12 @@ const InquiryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
         console.log(e.value);
         setFormData({ ...formData, pmcTag: e.value, pmcName: e.label.split('-')[0], pmcNumber: e.label.split('-')[1] })
     }
+
+    const OEMFormHandler = (e) => {
+        console.log(e.value);
+        setFormData({ ...formData, oemTag: e.value, oemName: e.label.split('-')[0], oemNumber: e.label.split('-')[1] })
+    }
+
     // const Salesmenchangehandler = (selecteds) => {
 
     //     setselectedSalesmen(selecteds);
@@ -319,6 +325,7 @@ const InquiryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
     const [Mistries, setMistries] = useState([]);
     const [Dealers, setDealers] = useState([]);
     const [PMCs, setPMCs] = useState([]);
+    const [OEMs, setOEMs] = useState([]);
     const [selectedSalesmen, setselectedSalesmen] = useState([]);
     
     const getAllArchitects = async () => {
@@ -355,6 +362,16 @@ const InquiryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
 
     }
 
+    const getAllOEM = async () => {
+
+        const { data } = await axios.get("/api/v1/oem/getall");
+
+        const oems = data.oems.map((oem) => ({ value: oem._id, label: `${oem.name}-${oem.mobileno}` }))
+        setOEMs(oems);
+
+
+    }
+
     return (
         <div className={Styles.container}>
 
@@ -369,40 +386,40 @@ const InquiryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
                 <div className={Styles.personalDetails1}>
 
                     <label htmlFor='name'>Inquiry Name</label>
-                    <input className={Styles.inputTag} name="name" value={formData.name} onChange={(e) => formHandler(e)} placeholder='Customer Name' />
+                    <input className={Styles.inputTag} name="name" value={formData.name} onChange={(e) => formHandler(e)} placeholder='Customer Name' disabled={user.role !== "admin"} />
 
                     <label htmlFor='number'>Mobile Number</label>
-                    <input className={Styles.inputTag} name="mobileno" value={formData.mobileno} onChange={(e) => formHandler(e)} placeholder='Mobile Number' />
+                    <input className={Styles.inputTag} name="mobileno" value={formData.mobileno} onChange={(e) => formHandler(e)} placeholder='Mobile Number' disabled={user.role !== "admin"} />
 
                     <label htmlFor='number'>Email</label>
-                    <input className={Styles.inputTag} name="email" value={formData.email} onChange={(e) => formHandler(e)} placeholder='Email' />
+                    <input className={Styles.inputTag} name="email" value={formData.email} onChange={(e) => formHandler(e)} placeholder='Email' disabled={user.role !== "admin"} />
 
                     <label htmlFor='address'>Address</label>
-                    <input className={Styles.inputTag} name="address" value={formData.address} onChange={(e) => formHandler(e)} placeholder='Address' />
+                    <input className={Styles.inputTag} name="address" value={formData.address} onChange={(e) => formHandler(e)} placeholder='Address' disabled={user.role !== "admin"} />
   
                     <label htmlFor='area'>Area</label>
-                    <input className={Styles.inputTag} name="area" value={formData.area} onChange={(e) => formHandler(e)} placeholder='Area' />
+                    <input className={Styles.inputTag} name="area" value={formData.area} onChange={(e) => formHandler(e)} placeholder='Area' disabled={user.role !== "admin"} />
   
-                    <label htmlFor='ordervalue'>Order Value</label>
-                    <input className={Styles.inputTag} name="orderValue" value={formData.orderValue} onChange={(e) => formHandler(e)} placeholder='Order Value' />
+                    <label htmlFor='rewardpoints'>Reward Points</label>
+                    <input className={Styles.inputTag} name="rewardPoints" value={formData.rewardPoints} onChange={(e) => formHandler(e)} placeholder='Reward Points' disabled={user.role !== "admin"} />
   
                     <label htmlFor='name'>Remarks</label>
-                    <input className={Styles.inputTag} name="remarks" value={formData.remarks} onChange={(e) => formHandler(e)} placeholder='Remarks' /> 
+                    <input className={Styles.inputTag} name="remarks" value={formData.remarks} onChange={(e) => formHandler(e)} placeholder='Remarks' disabled={user.role !== "admin"} /> 
                 </div>
 
                 <div className={Styles.personalDetails2}>
 
                     <label htmlFor='name'>Created At</label>
-                    <input className={Styles.inputTag} type="date" name="date" value={formData.date} onChange={(e) => formHandler(e)} placeholder='Created At' />
+                    <input className={Styles.inputTag} type="date" name="date" value={formData.date} onChange={(e) => formHandler(e)} placeholder='Created At' disabled={user.role !== "admin"} />
 
                     <label htmlFor='name'>Follow up Date</label>
-                    <input className={Styles.inputTag} type="date" name="followupdate" value={formData.followupdate} onChange={(e) => formHandler(e)} placeholder='Follow up Date' />
+                    <input className={Styles.inputTag} type="date" name="followupdate" value={formData.followupdate} onChange={(e) => formHandler(e)} placeholder='Follow up Date' disabled={user.role !== "admin"} />
 
                     <label htmlFor='birthdate'>Birth Date</label>
-                    <input className={Styles.inputTag} type="date" name="birthdate" value={formData.birthdate} onChange={(e) => formHandler(e)} placeholder='Birth Date' />
+                    <input className={Styles.inputTag} type="date" name="birthdate" value={formData.birthdate} onChange={(e) => formHandler(e)} placeholder='Birth Date' disabled={user.role !== "admin"} />
 
                     <label htmlFor='marriagedate'>Anniversary</label>
-                    <input className={Styles.inputTag} type="date" name="marriagedate" value={formData.marriagedate} onChange={(e) => formHandler(e)} placeholder='Anniversary' />
+                    <input className={Styles.inputTag} type="date" name="marriagedate" value={formData.marriagedate} onChange={(e) => formHandler(e)} placeholder='Anniversary' disabled={user.role !== "admin"} />
 
                     <label>Requirements</label>
                     {/* <Select selectedValue={formData.requirement} onChange={(e) => Requirehandler(e)} defaultInputValue={initialState.requirement} options={requirement} /> */}
@@ -424,19 +441,9 @@ const InquiryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
                     <label>Stage</label>
                     <Select selectedValue={formData.stage} onChange={(e) => Stagehandler(e)} options={stage} defaultInputValue={initialState.stage} />
                     
-                    <label>Branches</label>
-                    <ReactSelect className={Styles.inputTag}
-                        options={Branches}
-                        isMulti
-                        closeMenuOnSelect={false}
-                        hideSelectedOptions={false}
-                        components={{
-                            Option
-                        }}
-                        onChange={Branchchangehandler}
-                        allowSelectAll={true}
-                        value={arr}
-                    />
+                    <label>Scale</label>
+                    <Select selectedValue={formData.scale} onChange={(e) => Scalehandler(e)} options={scale} defaultInputValue={initialState.scale} />
+                    
                     <label>Salesmen</label>
                     <ReactSelect className={Styles.inputTag}
                         options={Salesmen}
@@ -449,11 +456,12 @@ const InquiryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
                         onChange={Salesmenchangehandler}
                         allowSelectAll={true}
                         value={arr2}
+                        isDisabled={user.role !== "admin"}
                     />
                 </div>
             </div>
 
-          { user.role == "admin" && <div className={Styles.bankDetails}>
+            <div className={Styles.bankDetails}>
                 <div className={Styles.bankDetails1}>
 
                     <label htmlFor='name'>Mistry Tag</label>
@@ -461,17 +469,20 @@ const InquiryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
 
                     <label htmlFor='name'>Architect Tag</label>
                     <Select selectedValue={formData.architectTag} defaultValue={defalutArchitect} onChange={(e) => ArchitectFormHandler(e)} options={architects} />
+
+                    <label htmlFor='name'>Dealer Tag</label>
+                    <Select defaultValue={defaultDealer} selectedValue={formData.dealerTag} onChange={(e) => DealerFormHandler(e)} options={Dealers} />
                 </div>
 
                 <div className={Styles.bankDetails2}>
 
-                    <label htmlFor='name'>Dealer Tag</label>
-                    <Select defaultValue={defaultDealer} selectedValue={formData.dealerTag} onChange={(e) => DealerFormHandler(e)} options={Dealers} />
-
                     <label htmlFor='name'>PMC Tag</label>
                     <Select defaultValue={deafultPMC} selectedValue={formData.pmcTag} onChange={(e) => PMCFormHandler(e)} options={PMCs} />
+
+                    <label htmlFor='name'>OEM Tag</label>
+                    <Select defaultValue={defaultOEM} selectedValue={formData.oemTag} onChange={(e) => OEMFormHandler(e)} options={OEMs} />
                 </div>
-            </div>}
+            </div>
             <button disabled={isDisabled} className={isDisabled ? Styles.disable : Styles.submitButton} onClick={(e) => submitHandler(e)} type="Submit">Submit</button>
         </div>
 

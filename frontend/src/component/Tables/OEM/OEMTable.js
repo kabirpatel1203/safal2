@@ -1,12 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import Styles from './ArchitectTable.module.css'
+import Styles from './OEMTable.module.css'
 import axios from 'axios'
 import Add from '../../../Assets/Add.svg'
 import MaterialTable from 'material-table';
 import { Paper } from '@material-ui/core';
 import Modal from '../../Layout/Modal/Modal';
-import ArchitectEditForm from '../../Forms/ArchitectEditForm';
+import OEMEditForm from '../../Forms/OEMEditForm';
 import { toast, ToastContainer } from 'react-toastify';
 import Select from 'react-select'
 import { dateformater } from '../Utils/util';
@@ -29,8 +29,8 @@ import { Delete, Edit } from '@mui/icons-material';
 
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { useSelector } from 'react-redux';
-const ArchitecTable = ({ modalHandler, refresh, isOpen }) => {
-  const [architects, setArchitects] = useState([]);
+const OEMTable = ({ modalHandler, refresh, isOpen }) => {
+  const [oems, setOEMs] = useState([]);
   const [editModal, setEditModal] = useState(false);
   const [editModalData, setEditModalData] = useState({});
   const [tabledata, setTableData] = useState([]);
@@ -51,8 +51,8 @@ const ArchitecTable = ({ modalHandler, refresh, isOpen }) => {
 
   const submitDateRangeHandler = (e) => {
     console.log(startDate, endDate);
-    console.log(architects)
-    let data = architects.filter((item) => {
+    console.log(oems)
+    let data = oems.filter((item) => {
       let date = item.date;
       date = new Date(date);
       if(!date){
@@ -71,16 +71,15 @@ const ArchitecTable = ({ modalHandler, refresh, isOpen }) => {
   const delteHandler = async (mobileno) => {
 
     if(window.confirm("Are you sure ?")){
-      const data = await axios.delete(`/api/v1/architect/delete/${mobileno}`);
-      fetchArchitect();
+      const data = await axios.delete(`/api/v1/oem/delete/${mobileno}`);
+      fetchOEM();
     }
   }
 
-  const fetchArchitect = async () => {
-    const { data } = await axios.get("/api/v1/architect/getall");
+  const fetchOEM = async () => {
+    const { data } = await axios.get("/api/v1/oem/getall");
     console.log(data);
-    const newarchitects = data.architects.map((item)=>{
-      // console.log(item.date);
+    const newoems = data.oems.map((item)=>{
       let formateddate = item.date ? (item.date) : new Date('01/01/1799');
       console.log(formateddate);
       return {
@@ -93,17 +92,17 @@ const ArchitecTable = ({ modalHandler, refresh, isOpen }) => {
         remarks:item.remarks
       }
     });
-    console.log(newarchitects, "<========================");
-    setOriginalData(data.architects);
-    setTableData(newarchitects);
-    setArchitects(newarchitects);
+    console.log(newoems, "<========================");
+    setOriginalData(data.oems);
+    setTableData(newoems);
+    setOEMs(newoems);
   }
 
-  const getArchitectData = (mobileno) => {
+  const getOEMData = (mobileno) => {
     alert(mobileno);
-    let architect = orginalData.filter((item) => item.mobileno === mobileno);
-    console.log(architect);
-    setEditModalData(architect[0]);
+    let oem = orginalData.filter((item) => item.mobileno === mobileno);
+    console.log(oem);
+    setEditModalData(oem[0]);
     setEditModal(true);
   }
 
@@ -128,11 +127,11 @@ const ArchitecTable = ({ modalHandler, refresh, isOpen }) => {
 
   const handlesalesman = (selected) => {
     setSelectedSalesman(selected.value);
-    fetchFilteredArchitects(selected.value);
+    fetchFilteredOEMs(selected.value);
   }
 
   
-  const fetchFilteredArchitects =(salesman) => {
+  const fetchFilteredOEMs =(salesman) => {
 
     let filteredData = orginalData.filter((item)=>{
       let isSalesman = false;
@@ -164,13 +163,13 @@ const ArchitecTable = ({ modalHandler, refresh, isOpen }) => {
       }
       })
     console.log(data.length, "<++++++++++THIS IS THE LENGTH");
-    setArchitects(data);
+    setOEMs(data);
     setTableData(data);  
   }
 
 
   useEffect(() => {
-    fetchArchitect();
+    fetchOEM();
     fetchSalesmen();
   }, [refresh]);
 
@@ -209,15 +208,14 @@ const ArchitecTable = ({ modalHandler, refresh, isOpen }) => {
   };
   const handleCallbackCreate = async(childData) => {
 
-    toast.success("Architect edited");
-    const { data } = await axios.get("/api/v1/architect/getall");
-    setOriginalData(data.architects);
-    // fetchArchitect();
+    toast.success("OEM edited");
+    const { data } = await axios.get("/api/v1/oem/getall");
+    setOriginalData(data.oems);
     window.scrollTo(0, 0)
   }
 
   useEffect(()=>{
-    fetchFilteredArchitects(selectedSalesman)
+    fetchFilteredOEMs(selectedSalesman)
     console.log(`SET FILTERED DATA AGAIN`)
   },[orginalData]);
 
@@ -242,16 +240,6 @@ const ArchitecTable = ({ modalHandler, refresh, isOpen }) => {
     { header: 'Mobile Number', accessorKey: 'mobileno' },
     {header: 'Salesman', accessorKey:'salesmen'},
     { header: 'Remarks', accessorKey: 'remarks' },
-    // { header: 'Email', accessorKey: 'Email', },
-    // { header: 'Company_Name', accessorKey: 'companyName', },
-    // { header: 'Birth_Date', accessorKey: 'birthdate', },
-    // { header: 'Marriage_Date', accessorKey: 'marriagedate', },
-    // { header: 'Remarks', accessorKey: 'remarks', },
-    // { header: 'Bank_Name', accessorKey: 'bankname', },
-    // { header: 'IFS_Code', accessorKey: 'IFSCcode', },
-    // { header: 'Branch_Name', accessorKey: 'branchname', },
-    // { header: 'Adhar_Card', accessorKey: 'adharcard', },
-    // { header: 'Pan_Card', accessorKey: 'pancard', columnVisibility: 'false' },
   ]
   const csvOptions = {
     fieldSeparator: ',',
@@ -274,12 +262,12 @@ const ArchitecTable = ({ modalHandler, refresh, isOpen }) => {
     <div className={Styles.container}>
       <div className={Styles.table}>
         <div className={Styles.header}>
-          <h3>All Architect</h3>
+          <h3>All OEMs</h3>
 
           <button className={Styles.buttonContainer} onClick={modalHandler}>
             <img className={Styles.addImg} src={Add} alt="add" />
             <span className={Styles.buttonText}>
-              Add Architect
+              Add OEM
             </span>
           </button>
         </div>
@@ -288,7 +276,6 @@ const ArchitecTable = ({ modalHandler, refresh, isOpen }) => {
           <div className={Styles.DateRangeContainer}>
             <label>Salesman Filter</label>
             <Select styles={customStyles} onChange={(e) => handlesalesman(e)} options={salesman} />
-
             <TextField
               className={Styles.InputDate}
               id="start-date"
@@ -364,7 +351,7 @@ const ArchitecTable = ({ modalHandler, refresh, isOpen }) => {
             <button className={Styles.SubmitButton} onClick={(e) => submitDateRangeHandler(e)} type="submit"> Submit </button>
           </div>
         </div>
-        {architects &&
+        {oems &&
           <MaterialReactTable
             displayColumnDefOptions={{
               'mrt-row-actions': {
@@ -405,8 +392,7 @@ const ArchitecTable = ({ modalHandler, refresh, isOpen }) => {
                       left: 0,
                       behavior: "smooth"
                     });
-                    getArchitectData(row.original.mobileno)
-                    // setEditModalData(row.original)
+                    getOEMData(row.original.mobileno)
                     setEditModal(true);
                   }}>
                     <Edit />
@@ -464,7 +450,7 @@ const ArchitecTable = ({ modalHandler, refresh, isOpen }) => {
       </div>
 
       {
-        editModal ? <Modal ><ArchitectEditForm className={Styles.zi} modalHandler={() => { setEditModal(false) }} data={editModalData} setIsOpen={setEditModal} parentCallback={handleCallbackCreate} /></Modal> : null}
+        editModal ? <Modal ><OEMEditForm className={Styles.zi} modalHandler={() => { setEditModal(false) }} data={editModalData} setIsOpen={setEditModal} parentCallback={handleCallbackCreate} /></Modal> : null}
 
       <div className={Styles.filter}>
 
@@ -473,4 +459,4 @@ const ArchitecTable = ({ modalHandler, refresh, isOpen }) => {
   )
 }
 
-export default ArchitecTable
+export default OEMTable

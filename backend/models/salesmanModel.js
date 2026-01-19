@@ -18,34 +18,36 @@ const salesmanSchema = new mongoose.Schema({
     address:String,
     birthdate:String,
     date:String,
-    // marriagedate:String,
-    // date:Date,
-    // orderValue:Number,
-    // salesPerson:String,
-    // mistryTag:{
-    //     type:mongoose.Schema.Types.ObjectId,
-    //     ref:"mistry"
-    // },
-    // mistryName:String,
-    // mistryNumber:Number,
-    // architectTag:{
-    //     type:mongoose.Schema.Types.ObjectId,
-    //     ref:"architect"
-    // },
-    // architectName:String,
-    // architectNumber:Number,
-    // dealerTag:{
-    //     type:mongoose.Schema.Types.ObjectId,
-    //     ref:"dealer"
-    // },
-    // dealerName:String,
-    // dealerNumber:Number,
-    // pmcTag:{
-    //     type:mongoose.Schema.Types.ObjectId,
-    //     ref:"pmc"
-    // },
-    // pmcName:String,
-    // pmcNumber:Number,
+    mistryTag:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"Mistry"
+    },
+    mistryName:String,
+    mistryNumber:Number,
+    architectTag:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"Architect"
+    },
+    architectName:String,
+    architectNumber:Number,
+    dealerTag:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"Dealer"
+    },
+    dealerName:String,
+    dealerNumber:Number,
+    pmcTag:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"PMC"
+    },
+    pmcName:String,
+    pmcNumber:Number,
+    oemTag:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"OEM"
+    },
+    oemName:String,
+    oemNumber:Number,
     branches:[
         {branchname:String}
     ],

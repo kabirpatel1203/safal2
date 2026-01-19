@@ -9,8 +9,6 @@ import { default as ReactSelect } from "react-select";
 
 const ArchitectEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
     console.log(`data inside architect edit`, data);
-    const [Branches, setBranches] = useState([]);
-    const [selectedBranch, setselectedBranch] = useState(data.branches);
     const [Salesmen, setSalesmen] = useState([]);
     const [selectedSalesman, setselectedSalesman] = useState(data.salesmen);
     const arr2 = selectedSalesman.map(object => {
@@ -34,20 +32,6 @@ const ArchitectEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) =>
         console.log(selected);
         setFormData({ ...formData, selectedSalesman })
     };
-    const arr = selectedBranch.map(object => {
-        return { ...object, value: object.branchname, label: object.branchname };
-    })
-    const getAllbranches = async () => {
-        const { data } = await axios.get("/api/v1/branch/getall");
-        const branches = data.branches.map((branch) => (
-            {
-                branchname: branch.branchname,
-                value: branch.branchname,
-                label: branch.branchname
-            }
-        ))
-        setBranches(branches);
-    }
     let initialState = {
         name: data.name,
         email: data.email,
@@ -64,7 +48,6 @@ const ArchitectEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) =>
         adharcard: data.adharcard,
         pancard: data.pancard,
         date: data.date ? data.date.substr(0, 10) : null,
-        branches: data.branches,
         salesmen:data.salesmen
     }
     let id = data._id;
@@ -76,7 +59,6 @@ const ArchitectEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) =>
         setFormData({ ...formData, [e.target.name]: e.target.value })
     }
     useEffect(() => {
-        getAllbranches();
         getAllsalesmen();
     }, []);
     const submitHandler = async (e) => {
@@ -98,7 +80,6 @@ const ArchitectEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) =>
             pancard: formData.pancard,
             date: formData.date,
             IFSCcode: formData.IFSCcode,
-            branches: selectedBranch,
             salesmen:selectedSalesman
         }
         console.log(data)
@@ -117,12 +98,6 @@ const ArchitectEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) =>
         }
 
     }
-    const Branchchangehandler = (selected) => {
-
-        setselectedBranch(selected);
-        console.log(selected);
-        setFormData({ ...formData, selectedBranch })
-    };
     
     return (
         <div className={Styles.container}>
@@ -183,19 +158,6 @@ pauseOnHover
 
                     {/* <label htmlFor='salesMan'>Sales Man </label>
                     <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.companyName} value={formData.companyName} name="salesMan" placeholder='Company Name' /> */}
-                    <label>Branches</label>
-                    <ReactSelect lassName={Styles.inputTag}
-                        options={Branches}
-                        isMulti
-                        closeMenuOnSelect={false}
-                        hideSelectedOptions={false}
-                        components={{
-                            Option
-                        }}
-                        onChange={Branchchangehandler}
-                        allowSelectAll={true}
-                        value={arr}
-                    />
                     <label>Salesmen</label>
                     <ReactSelect lassName={Styles.inputTag}
                         options={Salesmen}

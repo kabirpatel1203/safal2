@@ -393,7 +393,7 @@ const TaskTable = ({ modalHandler, refresh, isOpen, doRefresh }) => {
                         <button className={Styles.SubmitButton} onClick={(e) => submitDateRangeHandler(e)} type="submit"> Submit </button>
                     </div>
                 </div>
-                {(customers && user.role === "admin" ) &&
+                {customers &&
                     <MaterialReactTable
                         displayColumnDefOptions={{
                             'mrt-row-actions': {
@@ -414,7 +414,7 @@ const TaskTable = ({ modalHandler, refresh, isOpen, doRefresh }) => {
                         }
                         columns={columns}
                         data={tabledata}
-                        enableEditing
+                        enableEditing={user?.role === "admin"}
                         enableRowNumbers
                         rowNumberMode='original'
                         enableTopToolbar={!editModal && !isOpen}
@@ -425,7 +425,8 @@ const TaskTable = ({ modalHandler, refresh, isOpen, doRefresh }) => {
                         }}
                         enableGlobalFilter={true}
                         positionActionsColumn='last'
-                        renderRowActions={({ row, table }) => (
+                        enableRowActions={user?.role === "admin"}
+                        renderRowActions={user?.role === "admin" ? ({ row, table }) => (
                             <Box sx={{ display: 'flex', gap: '1rem' }}>
                                 <Tooltip arrow placement="left" title="Edit">
                                     <IconButton onClick={() => {
@@ -455,7 +456,7 @@ const TaskTable = ({ modalHandler, refresh, isOpen, doRefresh }) => {
                                     </IconButton>
                                 </Tooltip>
                             </Box>
-                        )}
+                        ) : undefined}
                         renderTopToolbarCustomActions={({ table }) => (
                             <Box
                                 sx={{
@@ -467,26 +468,6 @@ const TaskTable = ({ modalHandler, refresh, isOpen, doRefresh }) => {
                                     width: '100%',
                                 }}
                             >
-                                <Button
-                                    disabled={table.getPrePaginationRowModel().rows.length === 0}
-                                    onClick={() =>
-                                        handleExportRows(table.getPrePaginationRowModel().rows)
-                                    }
-                                    startIcon={<FileDownloadIcon />}
-                                    variant="contained"
-                                    color="primary"
-                                    sx={{
-                                        backgroundColor: 'rgba(37,99,235,0.08)',
-                                        color: '#1d4ed8',
-                                        boxShadow: 'none',
-                                        '&:hover': {
-                                            backgroundColor: 'rgba(37,99,235,0.16)',
-                                            boxShadow: 'none',
-                                        },
-                                    }}
-                                >
-                                    Export All Rows
-                                </Button>
                                 <Button
                                     onClick={handleExportData}
                                     startIcon={<FileDownloadIcon />}
