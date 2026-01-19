@@ -118,9 +118,11 @@ const StatBox = ({ name, username, refresh }) => {
         </Drawer>
 
         <div className={Styles.BoxContainers}>
-          <div className={Styles.heading} >
-            <h1>{name}</h1>
-          </div>
+          {name && (
+            <div className={Styles.heading} >
+              <h1>{name}</h1>
+            </div>
+          )}
           {name == "Architect" && <div className={Styles.Box}>
             <div className={Styles.subBox}>
               <p>Total Architect</p>

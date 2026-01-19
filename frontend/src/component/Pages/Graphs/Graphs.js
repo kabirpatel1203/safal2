@@ -308,7 +308,7 @@ const Graphs = () => {
           pauseOnHover
         />
         <div className={Styles.rightcontainer}>
-          <StatBox name="Data Graphs" username={user.name} />
+          <StatBox username={user.name} />
           
           <div className={Styles.contentContainer}>
             <div className={Styles.section}>
