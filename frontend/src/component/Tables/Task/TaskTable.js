@@ -114,6 +114,9 @@ const TaskTable = ({ modalHandler, refresh, isOpen, doRefresh }) => {
                 _id: item._id,
                 architect: item.architectTag ? item.architectTag.name + ' - ' + item.architectTag.mobileno : '',
                 mistry: item.mistryTag ? item.mistryTag.name + ' - ' + item.mistryTag.mobileno : '',
+                pmc: item.pmcTag ? item.pmcTag.name + ' - ' + item.pmcTag.mobileno : '',
+                dealer: item.dealerTag ? item.dealerTag.name + ' - ' + item.dealerTag.mobileno : '',
+                oem: item.oemTag ? item.oemTag.name + ' - ' + item.oemTag.mobileno : '',
             }
         })
 
@@ -134,6 +137,9 @@ const TaskTable = ({ modalHandler, refresh, isOpen, doRefresh }) => {
                 _id: item._id,
                 architect: item.architectTag ? item.architectTag.name + ' - ' + item.architectTag.mobileno : '',
                 mistry: item.mistryTag ? item.mistryTag.name + ' - ' + item.mistryTag.mobileno : '',
+                pmc: item.pmcTag ? item.pmcTag.name + ' - ' + item.pmcTag.mobileno : '',
+                dealer: item.dealerTag ? item.dealerTag.name + ' - ' + item.dealerTag.mobileno : '',
+                oem: item.oemTag ? item.oemTag.name + ' - ' + item.oemTag.mobileno : '',
             }
         });
         setOriginalData(modifiedData);
@@ -157,6 +163,9 @@ const TaskTable = ({ modalHandler, refresh, isOpen, doRefresh }) => {
                 _id: item._id,
                 architect: item.architectTag ? item.architectTag.name + ' - ' + item.architectTag.mobileno : '',
                 mistry: item.mistryTag ? item.mistryTag.name + ' - ' + item.mistryTag.mobileno : '',
+                pmc: item.pmcTag ? item.pmcTag.name + ' - ' + item.pmcTag.mobileno : '',
+                dealer: item.dealerTag ? item.dealerTag.name + ' - ' + item.dealerTag.mobileno : '',
+                oem: item.oemTag ? item.oemTag.name + ' - ' + item.oemTag.mobileno : '',
             }
         })
 
@@ -207,6 +216,9 @@ const TaskTable = ({ modalHandler, refresh, isOpen, doRefresh }) => {
                 _id: item._id,
                 architect: item.architectTag ? item.architectTag.name + ' - ' + item.architectTag.mobileno : '',
                 mistry: item.mistryTag ? item.mistryTag.name + ' - ' + item.mistryTag.mobileno : '',
+                pmc: item.pmcTag ? item.pmcTag.name + ' - ' + item.pmcTag.mobileno : '',
+                dealer: item.dealerTag ? item.dealerTag.name + ' - ' + item.dealerTag.mobileno : '',
+                oem: item.oemTag ? item.oemTag.name + ' - ' + item.oemTag.mobileno : '',
             }
         });
         setOriginalData(modifiedData);
@@ -273,7 +285,10 @@ const TaskTable = ({ modalHandler, refresh, isOpen, doRefresh }) => {
             // { header: 'Tag', accessorKey: 'tag' },
             { header: 'Salesman', accessorKey: 'salesman' },
             { header: 'Architect', accessorKey: 'architect' },
-            { header: 'Mistry', accessorKey: 'mistry' }
+            { header: 'Mistry', accessorKey: 'mistry' },
+            { header: 'PMC', accessorKey: 'pmc' },
+            { header: 'Dealer', accessorKey: 'dealer' },
+            { header: 'OEM', accessorKey: 'oem' }
         ],
         [],
     );
@@ -283,7 +298,10 @@ const TaskTable = ({ modalHandler, refresh, isOpen, doRefresh }) => {
         // { header: 'Tag', accessorKey: 'tag' },
         { header: 'Salesman', accessorKey: 'salesman' },
         { header: 'Architect', accessorKey: 'architect' },
-        { header: 'Mistry', accessorKey: 'mistry' }
+        { header: 'Mistry', accessorKey: 'mistry' },
+        { header: 'PMC', accessorKey: 'pmc' },
+        { header: 'Dealer', accessorKey: 'dealer' },
+        { header: 'OEM', accessorKey: 'oem' }
     ]
     const csvOptions = {
         fieldSeparator: ',',

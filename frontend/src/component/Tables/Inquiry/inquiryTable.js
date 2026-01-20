@@ -1,7 +1,6 @@
 import React, { useState, useEffect,useMemo } from 'react';
 import Styles from './inquiryTable.module.css'
 import Add from '../../../Assets/Add.svg'
-import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import Modal from '../../Layout/Modal/Modal';
 import axios from 'axios';
 import { toast } from 'react-toastify'
@@ -143,7 +142,7 @@ const InquiryTable = ({ modalHandler ,modalHandler2,refresh,isOpen}) => {
         name:item.name,
         followupdate:item.followupdate,
         stage:item.stage,
-        scale:item.scale,
+        scale:item.scale || 'N/A',
         mobileno:item.mobileno,
         requirement:item.requirement.map((req)=>req.requirement).join('-'),
         salesmen:item.salesmen.map((req)=>req.name).join('-'),
@@ -167,7 +166,7 @@ const InquiryTable = ({ modalHandler ,modalHandler2,refresh,isOpen}) => {
           name:item.name,
           followupdate:item.followupdate,
           stage:item.stage,
-          scale:item.scale,
+          scale:item.scale || 'N/A',
           requirement:item.requirement.map((req)=>req.requirement).join('-'),
           salesmen:item.salesmen.map((req)=>req.name).join('-'),
           mobileno:item.mobileno,
@@ -213,7 +212,7 @@ const InquiryTable = ({ modalHandler ,modalHandler2,refresh,isOpen}) => {
           name:item.name,
           followupdate:item.followupdate,
           stage:item.stage,
-          scale:item.scale,
+          scale:item.scale || 'N/A',
           requirement:item.requirement.map((req)=>req.requirement).join('-'),
           salesmen:item.salesmen.map((req)=>req.name).join('-'),
           mobileno:item.mobileno,
@@ -340,12 +339,6 @@ const handleExportRows = (rows) => {
               <img className={Styles.addImg} src={Add} alt="add" />
               <span className={Styles.buttonText}>
                 Add Inquiry
-              </span>
-            </button>
-            <button className={Styles.addButton} onClick={modalHandler2}>
-              <FilterAltIcon/>
-              <span className={Styles.buttonText}>
-                Filter
               </span>
             </button>
           </div>

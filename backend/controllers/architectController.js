@@ -46,7 +46,16 @@ exports.getArchitect = catchAsyncErrors(async(req, res, next)=>{
 
 exports.updateArchitect = catchAsyncErrors(async(req, res, next)=>{
     const filter = req.user.role === "admin" ? { _id: req.params.id } : { _id: req.params.id, createdBy: req.user._id };
-    const architect = await Architect.findOneAndUpdate(filter,req.body,{
+    
+    // For non-admin users, only allow updating remarks field
+    let updateData = req.body;
+    if (req.user.role !== "admin") {
+        updateData = {
+            remarks: req.body.remarks
+        };
+    }
+    
+    const architect = await Architect.findOneAndUpdate(filter, updateData, {
         new:true,
         runValidators:true,
         useFindAndModify:false
@@ -73,7 +82,7 @@ exports.deleteArchitect = catchAsyncErrors(async(req, res, next)=>{
 exports.getAllArchitect = catchAsyncErrors(async(req, res, next)=>{
     // Admin sees all architects; users see only their own
     const filter = req.user.role === "admin" ? {} : { createdBy: req.user._id };
-    const architects = await Architect.find(filter);
+    const architects = await Architect.find(filter).populate('createdBy', 'email name');
 
     res.status(200).json({
         architects,

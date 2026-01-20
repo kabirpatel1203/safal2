@@ -129,7 +129,7 @@ const CustomerTable = ({ modalHandler, refresh, isOpen }) => {
         address: item.address,
         area:item.area,
         mobileno: item.mobileno,
-        scale: item.scale,
+        scale: item.scale || 'N/A',
         // tag:item.tag,
         mistry: item.mistryName && item.mistryNumber ? item.mistryName + ' - ' + item.mistryNumber : '',
         architect: item.architectName && item.architectNumber ? item.architectName + ' - ' + item.architectNumber : '',
@@ -176,7 +176,7 @@ const CustomerTable = ({ modalHandler, refresh, isOpen }) => {
         address: item.address,
         area:item.area,
         mobileno: item.mobileno,
-        scale: item.scale,
+        scale: item.scale || 'N/A',
         // tag:item.tag
         mistry: item.mistryName && item.mistryNumber ? item.mistryName + ' - ' + item.mistryNumber : '',
         architect: item.architectName && item.architectNumber ? item.architectName + ' - ' + item.architectNumber : '',

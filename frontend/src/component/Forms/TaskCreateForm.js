@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { AiFillCloseCircle } from 'react-icons/ai'
 import { toast, ToastContainer } from 'react-toastify'
-import Styles from './TaskCreateForm.module.css'
+import Styles from './ArchitectCreateForm.module.css'
 import axios from 'axios'
 import Select from 'react-select'
 import { default as ReactSelect } from "react-select";

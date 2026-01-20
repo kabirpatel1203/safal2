@@ -26,6 +26,10 @@ const taskSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "PMC"
     },
+    oemTag: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "OEM"
+    },
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",

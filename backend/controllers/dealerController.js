@@ -44,8 +44,16 @@ exports.getDealer = catchAsyncErrors(async(req, res, next)=>{
 
 exports.updateDealer = catchAsyncErrors(async(req, res, next)=>{
     const filter = req.user.role === "admin" ? { _id: req.params.id } : { _id: req.params.id, createdBy: req.user._id };
+    
+    // For non-admin users, only allow updating remarks field
+    let updateData = req.body;
+    if (req.user.role !== "admin") {
+        updateData = {
+            remarks: req.body.remarks
+        };
+    }
 
-    const dealer = await Dealer.findOneAndUpdate(filter,req.body,{
+    const dealer = await Dealer.findOneAndUpdate(filter, updateData, {
         new:true,
         runValidators:true,
         useFindAndModify:false
@@ -74,7 +82,7 @@ exports.getAllDealer = catchAsyncErrors(async(req, res, next)=>{
     // All users can see all dealers (shared master data)
         // Admin sees all dealers; users see only their own
         const filter = req.user.role === "admin" ? {} : { createdBy: req.user._id };
-    const dealers = await Dealer.find(filter)
+    const dealers = await Dealer.find(filter).populate('createdBy', 'email name')
 
     res.status(200).json({
         dealers,

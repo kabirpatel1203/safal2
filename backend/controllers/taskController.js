@@ -4,7 +4,7 @@ const Task = require("../models/taskModel")
 
 exports.totalTask = catchAsyncErrors(async (req, res, next) => {
     const filter = req.user.role === "admin" ? {} : { createdBy: req.user._id };
-    const tasks = await Task.find(filter).populate("salesmanId mistryTag architectTag dealerTag pmcTag");
+    const tasks = await Task.find(filter).populate("salesmanId mistryTag architectTag dealerTag pmcTag oemTag");
 
     res.status(200).json({
         tasks,
@@ -14,13 +14,13 @@ exports.totalTask = catchAsyncErrors(async (req, res, next) => {
 })
 exports.createTask = async (req, res) => {
     try {
-        const { date, remarks, salesmanId, mistryTag, architectTag, dealerTag, pmcTag } = req.body;
+        const { date, remarks, salesmanId, mistryTag, architectTag, dealerTag, pmcTag, oemTag } = req.body;
         if (!date || !remarks || !salesmanId) {
             return res.status(500).json({ success: false, message: "Please fill all the fields" });
         }
-        if (!pmcTag && !mistryTag && !architectTag && !dealerTag)
+        if (!pmcTag && !mistryTag && !architectTag && !dealerTag && !oemTag)
             return res.status(500).json({ success: false, message: "Please select a tag" });
-        let task = await Task.create({ date, remarks, salesmanId, mistryTag, architectTag, dealerTag, pmcTag, createdBy: req.user._id })
+        let task = await Task.create({ date, remarks, salesmanId, mistryTag, architectTag, dealerTag, pmcTag, oemTag, createdBy: req.user._id })
         task = await task.populate("salesmanId");
         console.log(task);
         res.status(200).json({

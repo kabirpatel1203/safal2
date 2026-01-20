@@ -6,9 +6,11 @@ import { ToastContainer, toast } from 'react-toastify'
 import Option from '../DropDown/Options'
 import Select from 'react-select'
 import { default as ReactSelect } from "react-select";
+import { useSelector } from 'react-redux'
 
 const ArchitectEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
     console.log(`data inside architect edit`, data);
+    const { user, isAuthenticated } = useSelector((state) => state.user);
     const [Salesmen, setSalesmen] = useState([]);
     const [selectedSalesman, setselectedSalesman] = useState(data.salesmen);
     const arr2 = selectedSalesman.map(object => {
@@ -123,19 +125,19 @@ pauseOnHover
                 <div className={Styles.personalDetails1}>
 
                     <label htmlFor='name'>Name</label>
-                    <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.name} value={formData.name} name="name" placeholder='Architect Name' />
+                    <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.name} value={formData.name} name="name" placeholder='Architect Name' disabled={user.role !== "admin"} />
 
                     <label htmlFor='mobileno'>Mobile Number</label>
-                    <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.mobileno} value={formData.mobileno} name="mobileno" placeholder='Mobile Number' />
+                    <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.mobileno} value={formData.mobileno} name="mobileno" placeholder='Mobile Number' disabled={user.role !== "admin"} />
 
                     <label htmlFor='email'>Email</label>
-                    <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.email} value={FormData.email} name="email" placeholder='email' />
+                    <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.email} value={FormData.email} name="email" placeholder='email' disabled={user.role !== "admin"} />
 
                     <label htmlFor='AddressLine1'>Address</label>
-                    <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.address} value={formData.address} name="address" placeholder='address Line 1' />
+                    <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.address} value={formData.address} name="address" placeholder='address Line 1' disabled={user.role !== "admin"} />
 
-                    <label htmlFor='area'>Address</label>
-                    <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.area} value={formData.area} name="area" placeholder='area' />
+                    <label htmlFor='area'>Area</label>
+                    <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.area} value={formData.area} name="area" placeholder='area' disabled={user.role !== "admin"} />
 
 
                     <label htmlFor='AddressLine1'>Remarks</label>
@@ -145,16 +147,16 @@ pauseOnHover
                 <div className={Styles.personalDetails2}>
 
                     <label htmlFor='date'>Date</label>
-                    <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.date} type="date" value={formData.date} name="date" placeholder='Created At' />
+                    <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.date} type="date" value={formData.date} name="date" placeholder='Created At' disabled={user.role !== "admin"} />
 
                     <label htmlFor='birthdate'>Birth Date</label>
-                    <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.birthdate} value={formData.birthdate} name="birthdate" type="date" placeholder='Birthdate' />
+                    <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.birthdate} value={formData.birthdate} name="birthdate" type="date" placeholder='Birthdate' disabled={user.role !== "admin"} />
 
                     <label htmlFor='marrieagedate'>Marriage Date</label>
-                    <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.marriagedate} value={formData.marrieagedate} name="marriagedate" type="date" placeholder='Annivarsary' />
+                    <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.marriagedate} value={formData.marrieagedate} name="marriagedate" type="date" placeholder='Annivarsary' disabled={user.role !== "admin"} />
 
                     <label htmlFor='companyName'>Company Name</label>
-                    <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.companyName} name="companyName" placeholder='Company Name' />
+                    <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.companyName} name="companyName" placeholder='Company Name' disabled={user.role !== "admin"} />
 
                     {/* <label htmlFor='salesMan'>Sales Man </label>
                     <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.companyName} value={formData.companyName} name="salesMan" placeholder='Company Name' /> */}
@@ -170,6 +172,7 @@ pauseOnHover
                         onChange={Salesmenchangehandler}
                         allowSelectAll={true}
                         value={arr2}
+                        isDisabled={user.role !== "admin"}
                     />
                 </div>
             </div>
@@ -179,21 +182,21 @@ pauseOnHover
 
                 <div className={Styles.bankDetails1}>
                     <label htmlFor='bankname'>Bank Name</label>
-                    <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.bankname} value={formData.bankname} name="bankname" placeholder='Bank Name' />
+                    <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.bankname} value={formData.bankname} name="bankname" placeholder='Bank Name' disabled={user.role !== "admin"} />
 
                     <label htmlFor='branchname'>Branch Name</label>
-                    <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.branchname} value={formData.branchname} name="branchname" placeholder='Branch Name' />
+                    <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.branchname} value={formData.branchname} name="branchname" placeholder='Branch Name' disabled={user.role !== "admin"} />
 
                     <label htmlFor='IFSCCode'>IFSC Code</label>
-                    <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.IFSCcode} value={formData.IFSCcode} name="IFSCcode" placeholder='IFSC Code' />
+                    <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.IFSCcode} value={formData.IFSCcode} name="IFSCcode" placeholder='IFSC Code' disabled={user.role !== "admin"} />
                 </div>
 
                 <div className={Styles.bankDetails2}>
                     <label htmlFor='adharcard'>Adhar Card</label>
-                    <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.adharcard} value={formData.adharcard} name="adharcard" placeholder='Adhar Card' />
+                    <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.adharcard} value={formData.adharcard} name="adharcard" placeholder='Adhar Card' disabled={user.role !== "admin"} />
 
                     <label htmlFor='pancard'>Pan Card</label>
-                    <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.pancard} value={formData.pancard} name="pancard" placeholder='Pan Card' />
+                    <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.pancard} value={formData.pancard} name="pancard" placeholder='Pan Card' disabled={user.role !== "admin"} />
                 </div>
             </div>
 

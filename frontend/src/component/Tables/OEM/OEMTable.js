@@ -89,7 +89,8 @@ const OEMTable = ({ modalHandler, refresh, isOpen }) => {
         area:item.area,
         mobileno:item.mobileno,
         salesmen:item.salesmen.map((req)=>req.name).join('-'),
-        remarks:item.remarks
+        remarks:item.remarks,
+        createdBy:item.createdBy?.email || 'N/A',
       }
     });
     console.log(newoems, "<========================");
@@ -158,7 +159,8 @@ const OEMTable = ({ modalHandler, refresh, isOpen }) => {
         area:item.area,
         mobileno:item.mobileno,
         salesmen:item.salesmen.map((req)=>req.name).join('-'),
-        remarks:item.remarks
+        remarks:item.remarks,
+        createdBy:item.createdBy?.email || 'N/A',
         
       }
       })
@@ -220,17 +222,25 @@ const OEMTable = ({ modalHandler, refresh, isOpen }) => {
   },[orginalData]);
 
   const columns = useMemo(
-    () => [
-      { header: 'Date', accessorKey: 'date', type: "date", dateSetting: { locale: "en-GB" },
-      Cell: ({cell})=>(dateformater(cell.getValue())) },
-      { header: 'Name', accessorKey: 'name' },
-      { header: 'Address', accessorKey: 'address' },
-      { header: 'Area', accessorKey: 'area' },
-      { header: 'Mobile Number', accessorKey: 'mobileno' },
-      {header: 'Salesman', accessorKey:'salesmen'},
-      { header: 'Remarks', accessorKey: 'remarks' },
-    ],
-    [],
+    () => {
+      const baseColumns = [
+        { header: 'Date', accessorKey: 'date', type: "date", dateSetting: { locale: "en-GB" },
+        Cell: ({cell})=>(dateformater(cell.getValue())) },
+        { header: 'Name', accessorKey: 'name' },
+        { header: 'Address', accessorKey: 'address' },
+        { header: 'Area', accessorKey: 'area' },
+        { header: 'Mobile Number', accessorKey: 'mobileno' },
+        {header: 'Salesman', accessorKey:'salesmen'},
+        { header: 'Remarks', accessorKey: 'remarks' },
+      ];
+      
+      if (user?.role === 'admin') {
+        baseColumns.push({ header: 'Created By', accessorKey: 'createdBy' });
+      }
+      
+      return baseColumns;
+    },
+    [user],
   );
   const ops = [
     { header: 'Date', accessorKey: 'date', type: "date", dateSetting: { locale: "en-GB" }, Cell: ({cell})=>(dateformater(cell.getValue())) },
@@ -240,6 +250,7 @@ const OEMTable = ({ modalHandler, refresh, isOpen }) => {
     { header: 'Mobile Number', accessorKey: 'mobileno' },
     {header: 'Salesman', accessorKey:'salesmen'},
     { header: 'Remarks', accessorKey: 'remarks' },
+    { header: 'Created By', accessorKey: 'createdBy' },
   ]
   const csvOptions = {
     fieldSeparator: ',',

@@ -45,8 +45,16 @@ exports.getPMC = catchAsyncErrors(async(req, res, next)=>{
 
 exports.updatePMC = catchAsyncErrors(async(req, res, next)=>{
     const filter = req.user.role === "admin" ? { _id: req.params.id } : { _id: req.params.id, createdBy: req.user._id };
+    
+    // For non-admin users, only allow updating remarks field
+    let updateData = req.body;
+    if (req.user.role !== "admin") {
+        updateData = {
+            remarks: req.body.remarks
+        };
+    }
 
-    const pmc = await PMC.findOneAndUpdate(filter,req.body,{
+    const pmc = await PMC.findOneAndUpdate(filter, updateData, {
         new:true,
         runValidators:true,
         useFindAndModify:false
@@ -75,7 +83,7 @@ exports.deletePMC = catchAsyncErrors(async(req, res, next)=>{
 exports.getAllPMC = catchAsyncErrors(async(req, res, next)=>{
     // Admin sees all PMCs; users see only their own
     const filter = req.user.role === "admin" ? {} : { createdBy: req.user._id };
-    const pmcs = await PMC.find(filter)
+    const pmcs = await PMC.find(filter).populate('createdBy', 'email name')
 
     res.status(200).json({
         pmcs,

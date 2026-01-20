@@ -45,8 +45,16 @@ exports.getMistry = catchAsyncErrors(async(req, res, next)=>{
 
 exports.updateMistry = catchAsyncErrors(async(req, res, next)=>{
     const filter = req.user.role === "admin" ? { _id: req.params.id } : { _id: req.params.id, createdBy: req.user._id };
+    
+    // For non-admin users, only allow updating remarks field
+    let updateData = req.body;
+    if (req.user.role !== "admin") {
+        updateData = {
+            remarks: req.body.remarks
+        };
+    }
 
-    const mistry = await Mistry.findOneAndUpdate(filter,req.body,{
+    const mistry = await Mistry.findOneAndUpdate(filter, updateData, {
         new:true,
         runValidators:true,
         useFindAndModify:false
@@ -75,7 +83,7 @@ exports.deleteMistry = catchAsyncErrors(async(req, res, next)=>{
 exports.getAllMistry = catchAsyncErrors(async(req, res, next)=>{
     // Admin sees all mistries; users see only their own
     const filter = req.user.role === "admin" ? {} : { createdBy: req.user._id };
-    const mistries = await Mistry.find(filter)
+    const mistries = await Mistry.find(filter).populate('createdBy', 'email name')
 
     res.status(200).json({
         mistries,

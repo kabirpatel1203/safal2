@@ -33,6 +33,7 @@ import { useSelector } from 'react-redux';
 const DealerTable = ({ modalHandler, refresh, isOpen }) => {
   const { user, isAuthenticated } = useSelector((state) => state.user);
   const [dealers, setDealers] = useState([]);
+  const [originalData, setOriginalData] = useState([]);
   const [editModal, setEditModal] = useState(false);
   const [editModalData, setEditModalData] = useState({});
   const [isLoading, setIsLoading] = useState(false)
@@ -117,10 +118,17 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
       return {
         ...item,
         salesmen:item.salesmen.map((req)=>req.name).join('-'),
+        createdBy:item.createdBy?.email || 'N/A',
       }
     });
     setDealers(newdealers);
+    setOriginalData(data.dealers);
     setTableData(newdealers);
+  }
+
+  const getDealerData = (mobileno) => {
+    let dealer = originalData.filter((item) => item.mobileno === mobileno);
+    setEditModalData(dealer[0]);
   }
 
   const sleep = time => {
@@ -171,16 +179,24 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
     })
   };
   const columns = useMemo(
-    () => [
-      { header: 'Date', accessorKey: 'date', type: "date", dateSetting: { locale: "en-GB" }, },
-      { header: 'Name', accessorKey: 'name' },
-      { header: 'Address', accessorKey: 'address' },
-      { header: 'Area', accessorKey: 'area' },
-      { header: 'Mobile Number', accessorKey: 'mobileno' },
-      { header: 'Salesman', accessorKey: 'salesmen' },
-      { header: 'Remarks', accessorKey: 'remarks' },
-    ],
-    [],
+    () => {
+      const baseColumns = [
+        { header: 'Date', accessorKey: 'date', type: "date", dateSetting: { locale: "en-GB" }, },
+        { header: 'Name', accessorKey: 'name' },
+        { header: 'Address', accessorKey: 'address' },
+        { header: 'Area', accessorKey: 'area' },
+        { header: 'Mobile Number', accessorKey: 'mobileno' },
+        { header: 'Salesman', accessorKey: 'salesmen' },
+        { header: 'Remarks', accessorKey: 'remarks' },
+      ];
+      
+      if (user?.role === 'admin') {
+        baseColumns.push({ header: 'Created By', accessorKey: 'createdBy' });
+      }
+      
+      return baseColumns;
+    },
+    [user],
   );
   const ops = [
     { header: 'Date', accessorKey: 'date', type: "date", dateSetting: { locale: "en-GB" }, },
@@ -197,6 +213,7 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
     { header: 'Branch_Name', accessorKey: 'branchname', },
     { header: 'Adhar_Card', accessorKey: 'adharcard', },
     { header: 'Pan_Card', accessorKey: 'pancard', columnVisibility: 'false' },
+    { header: 'Created By', accessorKey: 'createdBy' },
   ]
   const csvOptions = {
     fieldSeparator: ',',
@@ -353,7 +370,7 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
                       behavior: "smooth"
                     });
 
-                    setEditModalData(row.original)
+                    getDealerData(row.original.mobileno)
                     setEditModal(true);
                   }}>
                     <Edit />

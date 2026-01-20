@@ -29,8 +29,7 @@ const customerSchema = new mongoose.Schema({
     ordervalue:Number,
     scale: {
         type: String,
-        enum: ["High", "Medium", "Low"],
-        default: "Medium"
+        enum: ["High", "Medium", "Low"]
     },
     // salesPerson:String,
     mistryTag:{

@@ -46,7 +46,16 @@ exports.getOEM = catchAsyncErrors(async(req, res, next)=>{
 
 exports.updateOEM = catchAsyncErrors(async(req, res, next)=>{
     const filter = req.user.role === "admin" ? { _id: req.params.id } : { _id: req.params.id, createdBy: req.user._id };
-    const oem = await OEM.findOneAndUpdate(filter,req.body,{
+    
+    // For non-admin users, only allow updating remarks field
+    let updateData = req.body;
+    if (req.user.role !== "admin") {
+        updateData = {
+            remarks: req.body.remarks
+        };
+    }
+    
+    const oem = await OEM.findOneAndUpdate(filter, updateData, {
         new:true,
         runValidators:true,
         useFindAndModify:false
@@ -73,7 +82,7 @@ exports.deleteOEM = catchAsyncErrors(async(req, res, next)=>{
 exports.getAllOEM = catchAsyncErrors(async(req, res, next)=>{
     // Admin sees all oems; users see only their own
     const filter = req.user.role === "admin" ? {} : { createdBy: req.user._id };
-    const oems = await OEM.find(filter);
+    const oems = await OEM.find(filter).populate('createdBy', 'email name');
 
     res.status(200).json({
         oems,
