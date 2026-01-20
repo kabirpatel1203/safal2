@@ -23,6 +23,7 @@ const TaskTable = ({ modalHandler, refresh, isOpen, doRefresh }) => {
     const [customers, setCustomers] = useState([]);
     const [tabledata, setTableData] = useState([])
     const [originalData, setOriginalData] = useState([]);
+    const [allFormattedData, setAllFormattedData] = useState([]);
     const [editModal, setEditModal] = useState(false);
     const [editModalData, setEditModalData] = useState({});
     const [startDate, setStartDate] = useState(new Date('2020-08-01'));
@@ -145,6 +146,7 @@ const TaskTable = ({ modalHandler, refresh, isOpen, doRefresh }) => {
         setOriginalData(modifiedData);
         setCustomers(newCustomers);
         setTableData(newCustomers);
+        setAllFormattedData(newCustomers);
     }
 
     const sleep = time => {
@@ -314,7 +316,7 @@ const TaskTable = ({ modalHandler, refresh, isOpen, doRefresh }) => {
     };
     const csvExporter = new ExportToCsv(csvOptions);
     const handleExportAllData = () => {
-        csvExporter.generateCsv(customers);
+        csvExporter.generateCsv(allFormattedData);
     };
     const handleExportFilteredData = () => {
         csvExporter.generateCsv(tabledata);
