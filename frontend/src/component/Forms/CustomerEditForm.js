@@ -36,9 +36,11 @@ const CustomerEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => 
   const [defaultMistry, setDefaultMistry] = useState(() => data.mistryTag ? { value: data.mistryTag, label: `${data.mistryName}-${data.mistryNumber}` } : "");
   const [defaultDealer, setDefaultDealer] = useState(() => data.dealerTag ? { value: data.dealerTag, label: `${data.dealerName}-${data.dealerNumber}` } : "");
   const [deafultPMC, setDefaultPMC] = useState(() => data.pmcTag ? { value: data.pmcTag, label: `${data.pmcName}-${data.pmcNumber}` } : "");
+  const [defaultOEM, setDefaultOEM] = useState(() => data.oemTag ? { value: data.oemTag, label: `${data.oemName}-${data.oemNumber}` } : "");
   const [Mistries, setMistries] = useState([]);
   const [Dealers, setDealers] = useState([]);
   const [PMCs, setPMCs] = useState([]);
+  const [OEMs, setOEMs] = useState([]);
   const [isDisabled, setIsDisabled] = useState(false);
   const { user, isAuthenticated } = useSelector((state) => state.user);
   let id = data._id
@@ -64,9 +66,14 @@ const CustomerEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => 
     pmcTag: data.pmcTag,
     pmcName: data.pmcName,
     pmcNumber: data.pmcNumber,
+    oemTag: data.oemTag,
+    oemName: data.oemName,
+    oemNumber: data.oemNumber,
     birthdate: data.birthdate ? data.birthdate.substr(0, 10) : null,
     marriagedate: data.marriagedate ? data.marriagedate.substr(0, 10) : null,
     date: data.date ? data.date.substr(0, 10) : null,
+    followupdate: data.followupdate ? data.followupdate.substr(0, 10) : null,
+    requirement: data.requirement || [],
     salesmen: data.salesmen
 
 
@@ -112,6 +119,8 @@ const CustomerEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => 
       marriagedate: formData.marriagedate,
       remarks: formData.remarks,
       date: formData.date,
+      followupdate: formData.followupdate,
+      requirement: formData.requirement,
       rewardPoints: formData.rewardPoints,
       scale: formData.scale,
       salesPerson: formData.salesPerson,
@@ -127,6 +136,9 @@ const CustomerEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => 
       pmcTag: formData.pmcTag,
       pmcName: formData.pmcName,
       pmcNumber: formData.pmcNumber,
+      oemTag: formData.oemTag,
+      oemName: formData.oemName,
+      oemNumber: formData.oemNumber,
       salesmen: selectedSalesman
 
 
@@ -172,12 +184,19 @@ const CustomerEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => 
     setPMCs(pmcs);
   }
 
+  const getAllOEM = async () => {
+    const { data } = await axios.get("/api/v1/oem/getall");
+    const oems = data.oems.map((oem) => ({ value: oem._id, label: `${oem.name}-${oem.mobileno}` }))
+    setOEMs(oems);
+  }
+
   useEffect(() => {
     console.log(`Default Architect: `, defalutArchitect);
     getAllArchitects();
     getAllDealer();
     getAllMistry();
     getAllPMC();
+    getAllOEM();
   }, []);
 
 
@@ -196,6 +215,16 @@ const CustomerEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => 
 
   const PMCFormHandler = (e) => {
     setFormData({ ...formData, pmcTag: e.value, pmcName: e.label.split('-')[0], pmcNumber: e.label.split('-')[1] })
+  }
+
+  const OEMFormHandler = (e) => {
+    setFormData({ ...formData, oemTag: e.value, oemName: e.label.split('-')[0], oemNumber: e.label.split('-')[1] })
+  }
+
+  const requirementHandler = (e) => {
+    const value = e.target.value;
+    const requirementArray = value.split(',').map(item => item.trim()).filter(item => item !== '');
+    setFormData({ ...formData, requirement: requirementArray });
   }
   return (
     <div className={Styles.container}>
@@ -251,6 +280,12 @@ const CustomerEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => 
           <label htmlFor='name'>Created At</label>
           <input className={Styles.inputTag} type="date" name="date" value={formData.date} onChange={(e) => formHandler(e)} placeholder='Created At' disabled={user.role !== "admin"} />
 
+          <label htmlFor='name'>Followup Date</label>
+          <input className={Styles.inputTag} type="date" name="followupdate" value={formData.followupdate} onChange={(e) => formHandler(e)} placeholder='Followup Date' disabled={user.role !== "admin"} />
+
+          <label htmlFor='requirement'>Requirement (comma separated)</label>
+          <input className={Styles.inputTag} name="requirement" value={formData.requirement.join(', ')} onChange={(e) => requirementHandler(e)} placeholder='e.g. Tiles, Sanitary, Bath Fittings' disabled={user.role !== "admin"} />
+
           <label htmlFor='name'>Birth Date</label>
           <input className={Styles.inputTag} type="date" name="birthdate" value={formData.birthdate} onChange={(e) => formHandler(e)} placeholder='Birthdate' disabled={user.role !== "admin"} />
 
@@ -284,6 +319,9 @@ const CustomerEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => 
 
           <label htmlFor='name'>Architect Tag</label>
           <Select defaultValue={defalutArchitect} onChange={(e) => ArchitectFormHandler(e)} options={architects} />
+
+          <label htmlFor='name'>PMC Tag</label>
+          <Select defaultValue={deafultPMC} onChange={(e) => PMCFormHandler(e)} options={PMCs} />
         </div>
 
         <div className={Styles.bankDetails2}>
@@ -291,8 +329,8 @@ const CustomerEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => 
           <label htmlFor='name'>Dealer Tag</label>
           <Select defaultValue={defaultDealer} onChange={(e) => DealerFormHandler(e)} options={Dealers} />
 
-          <label htmlFor='name'>PMC Tag</label>
-          <Select defaultValue={deafultPMC} onChange={(e) => PMCFormHandler(e)} options={PMCs} />
+          <label htmlFor='name'>OEM Tag</label>
+          <Select defaultValue={defaultOEM} onChange={(e) => OEMFormHandler(e)} options={OEMs} />
         </div>
       </div>}
       <button disabled={isDisabled} className={isDisabled ? Styles.disable : Styles.submitButton} onClick={(e) => submitHandler(e)} type="Submit">Submit</button>

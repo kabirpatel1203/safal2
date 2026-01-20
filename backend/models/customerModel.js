@@ -22,6 +22,10 @@ const customerSchema = new mongoose.Schema({
     birthdate:String,
     marriagedate:String,
     date:Date,
+    followupdate:Date,
+    requirement:[
+        {requirement:String}
+    ],
     remarks:String,
     revenue:Number,
     rewardPoints:Number,
@@ -56,6 +60,12 @@ const customerSchema = new mongoose.Schema({
     },
     pmcName:String,
     pmcNumber:Number,
+    oemTag:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"OEM"
+    },
+    oemName:String,
+    oemNumber:Number,
     branches:[
         {branchname:String}
     ],
