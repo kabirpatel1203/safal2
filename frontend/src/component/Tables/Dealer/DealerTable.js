@@ -41,6 +41,7 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
   const [startDate, setStartDate] = useState(new Date('2022-08-01'));
   const [endDate, setEndDate] = useState(new Date());
   const [salesman, setSalesman] = useState([]);
+  const [selectedSalesmanFilter, setSelectedSalesmanFilter] = useState(null);
   let selectedSalesman = [];
   const fetchSalesmen = async () => {
     const { data } = await axios.get("/api/v1/salesman/getall");
@@ -76,9 +77,14 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
   }
   const handlesalesman = (selected) => {
     console.log(selected);
-
-    selectedSalesman = { name: selected.value };
-    fetchArchitectsofSalesman();
+    if (selected) {
+      setSelectedSalesmanFilter(selected.value);
+      selectedSalesman = { name: selected.value };
+      fetchArchitectsofSalesman();
+    } else {
+      setSelectedSalesmanFilter(null);
+      setTableData(dealers);
+    }
   }
 
   const startDateHandler = (e) => {
@@ -98,7 +104,11 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
 
   const submitDateRangeHandler = (e) => {
     console.log(startDate, endDate);
-    let data = dealers.filter((item) => {
+    
+    // Start with the base dataset (either filtered by salesman or all dealers)
+    let baseData = selectedSalesmanFilter ? tabledata : dealers;
+    
+    let data = baseData.filter((item) => {
       let date = item.date;
       date = new Date(date);
       if (date < endDate && date > startDate) {
@@ -258,7 +268,7 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
           <div className={Styles.DateRangeContainer}>
             {/* <label>Branch</label> */}
             <label>Salesman Filter</label>
-            <Select styles={customStyles} onChange={(e) => handlesalesman(e)} options={salesman} />
+            <Select styles={customStyles} onChange={(e) => handlesalesman(e)} options={salesman} isClearable={true} placeholder="Select Salesman..." />
             <TextField
               className={Styles.InputDate}
               id="start-date"
