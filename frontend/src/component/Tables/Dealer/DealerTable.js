@@ -63,15 +63,21 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
     const response = await axios.post("/api/v1/salesman/dealer", selectedSalesman, { headers: { "Content-Type": "application/json" } });
 
     // console.log(response);
-    const newarchitects = response.data.dealers;
+    const newdealers = response.data.dealer.map((item)=>{
+      return {
+        ...item,
+        salesmen:item.salesmen.map((req)=>req.name).join('-'),
+        createdBy:item.createdBy?.email || 'N/A',
+      }
+    });
 
-    setTableData(newarchitects);
+    setTableData(newdealers);
     setIsLoading(false);
   }
   const handlesalesman = (selected) => {
     console.log(selected);
 
-    selectedSalesman = selected;
+    selectedSalesman = { name: selected.value };
     fetchArchitectsofSalesman();
   }
 
@@ -225,8 +231,10 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
     headers: ops.map((c) => c.header),
   };
   const csvExporter = new ExportToCsv(csvOptions);
-  const handleExportData = () => {
-
+  const handleExportAllData = () => {
+    csvExporter.generateCsv(dealers);
+  };
+  const handleExportFilteredData = () => {
     csvExporter.generateCsv(tabledata);
   };
   const handleExportRows = (rows) => {
@@ -251,7 +259,6 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
             {/* <label>Branch</label> */}
             <label>Salesman Filter</label>
             <Select styles={customStyles} onChange={(e) => handlesalesman(e)} options={salesman} />
-}
             <TextField
               className={Styles.InputDate}
               id="start-date"
@@ -404,7 +411,7 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
                 }}
               >
                 <Button
-                  onClick={handleExportData}
+                  onClick={handleExportAllData}
                   startIcon={<FileDownloadIcon />}
                   variant="contained"
                   color="primary"
@@ -419,6 +426,23 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
                   }}
                 >
                   Export All Data
+                </Button>
+                <Button
+                  onClick={handleExportFilteredData}
+                  startIcon={<FileDownloadIcon />}
+                  variant="contained"
+                  color="primary"
+                  sx={{
+                    backgroundColor: 'rgba(34,197,94,0.08)',
+                    color: '#15803d',
+                    boxShadow: 'none',
+                    '&:hover': {
+                      backgroundColor: 'rgba(34,197,94,0.16)',
+                      boxShadow: 'none',
+                    },
+                  }}
+                >
+                  Export Filtered Data
                 </Button>
               </Box>)}
 

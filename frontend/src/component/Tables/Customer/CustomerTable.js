@@ -346,8 +346,10 @@ const CustomerTable = ({ modalHandler, refresh, isOpen }) => {
     headers: ops.map((c) => c.header),
   };
   const csvExporter = new ExportToCsv(csvOptions);
-  const handleExportData = () => {
-
+  const handleExportAllData = () => {
+    csvExporter.generateCsv(customers);
+  };
+  const handleExportFilteredData = () => {
     csvExporter.generateCsv(tabledata);
   };
   const handleExportRows = (rows) => {
@@ -524,7 +526,7 @@ const CustomerTable = ({ modalHandler, refresh, isOpen }) => {
                 }}
               >
                 <Button
-                  onClick={handleExportData}
+                  onClick={handleExportAllData}
                   startIcon={<FileDownloadIcon />}
                   variant="contained"
                   color="primary"
@@ -539,6 +541,23 @@ const CustomerTable = ({ modalHandler, refresh, isOpen }) => {
                   }}
                 >
                   Export All Data
+                </Button>
+                <Button
+                  onClick={handleExportFilteredData}
+                  startIcon={<FileDownloadIcon />}
+                  variant="contained"
+                  color="primary"
+                  sx={{
+                    backgroundColor: 'rgba(34,197,94,0.08)',
+                    color: '#15803d',
+                    boxShadow: 'none',
+                    '&:hover': {
+                      backgroundColor: 'rgba(34,197,94,0.16)',
+                      boxShadow: 'none',
+                    },
+                  }}
+                >
+                  Export Filtered Data
                 </Button>
               </Box>)}
 
