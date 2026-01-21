@@ -42,7 +42,6 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
   const [endDate, setEndDate] = useState(new Date());
   const [salesman, setSalesman] = useState([]);
   const [selectedSalesmanFilter, setSelectedSalesmanFilter] = useState(null);
-  let selectedSalesman = [];
   const fetchSalesmen = async () => {
     const { data } = await axios.get("/api/v1/salesman/getall");
 
@@ -56,14 +55,12 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
     ))
     setSalesman(salesmen);
   }
-  const fetchArchitectsofSalesman = async () => {
+  const fetchDealersOfSalesman = async (salesmanName) => {
     setIsLoading(true);
     sleep(500);
 
-    // console.log(selectedSalesman);
-    const response = await axios.post("/api/v1/salesman/dealer", selectedSalesman, { headers: { "Content-Type": "application/json" } });
+    const response = await axios.post("/api/v1/salesman/dealer", { name: salesmanName }, { headers: { "Content-Type": "application/json" } });
 
-    // console.log(response);
     const newdealers = response.data.dealer.map((item)=>{
       return {
         ...item,
@@ -79,8 +76,7 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
     console.log(selected);
     if (selected) {
       setSelectedSalesmanFilter(selected.value);
-      selectedSalesman = { name: selected.value };
-      fetchArchitectsofSalesman();
+      fetchDealersOfSalesman(selected.value);
     } else {
       setSelectedSalesmanFilter(null);
       setTableData(dealers);
@@ -197,7 +193,7 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
   const columns = useMemo(
     () => {
       const baseColumns = [
-        { header: 'Date', accessorKey: 'date', type: "date", dateSetting: { locale: "en-GB" }, },
+        { header: 'Date', accessorKey: 'date', type: "date", dateSetting: { locale: "en-GB" }, Cell: ({cell})=>(cell.getValue() ? new Date(cell.getValue()).toLocaleDateString('en-GB') : '') },
         { header: 'Name', accessorKey: 'name' },
         { header: 'Address', accessorKey: 'address' },
         { header: 'Area', accessorKey: 'area' },
@@ -219,7 +215,7 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
     { header: 'Name', accessorKey: 'name' },
     { header: 'Address', accessorKey: 'address' },
     { header: 'Mobile Number', accessorKey: 'mobileno' },
-    { header: 'Email', accessorKey: 'Email', },
+    { header: 'Email', accessorKey: 'email', },
     { header: 'Company_Name', accessorKey: 'companyName', },
     { header: 'Birth_Date', accessorKey: 'birthdate', },
     { header: 'Marriage_Date', accessorKey: 'marriagedate', },
@@ -239,10 +235,18 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
     useBom: true,
     useKeysAsHeaders: false,
     headers: ops.map((c) => c.header),
+    keys: ops.map((c) => c.accessorKey),
   };
   const csvExporter = new ExportToCsv(csvOptions);
   const handleExportData = () => {
-    csvExporter.generateCsv(tabledata);
+    const exportData = tabledata.map(row => {
+      const exportRow = {};
+      ops.forEach(col => {
+        exportRow[col.accessorKey] = row[col.accessorKey] || '';
+      });
+      return exportRow;
+    });
+    csvExporter.generateCsv(exportData);
   };
   const handleExportRows = (rows) => {
     csvExporter.generateCsv(rows.map((row) => row.original));

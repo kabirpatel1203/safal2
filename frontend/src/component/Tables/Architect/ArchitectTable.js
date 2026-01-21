@@ -272,10 +272,18 @@ const ArchitecTable = ({ modalHandler, refresh, isOpen }) => {
     useBom: true,
     useKeysAsHeaders: false,
     headers: ops.map((c) => c.header),
+    keys: ops.map((c) => c.accessorKey),
   };
   const csvExporter = new ExportToCsv(csvOptions);
   const handleExportData = () => {
-    csvExporter.generateCsv(tabledata);
+    const exportData = tabledata.map(row => {
+      const exportRow = {};
+      ops.forEach(col => {
+        exportRow[col.accessorKey] = row[col.accessorKey] || '';
+      });
+      return exportRow;
+    });
+    csvExporter.generateCsv(exportData);
   };
   const handleExportRows = (rows) => {
     csvExporter.generateCsv(rows.map((row) => row.original));
