@@ -115,10 +115,7 @@ const PMCTable = ({ modalHandler, refresh,isOpen }) => {
     headers: ops.map((c) => c.header),
   };
   const csvExporter = new ExportToCsv(csvOptions);
-  const handleExportAllData = () => {
-    csvExporter.generateCsv(PMC);
-  };
-  const handleExportFilteredData = () => {
+  const handleExportData = () => {
     csvExporter.generateCsv(tabledata);
   };
   const handleExportRows = (rows) => {
@@ -426,7 +423,7 @@ const PMCTable = ({ modalHandler, refresh,isOpen }) => {
                 }}
               >
                 <Button
-                  onClick={handleExportAllData}
+                  onClick={handleExportData}
                   startIcon={<FileDownloadIcon />}
                   variant="contained"
                   color="primary"
@@ -440,24 +437,7 @@ const PMCTable = ({ modalHandler, refresh,isOpen }) => {
                     },
                   }}
                 >
-                  Export All Data
-                </Button>
-                <Button
-                  onClick={handleExportFilteredData}
-                  startIcon={<FileDownloadIcon />}
-                  variant="contained"
-                  color="primary"
-                  sx={{
-                    backgroundColor: 'rgba(34,197,94,0.08)',
-                    color: '#15803d',
-                    boxShadow: 'none',
-                    '&:hover': {
-                      backgroundColor: 'rgba(34,197,94,0.16)',
-                      boxShadow: 'none',
-                    },
-                  }}
-                >
-                  Export Filtered Data
+                  Export Data
                 </Button>
               </Box>)}
 
