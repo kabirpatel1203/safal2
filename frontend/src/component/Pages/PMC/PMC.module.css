@@ -8,3 +8,14 @@
     flex-direction: column;
     gap: 18px;
 }
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+    }
+    
+    .rightcontainer {
+        gap: 12px;
+    }
+}

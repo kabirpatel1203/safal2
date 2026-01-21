@@ -1,13 +1,12 @@
 .container{
     width: 260px;
-    background: linear-gradient(180deg, #ffffff 0%, #e5edff 55%, #dbeafe 100%);
-    border-right: 1px solid rgba(148,163,184,0.35);
-    box-shadow: 1px 0 0 rgba(148,163,184,0.4);
-    padding: 18px 18px 20px;
+    background: transparent;
+    padding: 0;
+    overflow-y: auto;
 }
 
 .itemContainer{
-    margin-top: 24px;
+    margin-top: 8px;
     padding: 0;
     list-style: none;
     display: flex;
@@ -28,6 +27,7 @@
     align-items: center;
     border-radius: 999px;
     background: transparent;
+    cursor: pointer;
     transition: background-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
 }
 
@@ -36,12 +36,7 @@
     color: var(--color-primary-strong);
     transform: translateX(2px);
 }
-/* LogoutIcon{ */
-    /* margin-right: 100px; */
-/* } */
-/* .button text{ */
-    /* margin-left: 100px; */
-/* } */
+
 .item{
     font-weight: 500;
     font-size: 0.96rem;

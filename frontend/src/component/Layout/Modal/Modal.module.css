@@ -6,4 +6,22 @@
     justify-content: center;
     background: rgba(15, 23, 42, 0.35);
     z-index: 990;
+    padding: 10px;
+    overflow-y: auto;
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+    .container {
+        padding: 5px;
+        align-items: flex-start;
+        padding-top: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 2px;
+        padding-top: 10px;
+    }
 }

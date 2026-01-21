@@ -20,6 +20,7 @@ import PrecisionManufacturingIcon from '@mui/icons-material/PrecisionManufacturi
 const Navigation = () => {
     const dispatch = useDispatch();
     const { user } = useSelector(state => state.user);
+    
     function handleclick() {
         dispatch(logout());
     }
@@ -116,7 +117,7 @@ const Navigation = () => {
             setDealerpath(false);
             setPMCpath(false)
         }
-    }, []);
+    }, [location.pathname]);
 
     return (
         <div className={Styles.container}>

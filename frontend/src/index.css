@@ -13,3 +13,70 @@ code {
 label{
   margin: 0px !important;
 }
+
+/* Global Mobile Responsive Styles */
+html {
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+}
+
+/* Prevent horizontal scroll on mobile */
+body {
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Make inputs and buttons touch-friendly on mobile */
+@media (max-width: 768px) {
+  input, button, select, textarea {
+    font-size: 16px !important; /* Prevent zoom on iOS */
+  }
+  
+  /* Improve touch targets */
+  button, 
+  [role="button"],
+  input[type="submit"],
+  input[type="button"] {
+    min-height: 44px;
+  }
+  
+  /* Better scrolling for tables */
+  .MuiTableContainer-root {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* MUI Table mobile adjustments */
+  .MuiTable-root {
+    min-width: auto !important;
+  }
+  
+  .MuiTableCell-root {
+    padding: 8px 6px !important;
+    font-size: 0.8rem !important;
+  }
+  
+  .MuiTableCell-head {
+    font-size: 0.75rem !important;
+    white-space: nowrap;
+  }
+  
+  /* MUI Dialog mobile adjustments */
+  .MuiDialog-paper {
+    margin: 16px !important;
+    max-width: calc(100% - 32px) !important;
+    width: 100% !important;
+  }
+  
+  /* MUI TextField mobile adjustments */
+  .MuiTextField-root {
+    width: 100%;
+  }
+  
+  /* Material React Table mobile adjustments */
+  .MuiBox-root > .MuiToolbar-root {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px !important;
+  }
+}

@@ -99,3 +99,67 @@ label{
     border: 1px solid rgba(191, 219, 254, 0.7);
     color: #d1d5db;
 }
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+    .container {
+        width: 95vw;
+        max-height: 90vh;
+        padding: 0.75em;
+        border-radius: 12px;
+        overflow-y: auto;
+    }
+    
+    .personalDetails {
+        flex-direction: column;
+    }
+    
+    .personalDetails1,
+    .personalDetails2 {
+        width: 100%;
+        padding: 0 0.5em;
+    }
+    
+    .bankDetails {
+        flex-direction: column;
+    }
+    
+    .bankDetails1,
+    .bankDetails2 {
+        width: 100%;
+    }
+    
+    .heading {
+        font-size: 1.1rem;
+        margin: 0.3em 0.3em 0.5em;
+    }
+    
+    .inputTag {
+        width: 100%;
+        padding: 10px 14px;
+    }
+    
+    .submitButton,
+    .disable {
+        width: 100%;
+        margin: 10px 0;
+        padding: 12px 20px;
+    }
+    
+    .closebutton {
+        transform: scale(1.2);
+        top: 5px;
+        right: 5px;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        width: 98vw;
+        padding: 0.5em;
+    }
+    
+    .heading {
+        font-size: 1rem;
+    }
+}

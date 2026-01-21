@@ -6,4 +6,12 @@
     text-align: center;
     padding: 15px 0 0 0;
     background-color: #F0F0F0;
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+    .container {
+        font-size: 1.2rem;
+        padding: 10px 0 0 0;
     }
+}
