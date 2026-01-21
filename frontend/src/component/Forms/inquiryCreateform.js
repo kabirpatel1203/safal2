@@ -31,7 +31,7 @@ const InquiryCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
     architectNumber: "",
     requirement:"",
     stage:"",
-    scale: "Medium",
+    scale: "N/A",
     pmcTag: null,
     pmcName: "",
     pmcNumber: "",
@@ -133,6 +133,10 @@ const InquiryCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
 
   ]
   const scale = [
+    {
+      value: "N/A",
+      label:"N/A"
+    },
     {
       value: "High",
       label:"High"

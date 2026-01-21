@@ -30,7 +30,8 @@ const inquirySchema = new mongoose.Schema({
     stage:String,
     scale: {
         type: String,
-        enum: ["High", "Medium", "Low"]
+        enum: ["High", "Medium", "Low", "N/A"],
+        default: "N/A"
     },
     architectTag: {
         type: mongoose.Schema.Types.ObjectId,
