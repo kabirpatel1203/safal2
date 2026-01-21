@@ -42,6 +42,7 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
   const [endDate, setEndDate] = useState(new Date());
   const [salesman, setSalesman] = useState([]);
   const [selectedSalesmanFilter, setSelectedSalesmanFilter] = useState(null);
+  const [tempSalesmanFilter, setTempSalesmanFilter] = useState(null);
   const fetchSalesmen = async () => {
     const { data } = await axios.get("/api/v1/salesman/getall");
 
@@ -69,17 +70,14 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
       }
     });
 
-    setTableData(newdealers);
-    setIsLoading(false);
+    return newdealers;
   }
   const handlesalesman = (selected) => {
     console.log(selected);
     if (selected) {
-      setSelectedSalesmanFilter(selected.value);
-      fetchDealersOfSalesman(selected.value);
+      setTempSalesmanFilter(selected.value);
     } else {
-      setSelectedSalesmanFilter(null);
-      setTableData(dealers);
+      setTempSalesmanFilter(null);
     }
   }
 
@@ -98,12 +96,21 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
     return `${year}-${month}-${day}`
   }
 
-  const submitDateRangeHandler = (e) => {
+  const submitDateRangeHandler = async (e) => {
     console.log(startDate, endDate);
+    setIsLoading(true);
     
-    // Start with the base dataset (either filtered by salesman or all dealers)
-    let baseData = selectedSalesmanFilter ? tabledata : dealers;
+    // Apply salesman filter first if selected
+    let baseData;
+    if (tempSalesmanFilter) {
+      setSelectedSalesmanFilter(tempSalesmanFilter);
+      baseData = await fetchDealersOfSalesman(tempSalesmanFilter);
+    } else {
+      setSelectedSalesmanFilter(null);
+      baseData = dealers;
+    }
     
+    // Then apply date filter on the result
     let data = baseData.filter((item) => {
       let date = item.date;
       date = new Date(date);
@@ -114,7 +121,8 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
         return false
       }
     })
-    setTableData(data)
+    setTableData(data);
+    setIsLoading(false);
   }
 
   const delteHandler = async (id) => {
@@ -242,7 +250,16 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
     const exportData = tabledata.map(row => {
       const exportRow = {};
       ops.forEach(col => {
-        exportRow[col.accessorKey] = row[col.accessorKey] || '';
+        let value = row[col.accessorKey] || '';
+        // Format dates to readable format
+        if (col.type === 'date' && value) {
+          try {
+            value = new Date(value).toLocaleDateString('en-GB');
+          } catch (e) {
+            // Keep original value if date parsing fails
+          }
+        }
+        exportRow[col.accessorKey] = value;
       });
       return exportRow;
     });

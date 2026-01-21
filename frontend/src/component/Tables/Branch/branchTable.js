@@ -98,7 +98,16 @@ const BranchTable = ({ modalHandler, refresh ,isOpen}) => {
         const exportData = tabledata.map(row => {
             const exportRow = {};
             ops.forEach(col => {
-                exportRow[col.accessorKey] = row[col.accessorKey] || '';
+                let value = row[col.accessorKey] || '';
+                // Format dates to readable format
+                if (col.type === 'date' && value) {
+                    try {
+                        value = new Date(value).toLocaleDateString('en-GB');
+                    } catch (e) {
+                        // Keep original value if date parsing fails
+                    }
+                }
+                exportRow[col.accessorKey] = value;
             });
             return exportRow;
         });

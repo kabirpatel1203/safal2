@@ -30,6 +30,7 @@ const TaskTable = ({ modalHandler, refresh, isOpen, doRefresh }) => {
     const [endDate, setEndDate] = useState(new Date('2025-01-01'));
     const [isLoading, setIsLoading] = useState(false);
     let [selectedSalesman, setSelectedSalesman] = useState(null);
+    const [tempSalesman, setTempSalesman] = useState(null);
     const [edited, setEdited] = useState(false)
     const { user, isAuthenticated } = useSelector((state) => state.user);
 
@@ -82,15 +83,17 @@ const TaskTable = ({ modalHandler, refresh, isOpen, doRefresh }) => {
     }
 
     const submitDateRangeHandler = (e) => {
-        // console.log("OK");
-        // console.log(originalData);
+        // Apply tempSalesman to selectedSalesman on submit
+        setSelectedSalesman(tempSalesman ? { name: tempSalesman } : null);
+        
         let filteredData = originalData.filter((item) => {
             if (item.date) {
                 let date = item.date;
                 date = new Date(date);
                 if (date <= endDate && date >= startDate) {
-                    if (selectedSalesman !== null) {
-                        if (item.salesmanId.name === selectedSalesman.name) return true
+                    if (tempSalesman !== null) {
+                        if (item.salesmanId?.name === tempSalesman) return true;
+                        return false;
                     }
                     else {
                         return true
@@ -189,21 +192,18 @@ const TaskTable = ({ modalHandler, refresh, isOpen, doRefresh }) => {
         setSalesman(salesmen);
     }
     const handlesalesman = (selected) => {
-        setSelectedSalesman(selected);
-        // selectedSalesman = selected;
-        fetchFilteredCustomers(selected.value);
+        if (selected) {
+            setTempSalesman(selected.value);
+        } else {
+            setTempSalesman(null);
+        }
     }
 
 
     useEffect(() => {
         fetchCustomers();
-        fetchFilteredCustomers(selectedSalesman);
         fetchSalesmen();
     }, [refresh]);
-
-    useEffect(() => {
-        fetchFilteredCustomers(selectedSalesman)
-    }, [originalData]);
 
     const handleCallbackCreate = async () => {
         const { data } = await axios.get("/api/v1/task/totaltasks");
@@ -320,7 +320,16 @@ const TaskTable = ({ modalHandler, refresh, isOpen, doRefresh }) => {
         const exportData = tabledata.map(row => {
             const exportRow = {};
             ops.forEach(col => {
-                exportRow[col.accessorKey] = row[col.accessorKey] || '';
+                let value = row[col.accessorKey] || '';
+                // Format dates to readable format
+                if (col.type === 'date' && value) {
+                    try {
+                        value = new Date(value).toLocaleDateString('en-GB');
+                    } catch (e) {
+                        // Keep original value if date parsing fails
+                    }
+                }
+                exportRow[col.accessorKey] = value;
             });
             return exportRow;
         });

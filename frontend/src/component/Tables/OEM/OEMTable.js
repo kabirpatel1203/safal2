@@ -39,6 +39,7 @@ const OEMTable = ({ modalHandler, refresh, isOpen }) => {
   const [endDate, setEndDate] = useState(new Date());
   const [isLoading, setIsLoading] = useState(false);
   let [selectedSalesman,setSelectedSalesman] = useState(null);
+  let [tempSalesman, setTempSalesman] = useState(null);
   const { user, isAuthenticated } = useSelector((state) => state.user);
 
   const startDateHandler = (e) => {
@@ -50,22 +51,48 @@ const OEMTable = ({ modalHandler, refresh, isOpen }) => {
   }
 
   const submitDateRangeHandler = (e) => {
-    console.log(startDate, endDate);
-    console.log(oems)
-    let data = oems.filter((item) => {
+    // Apply tempSalesman to selectedSalesman on submit
+    setSelectedSalesman(tempSalesman);
+    
+    // Filter from original data
+    let filteredData = orginalData.filter((item) => {
+      // Apply salesman filter
+      let isSalesman = false;
+      if (item.salesmen.length === 0 && tempSalesman === null) {
+        isSalesman = true;
+      }
+      item.salesmen.forEach((salesmanObj) => {
+        if (Object.values(salesmanObj).includes(tempSalesman) || tempSalesman === null || tempSalesman === "") {
+          isSalesman = true;
+        }
+      });
+      if (!isSalesman) return false;
+      
+      // Apply date filter
       let date = item.date;
       date = new Date(date);
-      if(!date){
-        return false;
-      }
+      if (!date) return false;
       if (date < endDate && date > startDate) {
-        return true
+        return true;
       }
-      else {
-        return false
-      }
-    })
-    setTableData(data)
+      return false;
+    });
+    
+    let data = filteredData.map((item) => {
+      let formateddate = item.date ? item.date : '01/01/1799';
+      return {
+        date: formateddate,
+        name: item.name,
+        address: item.address,
+        area: item.area,
+        mobileno: item.mobileno,
+        salesmen: item.salesmen.map((req) => req.name).join('-'),
+        remarks: item.remarks,
+        createdBy: item.createdBy?.email || 'N/A',
+      };
+    });
+    setOEMs(data);
+    setTableData(data);
   }
 
   const delteHandler = async (mobileno) => {
@@ -127,8 +154,11 @@ const OEMTable = ({ modalHandler, refresh, isOpen }) => {
   }
 
   const handlesalesman = (selected) => {
-    setSelectedSalesman(selected.value);
-    fetchFilteredOEMs(selected.value);
+    if (selected) {
+      setTempSalesman(selected.value);
+    } else {
+      setTempSalesman(null);
+    }
   }
 
   
@@ -216,10 +246,7 @@ const OEMTable = ({ modalHandler, refresh, isOpen }) => {
     window.scrollTo(0, 0)
   }
 
-  useEffect(()=>{
-    fetchFilteredOEMs(selectedSalesman)
-    console.log(`SET FILTERED DATA AGAIN`)
-  },[orginalData]);
+  // Removed auto-apply useEffect - filters now only apply on Submit button click
 
   const columns = useMemo(
     () => {
@@ -267,7 +294,16 @@ const OEMTable = ({ modalHandler, refresh, isOpen }) => {
     const exportData = tabledata.map(row => {
       const exportRow = {};
       ops.forEach(col => {
-        exportRow[col.accessorKey] = row[col.accessorKey] || '';
+        let value = row[col.accessorKey] || '';
+        // Format dates to readable format
+        if (col.type === 'date' && value) {
+          try {
+            value = new Date(value).toLocaleDateString('en-GB');
+          } catch (e) {
+            // Keep original value if date parsing fails
+          }
+        }
+        exportRow[col.accessorKey] = value;
       });
       return exportRow;
     });

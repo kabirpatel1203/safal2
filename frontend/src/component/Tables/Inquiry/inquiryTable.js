@@ -32,6 +32,7 @@ const InquiryTable = ({ modalHandler ,modalHandler2,refresh,isOpen}) => {
   const [isLoading, setIsLoading] = useState(false);
   const [salesman, setSalesman] = useState([]);
   let [selectedSalesman,setSelectedSalesman] = useState(null);
+  let [tempSalesman,setTempSalesman] = useState(null);
   const { user, isAuthenticated } = useSelector((state) => state.user);
 
   const fetchSalesmen = async () => {
@@ -48,8 +49,11 @@ const InquiryTable = ({ modalHandler ,modalHandler2,refresh,isOpen}) => {
   }
 
   const handlesalesman = (selected) => {
-    setSelectedSalesman(selected.value);
-    fetchFilteredInquiries(selected.value);
+    if (selected) {
+      setTempSalesman(selected.value);
+    } else {
+      setTempSalesman(null);
+    }
   }
 
   const modifyData = (data) => {
@@ -109,29 +113,48 @@ const InquiryTable = ({ modalHandler ,modalHandler2,refresh,isOpen}) => {
 
   const submitDateRangeHandler = () => {
 
-    if(startDate && endDate){
+    // Apply salesman filter first
+    let baseData;
+    if (tempSalesman) {
+      setSelectedSalesman(tempSalesman);
+      baseData = originalData.filter((item)=>{
+        let isSalesman = false;
+        item.salesmen.forEach((salesmanObj)=>{
+          if(Object.values(salesmanObj).includes(tempSalesman)){
+            isSalesman = true;
+          }
+        });
+        return isSalesman;
+      });
+    } else {
+      setSelectedSalesman(null);
+      baseData = originalData;
+    }
 
-      let data = originalData.filter((item) => {
+    // Then apply date filter if dates are provided
+    let filteredData;
+    if(startDate && endDate){
+      filteredData = baseData.filter((item) => {
         let date = (item.followupdate);
         date = new Date(date);
         
         if(date){
-        if (date < endDate && date > startDate) {
-          return true
+          if (date < endDate && date > startDate) {
+            return true
+          }
+          else {
+            return false
+          }
         }
-        else {
+        else{
           return false
         }
-      }
-      else{
-        return false
-      }
       })
-      // setInquiries()
-      setTableData(getInquiry(data))
-
+    } else {
+      filteredData = baseData;
     }
-
+    
+    setTableData(getInquiry(filteredData));
   }
 
 
@@ -226,15 +249,9 @@ const InquiryTable = ({ modalHandler ,modalHandler2,refresh,isOpen}) => {
 
   useEffect(() => {
     fetchInquiry();
-    fetchFilteredInquiries(selectedSalesman)
     fetchSalesmen();
     
   }, [refresh]);
-
-  useEffect(()=>{
-    fetchFilteredInquiries(selectedSalesman);
-    // submitDateRangeHandler();
-  },[originalData])
 
   const handleCallbackCreate = async(childData) => {
     toast.success("Inquiry edited");
@@ -326,7 +343,16 @@ const handleExportData = () => {
   const exportData = tabledata.map(row => {
     const exportRow = {};
     ops.forEach(col => {
-      exportRow[col.accessorKey] = row[col.accessorKey] || '';
+      let value = row[col.accessorKey] || '';
+      // Format dates to readable format
+      if (col.type === 'date' && value) {
+        try {
+          value = new Date(value).toLocaleDateString('en-GB');
+        } catch (e) {
+          // Keep original value if date parsing fails
+        }
+      }
+      exportRow[col.accessorKey] = value;
     });
     return exportRow;
   });

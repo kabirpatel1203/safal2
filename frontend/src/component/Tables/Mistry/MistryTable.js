@@ -40,6 +40,7 @@ const MistryTable = ({ modalHandler, refresh, isOpen }) => {
   const [endDate, setEndDate] = useState(new Date());
 
   let [selectedSalesman,setSelectedSalesman] = useState(null);
+  let [tempSalesman,setTempSalesman] = useState(null);
   const { user, isAuthenticated } = useSelector((state) => state.user);
 
   const [isLoading, setIsLoading] = useState(false);
@@ -106,7 +107,16 @@ const MistryTable = ({ modalHandler, refresh, isOpen }) => {
     const exportData = tabledata.map(row => {
       const exportRow = {};
       ops.forEach(col => {
-        exportRow[col.accessorKey] = row[col.accessorKey] || '';
+        let value = row[col.accessorKey] || '';
+        // Format dates to readable format
+        if (col.type === 'date' && value) {
+          try {
+            value = new Date(value).toLocaleDateString('en-GB');
+          } catch (e) {
+            // Keep original value if date parsing fails
+          }
+        }
+        exportRow[col.accessorKey] = value;
       });
       return exportRow;
     });
@@ -115,9 +125,22 @@ const MistryTable = ({ modalHandler, refresh, isOpen }) => {
   const handleExportRows = (rows) => {
     csvExporter.generateCsv(rows.map((row) => row.original));
   };
-  const submitDateRangeHandler = (e) => {
+  const submitDateRangeHandler = async (e) => {
     console.log(startDate, endDate);
-    let data = mistry.filter((item) => {
+    setIsLoading(true);
+    
+    // Apply salesman filter first if selected
+    let baseData;
+    if (tempSalesman) {
+      setSelectedSalesman(tempSalesman);
+      baseData = await fetchArchitectsofSalesman(tempSalesman);
+    } else {
+      setSelectedSalesman(null);
+      baseData = mistry;
+    }
+    
+    // Then apply date filter on the result
+    let data = baseData.filter((item) => {
       let date = item.date;
       date = new Date(date);
       if (date < endDate && date > startDate) {
@@ -127,7 +150,8 @@ const MistryTable = ({ modalHandler, refresh, isOpen }) => {
         return false
       }
     })
-    setTableData(data)
+    setTableData(data);
+    setIsLoading(false);
   }
 
   const delteHandler = async (mobileno) => {
@@ -174,12 +198,11 @@ const MistryTable = ({ modalHandler, refresh, isOpen }) => {
     ))
     setSalesman(salesmen);
   }
-  const fetchArchitectsofSalesman = async () => {
+  const fetchArchitectsofSalesman = async (salesmanName) => {
     setIsLoading(true);
     sleep(500);
 
-    // console.log(selectedSalesman);
-    const {data} = await axios.post("/api/v1/salesman/mistry", selectedSalesman, { headers: { "Content-Type": "application/json" } });
+    const {data} = await axios.post("/api/v1/salesman/mistry", { name: salesmanName }, { headers: { "Content-Type": "application/json" } });
 
     const newMistries = data.mistries.map((item)=>{
       let formateddate = item.date ? dateformater(item.date) : ' ';
@@ -195,13 +218,15 @@ const MistryTable = ({ modalHandler, refresh, isOpen }) => {
       }
     });
 
-    setOriginalData(data.mistries);
-    setTableData(newMistries);
     setIsLoading(false);
+    return newMistries;
   }
   const handlesalesman = (selected) => {
-    setSelectedSalesman(selected.value)
-    fetchArchitectsofSalesman(selected.value);
+    if (selected) {
+      setTempSalesman(selected.value);
+    } else {
+      setTempSalesman(null);
+    }
   }
 
   const fetchFilteredMistry = (salesman) => {
@@ -248,9 +273,7 @@ const MistryTable = ({ modalHandler, refresh, isOpen }) => {
 
   }, [refresh]);
 
-  useEffect(() => {
-    fetchFilteredMistry(selectedSalesman);
-  }, [originalData]);
+  // Removed auto-apply useEffect - filters now only apply on Submit button click
   
   const handleCallbackCreate = async(childData) => {
     // console.log("Parent Invoked!!")

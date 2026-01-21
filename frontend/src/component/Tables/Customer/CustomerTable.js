@@ -42,6 +42,7 @@ const CustomerTable = ({ modalHandler, refresh, isOpen }) => {
   const [endDate, setEndDate] = useState(new Date());
   const [isLoading, setIsLoading] = useState(false);
   let [selectedSalesman, setSelectedSalesman] = useState(null);
+  let [tempSalesman, setTempSalesman] = useState(null);
 
   const modifyData = (data) => {
     let datass1 = data.map((d) => {
@@ -93,27 +94,56 @@ const CustomerTable = ({ modalHandler, refresh, isOpen }) => {
   }
 
   const submitDateRangeHandler = (e) => {
-    console.log(startDate, endDate);
-    let data = customers.filter((item) => {
-      console.log(item.date)
+    // Apply tempSalesman to selectedSalesman on submit
+    setSelectedSalesman(tempSalesman);
+    
+    // Filter from original data
+    let filteredData = originalData.filter((item) => {
+      // Apply salesman filter
+      let isSalesman = false;
+      if (item.salesmen.length === 0 && tempSalesman === null) {
+        isSalesman = true;
+      }
+      item.salesmen.forEach((salesmanObj) => {
+        if (Object.values(salesmanObj).includes(tempSalesman) || tempSalesman === null || tempSalesman === "") {
+          isSalesman = true;
+        }
+      });
+      if (!isSalesman) return false;
+      
+      // Apply date filter
       if (item.date) {
-        let date = item.date;
-        date = new Date(date);
+        let date = new Date(item.date);
         if (date < endDate && date > startDate) {
-          return true
-        }
-        else {
-          return false
+          return true;
         }
       }
-      else {
-        return false
-      }
-
-
-    })
-    setCustomers(data);
-    setTableData(data)
+      return false;
+    });
+    
+    let data = filteredData.map((item) => {
+      let formateddate = item.date ? item.date : ' ';
+      return {
+        date: formateddate,
+        followupdate: item.followupdate || '',
+        name: item.name,
+        address: item.address,
+        area: item.area,
+        mobileno: item.mobileno,
+        scale: item.scale || 'N/A',
+        requirement: item.requirement ? item.requirement.map((req) => req.requirement).join('-') : '',
+        mistry: item.mistryName && item.mistryNumber ? item.mistryName + ' - ' + item.mistryNumber : '',
+        architect: item.architectName && item.architectNumber ? item.architectName + ' - ' + item.architectNumber : '',
+        pmc: item.pmcName && item.pmcNumber ? item.pmcName + ' - ' + item.pmcNumber : '',
+        dealer: item.dealerName && item.dealerNumber ? item.dealerName + ' - ' + item.dealerNumber : '',
+        oem: item.oemName && item.oemNumber ? item.oemName + ' - ' + item.oemNumber : '',
+        salesmen: item.salesmen.map((req) => req.name).join('-'),
+        remarks: item.remarks,
+        createdBy: item.createdBy?.email || 'N/A',
+      };
+    });
+    setCustomers(modifyData(data));
+    setTableData(modifyData(data));
   }
 
   const fetchCustomers = async () => {
@@ -214,21 +244,20 @@ const CustomerTable = ({ modalHandler, refresh, isOpen }) => {
     setSalesman(salesmen);
   }
   const handlesalesman = (selected) => {
-    selectedSalesman = selected;
-    fetchFilteredCustomers(selected.value);
+    if (selected) {
+      setTempSalesman(selected.value);
+    } else {
+      setTempSalesman(null);
+    }
   }
 
 
   useEffect(() => {
     fetchCustomers();
-    fetchFilteredCustomers(selectedSalesman);
     fetchSalesmen();
   }, [refresh]);
 
-  useEffect(() => {
-    fetchFilteredCustomers(selectedSalesman)
-    console.log(`SET FILTERED DATA AGAIN`)
-  }, [originalData]);
+  // Removed auto-apply useEffect - filters now only apply on Submit button click
 
   const handleCallbackCreate = async (childData) => {
     toast.success("Customer edited");
@@ -351,7 +380,16 @@ const CustomerTable = ({ modalHandler, refresh, isOpen }) => {
     const exportData = tabledata.map(row => {
       const exportRow = {};
       ops.forEach(col => {
-        exportRow[col.accessorKey] = row[col.accessorKey] || '';
+        let value = row[col.accessorKey] || '';
+        // Format dates to readable format
+        if (col.type === 'date' && value) {
+          try {
+            value = new Date(value).toLocaleDateString('en-GB');
+          } catch (e) {
+            // Keep original value if date parsing fails
+          }
+        }
+        exportRow[col.accessorKey] = value;
       });
       return exportRow;
     });
