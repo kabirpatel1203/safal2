@@ -125,31 +125,50 @@ const MistryTable = ({ modalHandler, refresh, isOpen }) => {
   const handleExportRows = (rows) => {
     csvExporter.generateCsv(rows.map((row) => row.original));
   };
-  const submitDateRangeHandler = async (e) => {
-    console.log(startDate, endDate);
+  const submitDateRangeHandler = (e) => {
     setIsLoading(true);
     
-    // Apply salesman filter first if selected
-    let baseData;
-    if (tempSalesman) {
-      setSelectedSalesman(tempSalesman);
-      baseData = await fetchArchitectsofSalesman(tempSalesman);
-    } else {
-      setSelectedSalesman(null);
-      baseData = mistry;
-    }
+    // Apply tempSalesman to selectedSalesman on submit
+    setSelectedSalesman(tempSalesman);
     
-    // Then apply date filter on the result
-    let data = baseData.filter((item) => {
+    // Filter from original data
+    let filteredData = originalData.filter((item) => {
+      // Apply salesman filter
+      let isSalesman = false;
+      if (item.salesmen.length === 0 && tempSalesman === null) {
+        isSalesman = true;
+      }
+      item.salesmen.forEach((salesmanObj) => {
+        if (Object.values(salesmanObj).includes(tempSalesman) || tempSalesman === null || tempSalesman === "") {
+          isSalesman = true;
+        }
+      });
+      if (!isSalesman) return false;
+      
+      // Apply date filter
       let date = item.date;
       date = new Date(date);
       if (date < endDate && date > startDate) {
-        return true
+        return true;
       }
-      else {
-        return false
-      }
-    })
+      return false;
+    });
+    
+    // Format the filtered data
+    let data = filteredData.map((item) => {
+      let formateddate = item.date ? dateformater(item.date) : '01/01/1799';
+      return {
+        date: formateddate,
+        name: item.name,
+        address: item.address,
+        area: item.area,
+        mobileno: item.mobileno,
+        salesmen: item.salesmen.map((req) => req.name).join('-'),
+        remarks: item.remarks,
+        createdBy: item.createdBy?.email || 'N/A',
+      };
+    });
+    
     setTableData(data);
     setIsLoading(false);
   }
