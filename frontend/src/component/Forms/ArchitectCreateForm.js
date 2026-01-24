@@ -14,6 +14,7 @@ const ArchitectCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
     mobileno: "",
     address: "",
     area:"",
+    grade: "",
     companyName: "",
     birthdate: "",
     marriagedate: "",
@@ -60,6 +61,7 @@ const ArchitectCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
       mobileno: formData.mobileno,
       address: formData.address,
       area:formData.area,
+      grade: formData.grade || null,
       companyName: formData.companyName,
       birthdate: formData.birthdate,
       marriagedate: formData.marriagedate,
@@ -120,6 +122,14 @@ const ArchitectCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
 
           <label htmlFor='area'>Area</label>
           <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} value={formData.area} name="area" placeholder='area' />
+
+          <label htmlFor='grade'>Grade</label>
+          <select className={Styles.inputTag} onChange={(e) => { formHandler(e) }} value={formData.grade} name="grade">
+            <option value="">Select Grade</option>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+          </select>
 
           <label htmlFor='AddressLine1'>Remarks</label>
           <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} value={formData.remarks} name="remarks" placeholder='Remarks' />

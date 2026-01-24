@@ -39,6 +39,7 @@ const PMCEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
         mobileno: data.mobileno,
         address: data.address,
         area:data.area,
+        grade: data.grade || '',
         branchname: data.branchname,
         IFSCcode: data.IFSCcode,
         companyName: data.companyName,
@@ -73,6 +74,7 @@ const PMCEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
             mobileno: formData.mobileno,
             address: formData.address,
             area:formData.area,
+            grade: formData.grade || null,
             branchname: formData.branchname,
             companyName: formData.companyName,
             birthdate: formData.birthdate,
@@ -139,6 +141,14 @@ pauseOnHover
 
                     <label htmlFor='area'>Area</label>
                     <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.area} value={formData.area} name="area" placeholder='area' disabled={user.role !== "admin"} />
+
+                    <label htmlFor='grade'>Grade</label>
+                    <select className={Styles.inputTag} onChange={(e) => { formHandler(e) }} value={formData.grade} name="grade" disabled={user.role !== "admin"}>
+                        <option value="">Select Grade</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                    </select>
                    
                     <label htmlFor='AddressLine1'>Remarks</label>
                     <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.remarks} value={formData.remarks} name="remarks" placeholder='Remarks' />

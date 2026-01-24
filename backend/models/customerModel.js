@@ -33,7 +33,7 @@ const customerSchema = new mongoose.Schema({
     ordervalue:Number,
     scale: {
         type: String,
-        enum: ["High", "Medium", "Low"]
+        enum: ["High", "Medium", "Low", "N/A"]
     },
     // salesPerson:String,
     mistryTag:{

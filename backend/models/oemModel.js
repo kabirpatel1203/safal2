@@ -17,6 +17,11 @@ const oemSchema = new mongoose.Schema({
         type:String,
         default:""
     },
+    grade: {
+        type: String,
+        enum: ['A', 'B', 'C'],
+        default: null
+    },
     companyName:String,
     birthdate:Date,
     marriagedate:Date,

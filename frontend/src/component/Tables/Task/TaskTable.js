@@ -110,17 +110,19 @@ const TaskTable = ({ modalHandler, refresh, isOpen, doRefresh }) => {
 
         let data = filteredData.map((item) => {
             let formateddate = item.date ? item.date : ' ';
+            let agentName = '';
+            if (item.architectTag) agentName = 'Architect - ' + item.architectTag.name + ' - ' + item.architectTag.mobileno;
+            else if (item.mistryTag) agentName = 'Mistry - ' + item.mistryTag.name + ' - ' + item.mistryTag.mobileno;
+            else if (item.pmcTag) agentName = 'PMC - ' + item.pmcTag.name + ' - ' + item.pmcTag.mobileno;
+            else if (item.dealerTag) agentName = 'Dealer - ' + item.dealerTag.name + ' - ' + item.dealerTag.mobileno;
+            else if (item.oemTag) agentName = 'OEM - ' + item.oemTag.name + ' - ' + item.oemTag.mobileno;
             return {
                 date: formateddate,
                 tag: item.tag,
                 remarks: item.remarks,
                 salesman: item.salesmanId?.name,
                 _id: item._id,
-                architect: item.architectTag ? item.architectTag.name + ' - ' + item.architectTag.mobileno : '',
-                mistry: item.mistryTag ? item.mistryTag.name + ' - ' + item.mistryTag.mobileno : '',
-                pmc: item.pmcTag ? item.pmcTag.name + ' - ' + item.pmcTag.mobileno : '',
-                dealer: item.dealerTag ? item.dealerTag.name + ' - ' + item.dealerTag.mobileno : '',
-                oem: item.oemTag ? item.oemTag.name + ' - ' + item.oemTag.mobileno : '',
+                agentName: agentName,
             }
         })
 
@@ -133,17 +135,19 @@ const TaskTable = ({ modalHandler, refresh, isOpen, doRefresh }) => {
         let modifiedData = modifyData(data.tasks);
         const newCustomers = modifiedData.map((item) => {
             let formateddate = item.date ? item.date : ' ';
+            let agentName = '';
+            if (item.architectTag) agentName = 'Architect - ' + item.architectTag.name + ' - ' + item.architectTag.mobileno;
+            else if (item.mistryTag) agentName = 'Mistry - ' + item.mistryTag.name + ' - ' + item.mistryTag.mobileno;
+            else if (item.pmcTag) agentName = 'PMC - ' + item.pmcTag.name + ' - ' + item.pmcTag.mobileno;
+            else if (item.dealerTag) agentName = 'Dealer - ' + item.dealerTag.name + ' - ' + item.dealerTag.mobileno;
+            else if (item.oemTag) agentName = 'OEM - ' + item.oemTag.name + ' - ' + item.oemTag.mobileno;
             return {
                 date: formateddate,
                 tag: item.tag,
                 remarks: item.remarks,
                 salesman: item.salesmanId?.name,
                 _id: item._id,
-                architect: item.architectTag ? item.architectTag.name + ' - ' + item.architectTag.mobileno : '',
-                mistry: item.mistryTag ? item.mistryTag.name + ' - ' + item.mistryTag.mobileno : '',
-                pmc: item.pmcTag ? item.pmcTag.name + ' - ' + item.pmcTag.mobileno : '',
-                dealer: item.dealerTag ? item.dealerTag.name + ' - ' + item.dealerTag.mobileno : '',
-                oem: item.oemTag ? item.oemTag.name + ' - ' + item.oemTag.mobileno : '',
+                agentName: agentName,
             }
         });
         setOriginalData(modifiedData);
@@ -160,17 +164,19 @@ const TaskTable = ({ modalHandler, refresh, isOpen, doRefresh }) => {
         let filteredData = originalData.filter((item) => item?.salesmanId?.name === salesman)
         let data = filteredData.map((item) => {
             let formateddate = item.date ? item.date : ' ';
+            let agentName = '';
+            if (item.architectTag) agentName = 'Architect - ' + item.architectTag.name + ' - ' + item.architectTag.mobileno;
+            else if (item.mistryTag) agentName = 'Mistry - ' + item.mistryTag.name + ' - ' + item.mistryTag.mobileno;
+            else if (item.pmcTag) agentName = 'PMC - ' + item.pmcTag.name + ' - ' + item.pmcTag.mobileno;
+            else if (item.dealerTag) agentName = 'Dealer - ' + item.dealerTag.name + ' - ' + item.dealerTag.mobileno;
+            else if (item.oemTag) agentName = 'OEM - ' + item.oemTag.name + ' - ' + item.oemTag.mobileno;
             return {
                 date: formateddate,
                 tag: item.tag,
                 remarks: item.remarks,
                 salesman: item.salesmanId.name,
                 _id: item._id,
-                architect: item.architectTag ? item.architectTag.name + ' - ' + item.architectTag.mobileno : '',
-                mistry: item.mistryTag ? item.mistryTag.name + ' - ' + item.mistryTag.mobileno : '',
-                pmc: item.pmcTag ? item.pmcTag.name + ' - ' + item.pmcTag.mobileno : '',
-                dealer: item.dealerTag ? item.dealerTag.name + ' - ' + item.dealerTag.mobileno : '',
-                oem: item.oemTag ? item.oemTag.name + ' - ' + item.oemTag.mobileno : '',
+                agentName: agentName,
             }
         })
 
@@ -210,17 +216,19 @@ const TaskTable = ({ modalHandler, refresh, isOpen, doRefresh }) => {
         let modifiedData = modifyData(data.tasks);
         const newCustomers = modifiedData.map((item) => {
             let formateddate = item.date ? item.date : ' ';
+            let agentName = '';
+            if (item.architectTag) agentName = 'Architect - ' + item.architectTag.name + ' - ' + item.architectTag.mobileno;
+            else if (item.mistryTag) agentName = 'Mistry - ' + item.mistryTag.name + ' - ' + item.mistryTag.mobileno;
+            else if (item.pmcTag) agentName = 'PMC - ' + item.pmcTag.name + ' - ' + item.pmcTag.mobileno;
+            else if (item.dealerTag) agentName = 'Dealer - ' + item.dealerTag.name + ' - ' + item.dealerTag.mobileno;
+            else if (item.oemTag) agentName = 'OEM - ' + item.oemTag.name + ' - ' + item.oemTag.mobileno;
             return {
                 date: formateddate,
                 tag: item.tag,
                 remarks: item.remarks,
                 salesman: item.salesmanId.name,
                 _id: item._id,
-                architect: item.architectTag ? item.architectTag.name + ' - ' + item.architectTag.mobileno : '',
-                mistry: item.mistryTag ? item.mistryTag.name + ' - ' + item.mistryTag.mobileno : '',
-                pmc: item.pmcTag ? item.pmcTag.name + ' - ' + item.pmcTag.mobileno : '',
-                dealer: item.dealerTag ? item.dealerTag.name + ' - ' + item.dealerTag.mobileno : '',
-                oem: item.oemTag ? item.oemTag.name + ' - ' + item.oemTag.mobileno : '',
+                agentName: agentName,
             }
         });
         setOriginalData(modifiedData);
@@ -286,11 +294,7 @@ const TaskTable = ({ modalHandler, refresh, isOpen, doRefresh }) => {
             { header: 'Remarks', accessorKey: 'remarks', },
             // { header: 'Tag', accessorKey: 'tag' },
             { header: 'Salesman', accessorKey: 'salesman' },
-            { header: 'Architect', accessorKey: 'architect' },
-            { header: 'Mistry', accessorKey: 'mistry' },
-            { header: 'PMC', accessorKey: 'pmc' },
-            { header: 'Dealer', accessorKey: 'dealer' },
-            { header: 'OEM', accessorKey: 'oem' }
+            { header: 'Agent Name', accessorKey: 'agentName' },
         ],
         [],
     );
@@ -299,11 +303,7 @@ const TaskTable = ({ modalHandler, refresh, isOpen, doRefresh }) => {
         { header: 'Remarks', accessorKey: 'remarks', },
         // { header: 'Tag', accessorKey: 'tag' },
         { header: 'Salesman', accessorKey: 'salesman' },
-        { header: 'Architect', accessorKey: 'architect' },
-        { header: 'Mistry', accessorKey: 'mistry' },
-        { header: 'PMC', accessorKey: 'pmc' },
-        { header: 'Dealer', accessorKey: 'dealer' },
-        { header: 'OEM', accessorKey: 'oem' }
+        { header: 'Agent Name', accessorKey: 'agentName' },
     ]
     const csvOptions = {
         fieldSeparator: ',',

@@ -65,8 +65,10 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
     const newdealers = response.data.dealer.map((item)=>{
       return {
         ...item,
+        grade:item.grade || '',
         salesmen:item.salesmen.map((req)=>req.name).join('-'),
         createdBy:item.createdBy?.email || 'N/A',
+        SS: item.SS ? item.SS.join(', ') : '',
       }
     });
 
@@ -137,8 +139,10 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
     const newdealers = data.dealers.map((item)=>{
       return {
         ...item,
+        grade:item.grade || '',
         salesmen:item.salesmen.map((req)=>req.name).join('-'),
         createdBy:item.createdBy?.email || 'N/A',
+        SS: item.SS ? item.SS.join(', ') : '',
       }
     });
     setDealers(newdealers);
@@ -206,6 +210,9 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
         { header: 'Address', accessorKey: 'address' },
         { header: 'Area', accessorKey: 'area' },
         { header: 'Mobile Number', accessorKey: 'mobileno' },
+        { header: 'Grade', accessorKey: 'grade' },
+        { header: 'L', accessorKey: 'L', Cell: ({cell})=>(cell.getValue() !== null && cell.getValue() !== undefined ? cell.getValue() : '') },
+        { header: 'SS', accessorKey: 'SS' },
         { header: 'Salesman', accessorKey: 'salesmen' },
         { header: 'Remarks', accessorKey: 'remarks' },
       ];
@@ -223,6 +230,9 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
     { header: 'Name', accessorKey: 'name' },
     { header: 'Address', accessorKey: 'address' },
     { header: 'Mobile Number', accessorKey: 'mobileno' },
+    { header: 'Grade', accessorKey: 'grade' },
+    { header: 'L', accessorKey: 'L' },
+    { header: 'SS', accessorKey: 'SS' },
     { header: 'Email', accessorKey: 'email', },
     { header: 'Company_Name', accessorKey: 'companyName', },
     { header: 'Birth_Date', accessorKey: 'birthdate', },

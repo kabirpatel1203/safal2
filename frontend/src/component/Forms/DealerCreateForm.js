@@ -14,7 +14,10 @@ const DealerCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
         mobileno: "",
         address: "",
         area:"",
+        grade: "",
         displaySize: "",
+        L: "",
+        SS: [],
         companyName: "",
         birthdate: "",
         marriagedate: "",
@@ -36,6 +39,15 @@ const DealerCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
     const [isDisabled, setIsDisabled] = useState(false);
     const [Salesmen, setSalesmen] = useState([]);
     const [selectedSalesmen, setselectedSalesmen] = useState([]);
+    const [selectedSS, setSelectedSS] = useState([]);
+    const SSOptions = [
+        { value: 'Display', label: 'Display' },
+        { value: 'Photo', label: 'Photo' },
+        { value: 'Sample', label: 'Sample' }
+    ];
+    const SSchangehandler = (selected) => {
+        setSelectedSS(selected);
+    };
     const getAllsalesmen = async () => {
         const { data } = await axios.get("/api/v1/salesman/getall");
         console.log(data.salesmans);
@@ -62,7 +74,10 @@ const DealerCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
             mobileno: formData.mobileno,
             address: formData.address,
             area:formData.area,
+            grade: formData.grade || null,
             displaySize: formData.displaySize,
+            L: formData.L ? Number(formData.L) : null,
+            SS: selectedSS.map(item => item.value),
             companyName: formData.companyName,
             birthdate: formData.birthdate,
             marriagedate: formData.marriagedate,
@@ -135,9 +150,33 @@ const DealerCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
                     <label htmlFor='area'>Area</label>
                     <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} value={formData.area} name="area" placeholder='area' />
 
+                    <label htmlFor='grade'>Grade</label>
+                    <select className={Styles.inputTag} onChange={(e) => { formHandler(e) }} value={formData.grade} name="grade">
+                        <option value="">Select Grade</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                    </select>
+
                     <label htmlFor='displaySize'>Display Size</label>
                     <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} value={formData.displaySize} name="displaySize" placeholder='Display Size' />
 
+                    <label htmlFor='L'>L</label>
+                    <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} value={formData.L} name="L" type="number" placeholder='L (numbers only)' />
+
+                    <label htmlFor='SS'>SS</label>
+                    <ReactSelect className={Styles.inputTag}
+                        options={SSOptions}
+                        isMulti
+                        closeMenuOnSelect={false}
+                        hideSelectedOptions={false}
+                        components={{
+                            Option
+                        }}
+                        onChange={SSchangehandler}
+                        allowSelectAll={true}
+                        value={selectedSS}
+                    />
 
                     <label htmlFor='AddressLine1'>Remarks</label>
                     <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} value={formData.remarks} name="remarks" placeholder='Remarks' />

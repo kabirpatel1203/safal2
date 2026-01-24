@@ -73,7 +73,7 @@ const CustomerEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => 
     marriagedate: data.marriagedate ? data.marriagedate.substr(0, 10) : null,
     date: data.date ? data.date.substr(0, 10) : null,
     followupdate: data.followupdate ? data.followupdate.substr(0, 10) : null,
-    requirement: data.requirement || [],
+    requirement: data.requirement ? data.requirement.map(r => typeof r === 'object' ? r.requirement : r) : [],
     salesmen: data.salesmen
 
 
@@ -120,7 +120,7 @@ const CustomerEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => 
       remarks: formData.remarks,
       date: formData.date,
       followupdate: formData.followupdate,
-      requirement: formData.requirement,
+      requirement: formData.requirement.map(r => ({ requirement: r })),
       rewardPoints: formData.rewardPoints,
       scale: formData.scale,
       salesPerson: formData.salesPerson,

@@ -17,9 +17,23 @@ const dealerSchema = new mongoose.Schema({
         type:String,
         default:""
     },
+    grade: {
+        type: String,
+        enum: ['A', 'B', 'C'],
+        default: null
+    },
     displaySize: {
         type: String,
         default: ""
+    },
+    L: {
+        type: Number,
+        default: null
+    },
+    SS: {
+        type: [String],
+        enum: ['Display', 'Photo', 'Sample'],
+        default: []
     },
     companyName:String,
     birthdate:Date,

@@ -40,6 +40,7 @@ const ArchitectEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) =>
         mobileno: data.mobileno,
         address: data.address,
         area:data.area,
+        grade: data.grade || '',
         companyName: data.companyName,
         birthdate: data.birthdate ? data.birthdate.substr(0, 10) : null,
         marriagedate: data.marriagedate ? data.marriagedate.substr(0, 10) : null,
@@ -72,6 +73,7 @@ const ArchitectEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) =>
             mobileno: formData.mobileno,
             address: formData.address,
             area:formData.area,
+            grade: formData.grade || null,
             companyName: formData.companyName,
             birthdate: formData.birthdate,
             marriagedate: formData.marriagedate,
@@ -138,6 +140,14 @@ pauseOnHover
 
                     <label htmlFor='area'>Area</label>
                     <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.area} value={formData.area} name="area" placeholder='area' disabled={user.role !== "admin"} />
+
+                    <label htmlFor='grade'>Grade</label>
+                    <select className={Styles.inputTag} onChange={(e) => { formHandler(e) }} value={formData.grade} name="grade" disabled={user.role !== "admin"}>
+                        <option value="">Select Grade</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                    </select>
 
 
                     <label htmlFor='AddressLine1'>Remarks</label>
