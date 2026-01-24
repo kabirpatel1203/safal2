@@ -29,8 +29,6 @@ const TaskTable = ({ modalHandler, refresh, isOpen, doRefresh }) => {
     const [startDate, setStartDate] = useState(new Date('2020-08-01'));
     const [endDate, setEndDate] = useState(new Date('2025-01-01'));
     const [isLoading, setIsLoading] = useState(false);
-    let [selectedSalesman, setSelectedSalesman] = useState(null);
-    const [tempSalesman, setTempSalesman] = useState(null);
     const [edited, setEdited] = useState(false)
     const { user, isAuthenticated } = useSelector((state) => state.user);
 
@@ -83,31 +81,14 @@ const TaskTable = ({ modalHandler, refresh, isOpen, doRefresh }) => {
     }
 
     const submitDateRangeHandler = (e) => {
-        // Apply tempSalesman to selectedSalesman on submit
-        setSelectedSalesman(tempSalesman ? { name: tempSalesman } : null);
-        
         let filteredData = originalData.filter((item) => {
             if (item.date) {
                 let date = item.date;
                 date = new Date(date);
-                if (date <= endDate && date >= startDate) {
-                    if (tempSalesman !== null) {
-                        if (item.salesmanId?.name === tempSalesman) return true;
-                        return false;
-                    }
-                    else {
-                        return true
-                    }
-                }
-                else {
-                    return false
-                }
+                return (date <= endDate && date >= startDate);
             }
-            else {
-                return false
-            }
-        })
-
+            return false;
+        });
         let data = filteredData.map((item) => {
             let formateddate = item.date ? item.date : ' ';
             let agentName = '';
@@ -120,12 +101,11 @@ const TaskTable = ({ modalHandler, refresh, isOpen, doRefresh }) => {
                 date: formateddate,
                 tag: item.tag,
                 remarks: item.remarks,
-                salesman: item.salesmanId?.name,
+                salesPerson: item.salesPerson || (item.salesmanId?.name || ""),
                 _id: item._id,
                 agentName: agentName,
             }
-        })
-
+        });
         setCustomers(modifyData(data));
         setTableData(modifyData(data));
     }
@@ -133,6 +113,11 @@ const TaskTable = ({ modalHandler, refresh, isOpen, doRefresh }) => {
     const fetchCustomers = async () => {
         const { data } = await axios.get("/api/v1/task/totaltasks");
         let modifiedData = modifyData(data.tasks);
+        // Migrate old salesmanId.name to salesPerson if salesPerson is empty
+        modifiedData = modifiedData.map(item => ({
+            ...item,
+            salesPerson: item.salesPerson && item.salesPerson !== "" ? item.salesPerson : (item.salesmanId?.name || "")
+        }));
         const newCustomers = modifiedData.map((item) => {
             let formateddate = item.date ? item.date : ' ';
             let agentName = '';
@@ -145,7 +130,7 @@ const TaskTable = ({ modalHandler, refresh, isOpen, doRefresh }) => {
                 date: formateddate,
                 tag: item.tag,
                 remarks: item.remarks,
-                salesman: item.salesmanId?.name,
+                salesPerson: item.salesPerson,
                 _id: item._id,
                 agentName: agentName,
             }
@@ -160,55 +145,13 @@ const TaskTable = ({ modalHandler, refresh, isOpen, doRefresh }) => {
         return new Promise(resolve => setTimeout(resolve, time));
     };
 
-    const fetchFilteredCustomers = (salesman) => {
-        let filteredData = originalData.filter((item) => item?.salesmanId?.name === salesman)
-        let data = filteredData.map((item) => {
-            let formateddate = item.date ? item.date : ' ';
-            let agentName = '';
-            if (item.architectTag) agentName = 'Architect - ' + item.architectTag.name + ' - ' + item.architectTag.mobileno;
-            else if (item.mistryTag) agentName = 'Mistry - ' + item.mistryTag.name + ' - ' + item.mistryTag.mobileno;
-            else if (item.pmcTag) agentName = 'PMC - ' + item.pmcTag.name + ' - ' + item.pmcTag.mobileno;
-            else if (item.dealerTag) agentName = 'Dealer - ' + item.dealerTag.name + ' - ' + item.dealerTag.mobileno;
-            else if (item.oemTag) agentName = 'OEM - ' + item.oemTag.name + ' - ' + item.oemTag.mobileno;
-            return {
-                date: formateddate,
-                tag: item.tag,
-                remarks: item.remarks,
-                salesman: item.salesmanId.name,
-                _id: item._id,
-                agentName: agentName,
-            }
-        })
+    // Removed fetchFilteredCustomers
 
-        setCustomers(modifyData(data));
-        setTableData(modifyData(data));
-    }
-
-    const [salesman, setSalesman] = useState([]);
-    const fetchSalesmen = async () => {
-        const { data } = await axios.get("/api/v1/salesman/getall");
-
-        const salesmen = data.salesmans.map((branch) => (
-            {
-                name: branch.name,
-                value: branch.name,
-                label: branch.name
-            }
-        ))
-        setSalesman(salesmen);
-    }
-    const handlesalesman = (selected) => {
-        if (selected) {
-            setTempSalesman(selected.value);
-        } else {
-            setTempSalesman(null);
-        }
-    }
+    // Removed salesman filter state and logic
 
 
     useEffect(() => {
         fetchCustomers();
-        fetchSalesmen();
     }, [refresh]);
 
     const handleCallbackCreate = async () => {
@@ -256,7 +199,7 @@ const TaskTable = ({ modalHandler, refresh, isOpen, doRefresh }) => {
             control: base => ({
                 ...base,
                 minHeight: 44,
-                borderRadius: 999,
+                borderRadius: 8,
                 borderColor: 'rgba(148,163,184,0.7)',
                 boxShadow: '0 0 0 1px rgba(148,163,184,0.25)',
                 '&:hover': {
@@ -292,52 +235,11 @@ const TaskTable = ({ modalHandler, refresh, isOpen, doRefresh }) => {
                 Cell: ({ cell }) => (dateformater(cell.getValue()))
             },
             { header: 'Remarks', accessorKey: 'remarks', },
-            // { header: 'Tag', accessorKey: 'tag' },
-            { header: 'Salesman', accessorKey: 'salesman' },
+            { header: 'Sales Person', accessorKey: 'salesPerson' },
             { header: 'Agent Name', accessorKey: 'agentName' },
         ],
         [],
     );
-    const ops = [
-        { header: 'Date', accessorKey: 'date', type: "date", dateSetting: { locale: "en-GB" }, },
-        { header: 'Remarks', accessorKey: 'remarks', },
-        // { header: 'Tag', accessorKey: 'tag' },
-        { header: 'Salesman', accessorKey: 'salesman' },
-        { header: 'Agent Name', accessorKey: 'agentName' },
-    ]
-    const csvOptions = {
-        fieldSeparator: ',',
-        quoteStrings: '"',
-        decimalSeparator: '.',
-        showLabels: true,
-        useBom: true,
-        useKeysAsHeaders: false,
-        headers: ops.map((c) => c.header),
-        keys: ops.map((c) => c.accessorKey),
-    };
-    const csvExporter = new ExportToCsv(csvOptions);
-    const handleExportData = () => {
-        const exportData = tabledata.map(row => {
-            const exportRow = {};
-            ops.forEach(col => {
-                let value = row[col.accessorKey] || '';
-                // Format dates to readable format
-                if (col.type === 'date' && value) {
-                    try {
-                        value = new Date(value).toLocaleDateString('en-GB');
-                    } catch (e) {
-                        // Keep original value if date parsing fails
-                    }
-                }
-                exportRow[col.accessorKey] = value;
-            });
-            return exportRow;
-        });
-        csvExporter.generateCsv(exportData);
-    };
-    const handleExportRows = (rows) => {
-        csvExporter.generateCsv(rows.map((row) => row.original));
-    };
     return (
         <div className={Styles.container}>
             <div className={Styles.table}>
@@ -353,8 +255,6 @@ const TaskTable = ({ modalHandler, refresh, isOpen, doRefresh }) => {
                 </div>
                 <div className={Styles.Yellow}>
                     <div className={Styles.DateRangeContainer}>
-                        <label>Salesman Filter</label>
-                        <Select styles={customStyles} onChange={(e) => handlesalesman(e)} options={salesman} />
                         <TextField
                             className={Styles.InputDate}
                             id="start-date"
@@ -367,7 +267,7 @@ const TaskTable = ({ modalHandler, refresh, isOpen, doRefresh }) => {
                                 width: 180,
                                 margin: 1,
                                 '& .MuiOutlinedInput-root': {
-                                    borderRadius: 999,
+                                    borderRadius: 8,
                                     backgroundColor: '#ffffff',
                                     '& fieldset': {
                                         borderColor: 'rgba(148,163,184,0.7)',
@@ -403,7 +303,7 @@ const TaskTable = ({ modalHandler, refresh, isOpen, doRefresh }) => {
                                 width: 180,
                                 margin: 1,
                                 '& .MuiOutlinedInput-root': {
-                                    borderRadius: 999,
+                                    borderRadius: 8,
                                     backgroundColor: '#ffffff',
                                     '& fieldset': {
                                         borderColor: 'rgba(148,163,184,0.7)',
@@ -505,23 +405,7 @@ const TaskTable = ({ modalHandler, refresh, isOpen, doRefresh }) => {
                                     width: '100%',
                                 }}
                             >
-                                <Button
-                                    onClick={handleExportData}
-                                    startIcon={<FileDownloadIcon />}
-                                    variant="contained"
-                                    color="primary"
-                                    sx={{
-                                        backgroundColor: 'rgba(37,99,235,0.08)',
-                                        color: '#1d4ed8',
-                                        boxShadow: 'none',
-                                        '&:hover': {
-                                            backgroundColor: 'rgba(37,99,235,0.16)',
-                                            boxShadow: 'none',
-                                        },
-                                    }}
-                                >
-                                    Export Data
-                                </Button>
+                                {/* Export Data button removed */}
                             </Box>)}
 
                     />

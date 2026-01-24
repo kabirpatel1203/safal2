@@ -11,36 +11,12 @@ import { useSelector } from 'react-redux'
 const InquiryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
     // console.log(data);
     const [selectedRequirement, setSelectedRequirement] = useState(data.requirement);
-    const [Salesmen, setSalesmen] = useState([]);
-    const [selectedSalesman, setselectedSalesman] = useState(data.salesmen);
 
     const [defalutArchitect, setDefaultArchitect] = useState(() => data.architectTag ? { value: data.architectTag, label: `${data.architectName}-${data.architectNumber}` } : "");
     const [defaultMistry, setDefaultMistry] = useState(() => data.mistryTag ? { value: data.mistryTag, label: `${data.mistryName}-${data.mistryNumber}` } : "");
     const [defaultDealer, setDefaultDealer] = useState(() => data.dealerTag ? { value: data.dealerTag, label: `${data.dealerName}-${data.dealerNumber}` } : "");
     const [deafultPMC, setDefaultPMC] = useState(() => data.pmcTag ? { value: data.pmcTag, label: `${data.pmcName}-${data.pmcNumber}` } : "");
     const [defaultOEM, setDefaultOEM] = useState(() => data.oemTag ? { value: data.oemTag, label: `${data.oemName}-${data.oemNumber}` } : "");
-
-    const arr2 = selectedSalesman.map(object => {
-        // console.log(object);
-        return { ...object, value: object.name, label: object.name };
-    })
-    const getAllsalesmen = async () => {
-        const { data } = await axios.get("/api/v1/salesman/getall");
-        const salesmen = data.salesmans.map((branch) => (
-            {
-                name: branch.name,
-                value: branch.name,
-                label: branch.name
-            }
-        ))
-        setSalesmen(salesmen);
-    }
-    const Salesmenchangehandler = (selected) => {
-
-        setselectedSalesman(selected);
-        console.log(selected);
-        setFormData({ ...formData, selectedSalesman })
-    };
 
     const arr3 = selectedRequirement.map((object)=>{
         return {...object, value:object.requirement, label:object.requirement}
@@ -75,7 +51,6 @@ const InquiryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
         requirement: data.requirement,
         stage: data.stage,
         scale: data.scale || "Medium",
-        salesmen: data.salesmen,
         // name: "",
         // email: "",
         // mobileno: "",
@@ -203,7 +178,6 @@ const InquiryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
         getAllMistry();
         getAllPMC();
         getAllOEM();
-        getAllsalesmen();
     }, []);
     const submitHandler = async (e) => {
         e.preventDefault();
@@ -235,12 +209,11 @@ const InquiryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
             oemNumber:formData.oemNumber,
             oemName:formData.oemName,
             requirement: selectedRequirement,
-            stage: formData.stage,            scale: formData.scale,            salesmen: selectedSalesman,
+            stage: formData.stage,            scale: formData.scale,
             remarks:formData.remarks
 
         }
         console.log(data)
-        console.log(selectedSalesman)
         try {
             const response = await axios.put(`/api/v1/inquiry/update/${id}`, data, { headers: { "Content-Type": "application/json" } });
             console.log(response);
@@ -326,7 +299,6 @@ const InquiryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
     const [Dealers, setDealers] = useState([]);
     const [PMCs, setPMCs] = useState([]);
     const [OEMs, setOEMs] = useState([]);
-    const [selectedSalesmen, setselectedSalesmen] = useState([]);
     
     const getAllArchitects = async () => {
 
@@ -443,21 +415,6 @@ const InquiryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
                     
                     <label>Scale</label>
                     <Select selectedValue={formData.scale} onChange={(e) => Scalehandler(e)} options={scale} defaultInputValue={initialState.scale} />
-                    
-                    <label>Salesmen</label>
-                    <ReactSelect className={Styles.inputTag}
-                        options={Salesmen}
-                        isMulti
-                        closeMenuOnSelect={false}
-                        hideSelectedOptions={false}
-                        components={{
-                            Option
-                        }}
-                        onChange={Salesmenchangehandler}
-                        allowSelectAll={true}
-                        value={arr2}
-                        isDisabled={user.role !== "admin"}
-                    />
                 </div>
             </div>
 

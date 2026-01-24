@@ -16,13 +16,10 @@ const InquiryFilterForm = ({ modalHandler2, setIsOpen2, parentCallback }) => {
     const [Branches, setBranches] = useState([]);
     const [selectedBranch, setselectedBranch] = useState([]);
     const [isDisabled, setIsDisabled] = useState(false);
-    const [Salesmen, setSalesmen] = useState([]);
-    const [selectedSalesmen, setselectedSalesmen] = useState([]);
     let initialState = {
         startdate: null,
         enddate: null,
-        branches: [],
-        salesmen: []
+        branches: []
     }
     const [formData, setFormData] = useState(initialState)
 
@@ -43,21 +40,8 @@ const InquiryFilterForm = ({ modalHandler2, setIsOpen2, parentCallback }) => {
         ))
         setBranches(branches);
     }
-    const getAllsalesmen = async () => {
-        const { data } = await axios.get("/api/v1/salesman/getall");
-        console.log(data.salesmans);
-        const salesmen = data.salesmans.map((salesman) => (
-            {
-                name: salesman.name,
-                value: salesman.name,
-                label: salesman.name
-            }
-        ))
-        setSalesmen(salesmen);
-    }
     useEffect(() => {
         getAllbranches();
-        getAllsalesmen();
     }, []);
     
     const submitHandler = async (e) => {
@@ -68,8 +52,7 @@ const InquiryFilterForm = ({ modalHandler2, setIsOpen2, parentCallback }) => {
             enddate: formData.enddate,
             
             
-            branches: selectedBranch,
-            salesmen: selectedSalesmen
+            branches: selectedBranch
         }
         let s=new Date(data.startdate);
         let w=new Date(data.enddate);
@@ -80,7 +63,7 @@ const InquiryFilterForm = ({ modalHandler2, setIsOpen2, parentCallback }) => {
             console.log(data);
             
             setIsOpen2(false);
-            navigate('/inquiry/'+data.salesmen.name+'/'+data.branches.branchname+'/'+s.toISOString()+'/'+w.toISOString())
+            navigate('/inquiry/all/'+data.branches.branchname+'/'+s.toISOString()+'/'+w.toISOString())
             
         }
         catch (e) {
@@ -99,13 +82,6 @@ const InquiryFilterForm = ({ modalHandler2, setIsOpen2, parentCallback }) => {
         setselectedBranch(selected);
         
         setFormData({ ...formData, selectedBranch })
-    };
-
-    const Salesmenchangehandler = (selecteds) => {
-
-        setselectedSalesmen(selecteds);
-        
-        setFormData({ ...formData, selectedSalesmen })
     };
 
     return (
@@ -134,10 +110,6 @@ const InquiryFilterForm = ({ modalHandler2, setIsOpen2, parentCallback }) => {
                         <div className={Styles.filterField}>
                             <label>Branches</label>
                             <Select className={Styles.inputTag} options={Branches} value={selectedBranch} onChange={Branchchangehandler}/>
-                        </div>
-                        <div className={Styles.filterField}>
-                            <label>Salesmen</label>
-                            <Select className={Styles.inputTag} options={Salesmen} onChange={Salesmenchangehandler} value={selectedSalesmen}/>
                         </div>
                     </div>
                 </div> 

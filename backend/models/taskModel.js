@@ -5,6 +5,10 @@ const taskSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "Salesman"
     },
+    salesPerson: {
+        type: String,
+        default: ""
+    },
     remarks: String,
     date: {
         type: Date,

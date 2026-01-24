@@ -70,6 +70,10 @@ const customerSchema = new mongoose.Schema({
         {branchname:String}
     ],
     salesmen:[{name:String}],
+    salesPerson: {
+        type: String,
+        default: ""
+    },
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",

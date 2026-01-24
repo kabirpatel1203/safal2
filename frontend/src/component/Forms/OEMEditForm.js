@@ -3,36 +3,11 @@ import Styles from './OEMCreateForm.module.css'
 import { AiFillCloseCircle } from 'react-icons/ai'
 import axios from "axios"
 import { ToastContainer, toast } from 'react-toastify'
-import Option from '../DropDown/Options'
-import Select from 'react-select'
-import { default as ReactSelect } from "react-select";
 import { useSelector } from 'react-redux'
 
 const OEMEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
     console.log(`data inside OEM edit`, data);
     const { user, isAuthenticated } = useSelector((state) => state.user);
-    const [Salesmen, setSalesmen] = useState([]);
-    const [selectedSalesman, setselectedSalesman] = useState(data.salesmen);
-    const arr2 = selectedSalesman.map(object => {
-        return { ...object, value: object.name, label: object.name };
-    })
-    const getAllsalesmen = async () => {
-        const { data } = await axios.get("/api/v1/salesman/getall");
-        const salesmen = data.salesmans.map((branch) => (
-            {
-                name: branch.name,
-                value: branch.name,
-                label: branch.name
-            }
-        ))
-        setSalesmen(salesmen);
-    }
-    const Salesmenchangehandler = (selected) => {
-
-        setselectedSalesman(selected);
-        console.log(selected);
-        setFormData({ ...formData, selectedSalesman })
-    };
     let initialState = {
         name: data.name,
         email: data.email,
@@ -49,8 +24,7 @@ const OEMEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
         IFSCcode: data.IFSCcode,
         adharcard: data.adharcard,
         pancard: data.pancard,
-        date: data.date ? data.date.substr(0, 10) : null,
-        salesmen:data.salesmen
+        date: data.date ? data.date.substr(0, 10) : null
     }
     let id = data._id;
     const [formData, setFormData] = useState(initialState)
@@ -60,9 +34,6 @@ const OEMEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
         e.preventDefault();
         setFormData({ ...formData, [e.target.name]: e.target.value })
     }
-    useEffect(() => {
-        getAllsalesmen();
-    }, []);
     const submitHandler = async (e) => {
         e.preventDefault();
         setIsDisabled(true);
@@ -82,8 +53,7 @@ const OEMEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
             adharcard: formData.adharcard,
             pancard: formData.pancard,
             date: formData.date,
-            IFSCcode: formData.IFSCcode,
-            salesmen:selectedSalesman
+            IFSCcode: formData.IFSCcode
         }
         console.log(data)
         try {
@@ -153,20 +123,9 @@ const OEMEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
                     <label htmlFor='companyName'>Company Name</label>
                     <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.companyName} name="companyName" placeholder='Company Name' disabled={user.role !== "admin"} />
 
-                    <label>Salesmen</label>
-                    <ReactSelect lassName={Styles.inputTag}
-                        options={Salesmen}
-                        isMulti
-                        closeMenuOnSelect={false}
-                        hideSelectedOptions={false}
-                        components={{
-                            Option
-                        }}
-                        onChange={Salesmenchangehandler}
-                        allowSelectAll={true}
-                        value={arr2}
-                        isDisabled={user.role !== "admin"}
-                    />
+                    {/* Sales Person is auto-assigned and cannot be edited */}
+                    <label>Sales Person</label>
+                    <input className={Styles.inputTag} value={data.salesPerson || (data.salesmen && data.salesmen.length > 0 ? data.salesmen[0].name : '')} disabled={true} />
                 </div>
             </div>
 

@@ -17,11 +17,13 @@ exports.createArchitect = catchAsyncErrors(async(req, res, next)=>{
     let t = req.body;
     t = {
         ...t,
-        date : t.date.substr(0,10)
+        date : t.date ? t.date.substr(0,10) : null
     }
     const architect = await Architect.create({
         ...t,
-        createdBy: req.user._id
+        createdBy: req.user._id,
+        salesPerson: req.user.name,
+        salesmen: []
     })
     console.log(architect);
     res.status(200).json({
@@ -84,8 +86,17 @@ exports.getAllArchitect = catchAsyncErrors(async(req, res, next)=>{
     const filter = req.user.role === "admin" ? {} : { createdBy: req.user._id };
     const architects = await Architect.find(filter).populate('createdBy', 'email name');
 
+    // Normalize salesPerson for each architect
+    const normalizedArchitects = architects.map(arch => {
+        const archObj = arch.toObject();
+        if (!archObj.salesPerson && archObj.salesmen && archObj.salesmen.length > 0) {
+            archObj.salesPerson = archObj.salesmen[0].name || '';
+        }
+        return archObj;
+    });
+
     res.status(200).json({
-        architects,
+        architects: normalizedArchitects,
         success:true
        })
 })

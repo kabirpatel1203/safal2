@@ -26,40 +26,16 @@ const MistryCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
         pancard: "",
         date: "",
         // salesMan: "",
-        salesmen:[]
 
 
     }
 
-    useEffect(() => {
-        getAllsalesmen();
-    }, []);
     const [formData, setFormData] = useState(initialState)
     const [isDisabled, setIsDisabled] = useState(false);
     const formHandler = (e) => {
         e.preventDefault();
         setFormData({ ...formData, [e.target.name]: e.target.value })
     }
-    const [Salesmen, setSalesmen] = useState([]);
-    const [selectedSalesmen, setselectedSalesmen] = useState([]);
-    const getAllsalesmen = async () => {
-        const { data } = await axios.get("/api/v1/salesman/getall");
-        console.log(data.salesmans);
-        const salesmen = data.salesmans.map((salesman) => (
-            {
-                name: salesman.name,
-                value: salesman.name,
-                label: salesman.name
-            }
-        ))
-        setSalesmen(salesmen);
-    }
-    const Salesmenchangehandler = (selecteds) => {
-
-        setselectedSalesmen(selecteds);
-        console.log(selecteds);
-        setFormData({ ...formData, selectedSalesmen })
-    };
     const submitHandler = async (e) => {
         e.preventDefault();
         setIsDisabled(true);
@@ -81,7 +57,6 @@ const MistryCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
             date: formData.date,
             IFSCcode: formData.IFSCcode,
             // salesMan: formData.salesMan,
-            salesmen:selectedSalesmen
 
         }
         try {
@@ -159,23 +134,6 @@ pauseOnHover
 
                     <label htmlFor='companyName'>Company Name</label>
                     <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} value={formData.companyName} name="companyName" placeholder='Company Name' />
-                </div>
-                
-                <div className={Styles.personalDetails3}>
-                    <label>Salesmen</label>
-
-                    <ReactSelect className={Styles.inputTag}
-                        options={Salesmen}
-                        isMulti
-                        closeMenuOnSelect={false}
-                        hideSelectedOptions={false}
-                        components={{
-                            Option
-                        }}
-                        onChange={Salesmenchangehandler}
-                        allowSelectAll={true}
-                        value={selectedSalesmen}
-                    />
                 </div>
             </div>
 

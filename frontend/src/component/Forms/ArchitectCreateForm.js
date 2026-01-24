@@ -25,33 +25,15 @@ const ArchitectCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
     pancard: "",
     date: "",
     // salesMan: "",
-    salesmen: []
 
   }
   const [formData, setFormData] = useState(initialState)
   const [isDisabled, setIsDisabled] = useState(false);
-  const [Salesmen, setSalesmen] = useState([]);
-  const [selectedSalesmen, setselectedSalesmen] = useState([]);
-  const getAllsalesmen = async () => {
-    const { data } = await axios.get("/api/v1/salesman/getall");
-    console.log(data.Salesmans);
-    const salesmen = data.salesmans.map((salesman) => (
-      {
-        name: salesman.name,
-        value: salesman.name,
-        label: salesman.name
-      }
-    ))
-    setSalesmen(salesmen);
-  }
   const formHandler = (e) => {
     e.preventDefault();
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
-  useEffect(() => {
-    getAllsalesmen();
-  }, []);
   const submitHandler = async (e) => {
     e.preventDefault();
     setIsDisabled(true);
@@ -73,7 +55,6 @@ const ArchitectCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
       date: formData.date,
       IFSCcode: formData.IFSCcode,
       // salesMan: formData.salesMan,
-      salesmen: selectedSalesmen
 
     }
     console.log(data)
@@ -92,12 +73,6 @@ const ArchitectCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
     }
 
   }
-  const Salesmenchangehandler = (selecteds) => {
-
-    setselectedSalesmen(selecteds);
-    console.log(selecteds);
-    setFormData({ ...formData, selectedSalesmen })
-  };
   return (
     <div className={Styles.container}>
       <div className={Styles.closebutton} onClick={modalHandler}>
@@ -148,22 +123,6 @@ const ArchitectCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
 
           <label htmlFor='companyName'>Company Name</label>
           <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} value={formData.companyName} name="companyName" placeholder='Company Name' />
-        </div>
-        
-        <div className={Styles.personalDetails3}>
-          <label>Salesmen</label>
-          <ReactSelect className={Styles.inputTag}
-            options={Salesmen}
-            isMulti
-            closeMenuOnSelect={false}
-            hideSelectedOptions={false}
-            components={{
-              Option
-            }}
-            onChange={Salesmenchangehandler}
-            allowSelectAll={true}
-            value={selectedSalesmen}
-          />
         </div>
       </div>
 

@@ -29,16 +29,12 @@ const DealerCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
         pancard: "",
         date: "",
         // salesMan: "",
-        salesmen: []
     }
 
     useEffect(() => {
-        getAllsalesmen()
     }, []);
     const [formData, setFormData] = useState(initialState)
     const [isDisabled, setIsDisabled] = useState(false);
-    const [Salesmen, setSalesmen] = useState([]);
-    const [selectedSalesmen, setselectedSalesmen] = useState([]);
     const [selectedSS, setSelectedSS] = useState([]);
     const SSOptions = [
         { value: 'Display', label: 'Display' },
@@ -48,18 +44,6 @@ const DealerCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
     const SSchangehandler = (selected) => {
         setSelectedSS(selected);
     };
-    const getAllsalesmen = async () => {
-        const { data } = await axios.get("/api/v1/salesman/getall");
-        console.log(data.salesmans);
-        const salesmen = data.salesmans.map((salesman) => (
-            {
-                name: salesman.name,
-                value: salesman.name,
-                label: salesman.name
-            }
-        ))
-        setSalesmen(salesmen);
-    }
     const formHandler = (e) => {
         e.preventDefault();
         setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -89,7 +73,6 @@ const DealerCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
             date: formData.date,
             IFSCcode: formData.IFSCcode,
             // salesMan: formData.salesMan,
-            salesmen: selectedSalesmen
 
         }
         try {
@@ -106,12 +89,6 @@ const DealerCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
             setIsDisabled(false);
         }
     }
-    const Salesmenchangehandler = (selecteds) => {
-
-        setselectedSalesmen(selecteds);
-        console.log(selecteds);
-        setFormData({ ...formData, selectedSalesmen })
-    };
     return (
         <div className={Styles.container}>
             <ToastContainer
@@ -198,19 +175,6 @@ const DealerCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
                     {/* 
                     <label htmlFor='salesMan'>Sales Man </label>
                     <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} value={formData.salesMan} name="salesMan" placeholder='Company Name' /> */}
-                    <label>Salesmen</label>
-                    <ReactSelect className={Styles.inputTag}
-                        options={Salesmen}
-                        isMulti
-                        closeMenuOnSelect={false}
-                        hideSelectedOptions={false}
-                        components={{
-                            Option
-                        }}
-                        onChange={Salesmenchangehandler}
-                        allowSelectAll={true}
-                        value={selectedSalesmen}
-                    />
                 </div>
             </div>
 

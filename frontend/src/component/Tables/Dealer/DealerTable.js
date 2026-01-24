@@ -40,48 +40,6 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
   const [tabledata, setTableData] = useState([])
   const [startDate, setStartDate] = useState(new Date('2022-08-01'));
   const [endDate, setEndDate] = useState(new Date());
-  const [salesman, setSalesman] = useState([]);
-  const [selectedSalesmanFilter, setSelectedSalesmanFilter] = useState(null);
-  const [tempSalesmanFilter, setTempSalesmanFilter] = useState(null);
-  const fetchSalesmen = async () => {
-    const { data } = await axios.get("/api/v1/salesman/getall");
-
-    const salesmen = data.salesmans.map((branch) => (
-      {
-        name: branch.name,
-        value: branch.name,
-        label: branch.name
-
-      }
-    ))
-    setSalesman(salesmen);
-  }
-  const fetchDealersOfSalesman = async (salesmanName) => {
-    setIsLoading(true);
-    sleep(500);
-
-    const response = await axios.post("/api/v1/salesman/dealer", { name: salesmanName }, { headers: { "Content-Type": "application/json" } });
-
-    const newdealers = response.data.dealer.map((item)=>{
-      return {
-        ...item,
-        grade:item.grade || '',
-        salesmen:item.salesmen.map((req)=>req.name).join('-'),
-        createdBy:item.createdBy?.email || 'N/A',
-        SS: item.SS ? item.SS.join(', ') : '',
-      }
-    });
-
-    return newdealers;
-  }
-  const handlesalesman = (selected) => {
-    console.log(selected);
-    if (selected) {
-      setTempSalesmanFilter(selected.value);
-    } else {
-      setTempSalesmanFilter(null);
-    }
-  }
 
   const startDateHandler = (e) => {
     setStartDate(new Date(e.target.value));
@@ -102,18 +60,8 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
     console.log(startDate, endDate);
     setIsLoading(true);
     
-    // Apply salesman filter first if selected
-    let baseData;
-    if (tempSalesmanFilter) {
-      setSelectedSalesmanFilter(tempSalesmanFilter);
-      baseData = await fetchDealersOfSalesman(tempSalesmanFilter);
-    } else {
-      setSelectedSalesmanFilter(null);
-      baseData = dealers;
-    }
-    
-    // Then apply date filter on the result
-    let data = baseData.filter((item) => {
+    // Apply date filter
+    let data = dealers.filter((item) => {
       let date = item.date;
       date = new Date(date);
       if (date < endDate && date > startDate) {
@@ -140,8 +88,7 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
       return {
         ...item,
         grade:item.grade || '',
-        salesmen:item.salesmen.map((req)=>req.name).join('-'),
-        createdBy:item.createdBy?.email || 'N/A',
+        salesPerson: item.salesPerson || (item.salesmen && item.salesmen.length > 0 ? item.salesmen[0].name : ''),
         SS: item.SS ? item.SS.join(', ') : '',
       }
     });
@@ -160,7 +107,6 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
   };
 
   useEffect(() => {
-    fetchSalesmen();
     fetchDealer();
   }, [refresh]);
   const handleCallbackCreate = (childData) => {
@@ -173,7 +119,7 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
     control: base => ({
       ...base,
       minHeight: 44,
-      borderRadius: 999,
+      borderRadius: 8,
       borderColor: 'rgba(148,163,184,0.7)',
       boxShadow: '0 0 0 1px rgba(148,163,184,0.25)',
       '&:hover': {
@@ -213,13 +159,9 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
         { header: 'Grade', accessorKey: 'grade' },
         { header: 'L', accessorKey: 'L', Cell: ({cell})=>(cell.getValue() !== null && cell.getValue() !== undefined ? cell.getValue() : '') },
         { header: 'SS', accessorKey: 'SS' },
-        { header: 'Salesman', accessorKey: 'salesmen' },
+        { header: 'Sales Person', accessorKey: 'salesPerson' },
         { header: 'Remarks', accessorKey: 'remarks' },
       ];
-      
-      if (user?.role === 'admin') {
-        baseColumns.push({ header: 'Created By', accessorKey: 'createdBy' });
-      }
       
       return baseColumns;
     },
@@ -243,7 +185,6 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
     { header: 'Branch_Name', accessorKey: 'branchname', },
     { header: 'Adhar_Card', accessorKey: 'adharcard', },
     { header: 'Pan_Card', accessorKey: 'pancard', columnVisibility: 'false' },
-    { header: 'Created By', accessorKey: 'createdBy' },
   ]
   const csvOptions = {
     fieldSeparator: ',',
@@ -295,8 +236,6 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
         <div className={Styles.Yellow}>
           <div className={Styles.DateRangeContainer}>
             {/* <label>Branch</label> */}
-            <label>Salesman Filter</label>
-            <Select styles={customStyles} onChange={(e) => handlesalesman(e)} options={salesman} isClearable={true} placeholder="Select Salesman..." />
             <TextField
               className={Styles.InputDate}
               id="start-date"
@@ -309,7 +248,7 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
                 width: 180,
                 margin: 1,
                 '& .MuiOutlinedInput-root': {
-                  borderRadius: 999,
+                  borderRadius: 8,
                   backgroundColor: '#ffffff',
                   '& fieldset': {
                     borderColor: 'rgba(148,163,184,0.7)',
@@ -345,7 +284,7 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
                 width: 180,
                 margin: 1,
                 '& .MuiOutlinedInput-root': {
-                  borderRadius: 999,
+                  borderRadius: 8,
                   backgroundColor: '#ffffff',
                   '& fieldset': {
                     borderColor: 'rgba(148,163,184,0.7)',

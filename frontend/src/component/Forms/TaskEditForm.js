@@ -2,15 +2,13 @@ import React, { useState, useEffect } from 'react'
 import { AiFillCloseCircle } from 'react-icons/ai'
 import Styles from './ArchitectCreateForm.module.css'
 import axios from 'axios'
-import { default as ReactSelect } from "react-select";
 import Select from 'react-select'
 import { useSelector } from 'react-redux';
 const TaskEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
-    const [Salesmen, setSalesmen] = useState([]);
+    // Removed Salesmen state
     let initialState = {
         remarks: data.remarks,
         date: data.date ? data.date.substr(0, 10) : null,
-        salesmen: data.salesmen,
         mistryTag: data.mistryTag,
         architectTag: data.architectTag,
         dealerTag: data.dealerTag,
@@ -28,24 +26,13 @@ const TaskEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
     const [Dealers, setDealers] = useState([]);
     const [PMCs, setPMCs] = useState([]);
     const [OEMs, setOEMs] = useState([]);
-    const [defaultSalesman, setDefaultSalesman] = useState(() => data.salesmanId ? { value: data.salesmanId._id, label: `${data.salesmanId.name}` } : "");
+    // No defaultSalesman state
     const { user, isAuthenticated } = useSelector((state) => state.user);
-    const getAllsalesmen = async () => {
-        const { data } = await axios.get("/api/v1/salesman/getall");
-        const salesmen = data.salesmans.map((salesman) => ({ value: salesman._id, label: `${salesman.name}-${salesman.mobileno}` }))
-        setSalesmen(salesmen);
-    }
-    const Salesmenchangehandler = (selected) => {
-        console.log(selected);
-        setDefaultSalesman(selected);
-        setFormData({ ...formData, defaultSalesman })
-    };
+    // Removed salesman fetching and change handler
 
     const [isDisabled, setIsDisabled] = useState(false);
     let id = data._id
-    useEffect(() => {
-        getAllsalesmen();
-    }, []);
+    // Removed salesman fetching effect
     const formHandler = (e) => {
         e.preventDefault();
         setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -57,7 +44,6 @@ const TaskEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
         let data1 = {
             remarks: formData.remarks,
             date: formData.date,
-            salesmanId: defaultSalesman.value,
             mistryTag: formData.mistryTag,
             architectTag: formData.architectTag,
             dealerTag: formData.dealerTag,
@@ -133,9 +119,7 @@ const TaskEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
         setFormData({ ...formData, oemTag: e.value, oemName: e.label.split('-')[0], oemNumber: e.label.split('-')[1] })
     }
 
-    useEffect(() => {
-        getAllsalesmen()
-    }, []);
+    // No salesman effect
     return (
         <div className={Styles.container}>
             <div className={Styles.closebutton} onClick={modalHandler}>
@@ -154,13 +138,8 @@ const TaskEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
                     <label htmlFor='name'>Created At</label>
                     <input className={Styles.inputTag} type="date" name="date" value={formData.date} onChange={(e) => formHandler(e)} placeholder='Created At' />
 
-                    <label>Salesman</label>
-                    {/* <ReactSelect lassName={Styles.inputTag}
-                        options={Salesmen}
-                        onChange={Salesmenchangehandler}
-                        value={defaultSalesman}
-                    /> */}
-                    <Select defaultValue={defaultSalesman} onChange={Salesmenchangehandler} options={Salesmen} />
+                    <label>Sales Person</label>
+                    <input className={Styles.inputTag} value={data.salesPerson || (data.salesmanId?.name || user?.name || '')} disabled={true} />
                 </div>
             </div>
 

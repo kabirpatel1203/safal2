@@ -18,7 +18,9 @@ exports.totalPMC = catchAsyncErrors(async(req, res, next)=>{
 exports.createPMC = catchAsyncErrors(async(req, res, next)=>{
     const pmc = await PMC.create({
         ...req.body,
-        createdBy: req.user._id
+        createdBy: req.user._id,
+        salesPerson: req.user.name,
+        salesmen: []
     })
 
     res.status(200).json({
@@ -85,8 +87,17 @@ exports.getAllPMC = catchAsyncErrors(async(req, res, next)=>{
     const filter = req.user.role === "admin" ? {} : { createdBy: req.user._id };
     const pmcs = await PMC.find(filter).populate('createdBy', 'email name')
 
+    // Normalize salesPerson for each PMC
+    const normalizedPmcs = pmcs.map(p => {
+        const pObj = p.toObject();
+        if (!pObj.salesPerson && pObj.salesmen && pObj.salesmen.length > 0) {
+            pObj.salesPerson = pObj.salesmen[0].name || '';
+        }
+        return pObj;
+    });
+
     res.status(200).json({
-        pmcs,
+        pmcs: normalizedPmcs,
         success:true
        })
 })

@@ -31,6 +31,16 @@ const normalizeCustomerDoc = (doc) => {
     );
     plain.rewardPoints = rewardValue;
     plain.revenue = rewardValue;
+    
+    // Compute salesPerson: prioritize existing salesPerson, then legacy salesmen[0].name, then createdBy.name
+    if (!plain.salesPerson || plain.salesPerson === "") {
+        if (plain.salesmen && plain.salesmen.length > 0 && plain.salesmen[0].name) {
+            plain.salesPerson = plain.salesmen[0].name;
+        } else if (plain.createdBy && plain.createdBy.name) {
+            plain.salesPerson = plain.createdBy.name;
+        }
+    }
+    
     return plain;
 };
 
@@ -100,6 +110,9 @@ exports.updateCustomer = catchAsyncErrors(async (req, res, next) => {
             remarks: req.body.remarks
         };
     }
+    
+    // Remove salesmen from update data - we don't use it anymore
+    delete updateData.salesmen;
 
     const hasRewardUpdate = Object.prototype.hasOwnProperty.call(updateData, "rewardPoints") || Object.prototype.hasOwnProperty.call(updateData, "revenue");
     if (hasRewardUpdate) {
@@ -112,7 +125,7 @@ exports.updateCustomer = catchAsyncErrors(async (req, res, next) => {
         new: true,
         runValidators: true,
         useFindAndModify: false
-    });
+    }).populate('createdBy', 'email name');
 
     if (!customer) {
         return next(new ErrorHander("Customer not found", 404));

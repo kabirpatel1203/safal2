@@ -15,8 +15,6 @@ const InquiryCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
   const [OEMs, setOEMs] = useState([]);
   const [selectedRequirement, setSelectedRequirement] = useState([]);
   const [isDisabled, setIsDisabled] = useState(false);
-  const [Salesmen, setSalesmen] = useState([]);
-  const [selectedSalesmen, setselectedSalesmen] = useState([]);
   let initialState = {
     name: "",
     email: "",
@@ -40,7 +38,6 @@ const InquiryCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
     oemNumber: "",
     date: "",
     followupdate: "",
-    salesmen: [],
     remarks:""
   }
   // ["Plywood", "Laminate","Veneer","Other","Hardware"]
@@ -158,19 +155,6 @@ const InquiryCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
-
-  const getAllsalesmen = async () => {
-    const { data } = await axios.get("/api/v1/salesman/getall");
-    console.log(data.salesmans);
-    const salesmen = data.salesmans.map((salesman) => (
-      {
-        name: salesman.name,
-        value: salesman.name,
-        label: salesman.name
-      }
-    ))
-    setSalesmen(salesmen);
-  }
   const getAllArchitects = async () => {
 
     const { data } = await axios.get("/api/v1/architect/getall");
@@ -232,7 +216,6 @@ const InquiryCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
     getAllMistry();
     getAllPMC();
     getAllOEM();
-    getAllsalesmen();
   }, []);
 
   const submitHandler = async (e) => {
@@ -281,7 +264,6 @@ const InquiryCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
       requirement: selectedRequirement,
       stage:formData.stage,
       scale:formData.scale,
-      salesmen: selectedSalesmen,
       remarks:formData.remarks
     }
     console.log(data);
@@ -346,13 +328,6 @@ const InquiryCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
     console.log(e.value);
     setFormData({ ...formData, oemTag: e.value, oemName: e.label.split('-')[0], oemNumber: e.label.split('-')[1] })
   }
-
-  const Salesmenchangehandler = (selecteds) => {
-
-    setselectedSalesmen(selecteds);
-    console.log(selecteds);
-    setFormData({ ...formData, selectedSalesmen })
-  };
 
   return (
     <div className={Styles.container}>
@@ -422,19 +397,6 @@ const InquiryCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
           <Select selectedValue={formData.stage} onChange={(e) => Stagehandler(e)} options={ stage} />
           <label>Scale</label>
           <Select selectedValue={formData.scale} onChange={(e) => Scalehandler(e)} options={ scale} />
-          <label>Salesmen</label>
-          <ReactSelect className={Styles.inputTag}
-            options={Salesmen}
-            isMulti
-            closeMenuOnSelect={false}
-            hideSelectedOptions={false}
-            components={{
-              Option
-            }}
-            onChange={Salesmenchangehandler}
-            allowSelectAll={true}
-            value={selectedSalesmen}
-          />
         </div>
       </div>
 

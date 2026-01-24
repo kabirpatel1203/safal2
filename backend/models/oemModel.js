@@ -19,7 +19,7 @@ const oemSchema = new mongoose.Schema({
     },
     grade: {
         type: String,
-        enum: ['A', 'B', 'C'],
+        enum: ['A', 'B', 'C', null, ''],
         default: null
     },
     companyName:String,
@@ -33,6 +33,10 @@ const oemSchema = new mongoose.Schema({
     adharcard:Number,
     pancard:String,
     salesmen:[{name:String}],
+    salesPerson: {
+        type: String,
+        default: ""
+    },
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",

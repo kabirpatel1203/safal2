@@ -68,6 +68,10 @@ const inquirySchema = new mongoose.Schema({
         { branchname: String }
     ],
     salesmen: [{ name: String }],
+    salesPerson: {
+        type: String,
+        default: ""
+    },
     remarks:String,
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,

@@ -1,4 +1,4 @@
-import React ,{useEffect}from 'react';
+import React ,{useEffect, useState}from 'react';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -53,8 +53,10 @@ export default function SignIn() {
   // const history = createHashHistory();
   let navigate= useNavigate();
   const {user,isAuthenticated,error}=useSelector(state=>state.user);
+  const [loginError, setLoginError] = useState('');
   useEffect(() => {
     if (error) {
+      setLoginError(error);
       dispatch(clearErrors())
     }
     if (isAuthenticated) {
@@ -84,6 +86,20 @@ export default function SignIn() {
         <Typography component="h1" variant="h5">
           Sign in
         </Typography>
+        {loginError && (
+          <div style={{ 
+            width: '100%', 
+            marginTop: '16px', 
+            padding: '12px 16px',
+            backgroundColor: '#fdeded',
+            color: '#5f2120',
+            borderRadius: '8px',
+            border: '1px solid #f5c6cb',
+            fontSize: '14px'
+          }}>
+            {loginError}
+          </div>
+        )}
         <form className={classes.form} noValidate onSubmit={handleSubmit}>
           <TextField
             variant="outlined"

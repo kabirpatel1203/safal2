@@ -9,7 +9,6 @@ import Modal from '../../Layout/Modal/Modal';
 import ArchitectEditForm from '../../Forms/ArchitectEditForm';
 import PMCEditForm from '../../Forms/PMCEditForm'
 import { toast, ToastContainer } from 'react-toastify'
-import Select from 'react-select'
 import TextField from '@mui/material/TextField';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import MaterialReactTable from 'material-react-table';
@@ -38,8 +37,7 @@ const PMCTable = ({ modalHandler, refresh,isOpen }) => {
   const [originalData, setOriginalData] = useState([])
   const [startDate, setStartDate] = useState(new Date('2022-08-01'));
   const [endDate, setEndDate] = useState(new Date());
-  let [selectedSalesman,setSelectedSalesman] = useState(null);
-  let [tempSalesman, setTempSalesman] = useState(null);
+  
   const { user, isAuthenticated } = useSelector((state) => state.user);
 
   const [isLoading, setIsLoading] = useState(false)
@@ -53,23 +51,8 @@ const PMCTable = ({ modalHandler, refresh,isOpen }) => {
 
 
   const submitDateRangeHandler = (e) => {
-    // Apply tempSalesman to selectedSalesman on submit
-    setSelectedSalesman(tempSalesman);
-    
     // Filter from original data
     let filteredData = originalData.filter((item) => {
-      // Apply salesman filter
-      let isSalesman = false;
-      if (item.salesmen.length === 0 && tempSalesman === null) {
-        isSalesman = true;
-      }
-      item.salesmen.forEach((salesmanObj) => {
-        if (Object.values(salesmanObj).includes(tempSalesman) || tempSalesman === null || tempSalesman === "") {
-          isSalesman = true;
-        }
-      });
-      if (!isSalesman) return false;
-      
       // Apply date filter
       let date = item.date ? item.date : '01/01/1799';
       date = new Date(date);
@@ -88,9 +71,8 @@ const PMCTable = ({ modalHandler, refresh,isOpen }) => {
         address: item.address,
         area: item.area,
         mobileno: item.mobileno,
-        salesmen: item.salesmen.map((req) => req.name).join('-'),
+        salesPerson: item.salesPerson || (item.salesmen && item.salesmen.length > 0 ? item.salesmen[0].name : ''),
         remarks: item.remarks,
-        createdBy: item.createdBy?.email || 'N/A',
       };
     });
     setPMC(data);
@@ -106,13 +88,9 @@ const PMCTable = ({ modalHandler, refresh,isOpen }) => {
         { header: 'area', accessorKey: 'area' },
         { header: 'Mobile Number', accessorKey: 'mobileno' },
         { header: 'Grade', accessorKey: 'grade' },
-        { header: 'Salesman', accessorKey: 'salesmen' },
+        { header: 'Sales Person', accessorKey: 'salesPerson' },
         { header: 'Remarks', accessorKey: 'remarks' },
       ];
-      
-      if (user?.role === 'admin') {
-        baseColumns.push({ header: 'Created By', accessorKey: 'createdBy' });
-      }
       
       return baseColumns;
     },
@@ -126,7 +104,6 @@ const PMCTable = ({ modalHandler, refresh,isOpen }) => {
     { header: 'Mobile Number', accessorKey: 'mobileno' },
     { header: 'Grade', accessorKey: 'grade' },
     { header: 'Remarks', accessorKey: 'remarks' },
-    { header: 'Created By', accessorKey: 'createdBy' },
     // { header: 'Email', accessorKey: 'Email', },
     // { header: 'Company_Name', accessorKey: 'companyName', },
     // { header: 'Birth_Date', accessorKey: 'birthdate', },
@@ -191,9 +168,8 @@ const PMCTable = ({ modalHandler, refresh,isOpen }) => {
         area: item.area,
         mobileno: item.mobileno,
         grade: item.grade || '',
-        salesmen: item.salesmen.map((req) => req.name).join('-'),
+        salesPerson: item.salesPerson || (item.salesmen && item.salesmen.length > 0 ? item.salesmen[0].name : ''),
         remarks: item.remarks,
-        createdBy: item.createdBy?.email || 'N/A',
       }
     });
     setPMC(formattedData);
@@ -207,68 +183,8 @@ const PMCTable = ({ modalHandler, refresh,isOpen }) => {
   }
 
 
-  const [salesman, setSalesman] = useState([]);
-  const fetchSalesmen = async () => {
-    const { data } = await axios.get("/api/v1/salesman/getall");
-
-    const salesmen = data.salesmans.map((branch) => (
-      {
-        name: branch.name,
-        value: branch.name,
-        label: branch.name
-
-      }
-    ))
-    setSalesman(salesmen);
-  }
-  
-  const fetchFilteredPMC =(salesman) => {
-
-    let filteredData = originalData.filter((item)=>{
-      let isSalesman = false;
-      
-      item.salesmen.forEach((salesmanObj)=>{
-        if(Object.values(salesmanObj).includes(salesman) || salesman===null){
-          isSalesman = true;
-        }})
-
-      console.log(isSalesman)
-      if(isSalesman){
-        return true
-      }
-    })
-    console.log(filteredData);
-    let data = filteredData.map((item)=>{
-      let formateddate = item.date ? item.date : '01/01/1799';
-      return {
-        _id: item._id,
-        date:formateddate,
-        name:item.name,
-        address:item.address,
-        area:item.area,
-        mobileno:item.mobileno,
-        grade:item.grade || '',
-        salesmen:item.salesmen.map((req)=>req.name).join('-'),
-        remarks:item.remarks,
-        createdBy:item.createdBy?.email || 'N/A',
-      }
-      })
-
-    setPMC(data);
-    setTableData(data);  
-  }
-  
-  const handlesalesman = (selected) => {
-    if (selected) {
-      setTempSalesman(selected.value);
-    } else {
-      setTempSalesman(null);
-    }
-  }
-
   useEffect(() => {
     fetchPMC();
-    fetchSalesmen();
   }, [refresh]);
   const handleCallbackCreate = (childData) => {
     // console.log("Parent Invoked!!")
@@ -279,7 +195,7 @@ const PMCTable = ({ modalHandler, refresh,isOpen }) => {
     control: base => ({
       ...base,
       minHeight: 44,
-      borderRadius: 999,
+      borderRadius: 8,
       borderColor: 'rgba(148,163,184,0.7)',
       boxShadow: '0 0 0 1px rgba(148,163,184,0.25)',
       '&:hover': {
@@ -324,8 +240,7 @@ const PMCTable = ({ modalHandler, refresh,isOpen }) => {
 
         <div className={Styles.Yellow}>
           <div className={Styles.DateRangeContainer}>
-            <label>Salesman Filter</label>
-            <Select styles={customStyles} onChange={(e) => handlesalesman(e)} options={salesman} />
+            
             <TextField
               className={Styles.InputDate}
               id="start-date"
@@ -338,7 +253,7 @@ const PMCTable = ({ modalHandler, refresh,isOpen }) => {
                 width: 180,
                 margin: 1,
                 '& .MuiOutlinedInput-root': {
-                  borderRadius: 999,
+                  borderRadius: 8,
                   backgroundColor: '#ffffff',
                   '& fieldset': {
                     borderColor: 'rgba(148,163,184,0.7)',
@@ -374,7 +289,7 @@ const PMCTable = ({ modalHandler, refresh,isOpen }) => {
                 width: 180,
                 margin: 1,
                 '& .MuiOutlinedInput-root': {
-                  borderRadius: 999,
+                  borderRadius: 8,
                   backgroundColor: '#ffffff',
                   '& fieldset': {
                     borderColor: 'rgba(148,163,184,0.7)',

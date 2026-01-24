@@ -18,7 +18,9 @@ exports.totalDealer = catchAsyncErrors(async(req, res, next)=>{
 exports.createDealer = catchAsyncErrors(async(req, res, next)=>{
     const d = await Dealer.create({
         ...req.body,
-        createdBy: req.user._id
+        createdBy: req.user._id,
+        salesPerson: req.user.name,
+        salesmen: []
     })
 
     res.status(200).json({
@@ -84,8 +86,17 @@ exports.getAllDealer = catchAsyncErrors(async(req, res, next)=>{
         const filter = req.user.role === "admin" ? {} : { createdBy: req.user._id };
     const dealers = await Dealer.find(filter).populate('createdBy', 'email name')
 
+    // Normalize salesPerson for each dealer
+    const normalizedDealers = dealers.map(d => {
+        const dObj = d.toObject();
+        if (!dObj.salesPerson && dObj.salesmen && dObj.salesmen.length > 0) {
+            dObj.salesPerson = dObj.salesmen[0].name || '';
+        }
+        return dObj;
+    });
+
     res.status(200).json({
-        dealers,
+        dealers: normalizedDealers,
         success:true
        })
 })

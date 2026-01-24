@@ -18,7 +18,9 @@ exports.totalMistry = catchAsyncErrors(async(req, res, next)=>{
 exports.createMistry = catchAsyncErrors(async(req, res, next)=>{
     const mistry = await Mistry.create({
         ...req.body,
-        createdBy: req.user._id
+        createdBy: req.user._id,
+        salesPerson: req.user.name,
+        salesmen: []
     })
 
     res.status(200).json({
@@ -85,8 +87,17 @@ exports.getAllMistry = catchAsyncErrors(async(req, res, next)=>{
     const filter = req.user.role === "admin" ? {} : { createdBy: req.user._id };
     const mistries = await Mistry.find(filter).populate('createdBy', 'email name')
 
+    // Normalize salesPerson for each mistry
+    const normalizedMistries = mistries.map(m => {
+        const mObj = m.toObject();
+        if (!mObj.salesPerson && mObj.salesmen && mObj.salesmen.length > 0) {
+            mObj.salesPerson = mObj.salesmen[0].name || '';
+        }
+        return mObj;
+    });
+
     res.status(200).json({
-        mistries,
+        mistries: normalizedMistries,
         success:true
        })
 })

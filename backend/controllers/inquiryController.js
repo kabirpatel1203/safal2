@@ -32,6 +32,16 @@ const normalizeInquiryDoc = (doc) => {
     );
     plain.rewardPoints = rewardValue;
     plain.revenue = rewardValue;
+    
+    // Compute salesPerson: prioritize existing salesPerson, then legacy salesmen[0].name, then createdBy.name
+    if (!plain.salesPerson || plain.salesPerson === "") {
+        if (plain.salesmen && plain.salesmen.length > 0 && plain.salesmen[0].name) {
+            plain.salesPerson = plain.salesmen[0].name;
+        } else if (plain.createdBy && plain.createdBy.name) {
+            plain.salesPerson = plain.createdBy.name;
+        }
+    }
+    
     return plain;
 };
 
@@ -58,8 +68,13 @@ const normalizeInquiriesArray = (inquiries) => {
 exports.createInquiry = catchAsyncErrors(async (req, res, next) => {
     const inquiryData = {
         ...req.body,
-        createdBy: req.user._id
+        createdBy: req.user._id,
+        // Set salesPerson to the logged-in user's name for new entries
+        salesPerson: req.user.name
     };
+    
+    // Clear salesmen array as we're now using salesPerson field
+    inquiryData.salesmen = [];
 
     const rewardValue = parseRewardValue(
         inquiryData.rewardPoints ??
@@ -109,7 +124,8 @@ exports.createInquiry = catchAsyncErrors(async (req, res, next) => {
                 oemName: inquiryData.oemName,
                 oemNumber: inquiryData.oemNumber,
                 branches: inquiryData.branches,
-                salesmen: inquiryData.salesmen,
+                salesmen: [],
+                salesPerson: inquiryData.salesPerson,
                 createdBy: inquiryData.createdBy,
             });
             console.log(`Customer created from qualified inquiry`);
@@ -133,18 +149,19 @@ exports.getInquiry = catchAsyncErrors(async (req, res, next) => {
     let filter = { _id: req.params.id };
     
     if (req.user.role !== "admin") {
-        // Non-admin users can only see inquiries they created or are assigned to
+        // Non-admin users can only see inquiries they created or are assigned to (by salesPerson or legacy salesmen)
         filter = {
             _id: req.params.id,
             $or: [
                 { createdBy: req.user._id },
-                // Match salesman entries that contain the user's name (case-insensitive)
+                { salesPerson: { $regex: req.user.name, $options: "i" } },
+                // Legacy support: match salesman entries that contain the user's name
                 { "salesmen.name": { $regex: req.user.name, $options: "i" } }
             ]
         };
     }
     
-    const inquiry = await Inquiry.findOne(filter);
+    const inquiry = await Inquiry.findOne(filter).populate('createdBy', 'email name');
 
     if (!inquiry) {
         return next(new ErrorHander("Inquiry not found", 404));
@@ -160,11 +177,12 @@ exports.updateInquiry = catchAsyncErrors(async (req, res, next) => {
     let filter = { _id: req.params.id };
 
     if (req.user.role !== "admin") {
-        // Non-admin users can only update inquiries they created or are assigned to
+        // Non-admin users can only update inquiries they created or are assigned to (by salesPerson or legacy salesmen)
         filter = {
             _id: req.params.id,
             $or: [
                 { createdBy: req.user._id },
+                { salesPerson: { $regex: req.user.name, $options: "i" } },
                 { "salesmen.name": { $regex: req.user.name, $options: "i" } }
             ]
         };
@@ -185,6 +203,9 @@ exports.updateInquiry = catchAsyncErrors(async (req, res, next) => {
             requirement: req.body.requirement
         };
     }
+    
+    // Remove salesmen from update data - we don't use it anymore
+    delete updateData.salesmen;
 
     // Apply incoming changes and save
     Object.assign(existingInquiry, updateData);
@@ -213,6 +234,12 @@ exports.updateInquiry = catchAsyncErrors(async (req, res, next) => {
             inquiry.orderValue ??
             inquiry.ordervalue
         );
+        
+        // Compute salesPerson: prioritize existing salesPerson, then legacy salesmen[0].name
+        let salesPersonValue = inquiry.salesPerson || "";
+        if (!salesPersonValue && inquiry.salesmen && inquiry.salesmen.length > 0 && inquiry.salesmen[0].name) {
+            salesPersonValue = inquiry.salesmen[0].name;
+        }
 
         if (!existingCustomer) {
             console.log(`Creating new customer from inquiry ${inquiry.mobileno}`);
@@ -247,7 +274,8 @@ exports.updateInquiry = catchAsyncErrors(async (req, res, next) => {
                 oemName: inquiry.oemName,
                 oemNumber: inquiry.oemNumber,
                 branches: inquiry.branches,
-                salesmen: inquiry.salesmen,
+                salesmen: [],
+                salesPerson: salesPersonValue,
                 createdBy: inquiry.createdBy,
             });
         } else {
@@ -289,10 +317,12 @@ exports.getAllInquiry = catchAsyncErrors(async (req, res, next) => {
     } else {
         // Non-admin users see:
         // 1. Inquiries they created
-        // 2. Inquiries where they are listed as a salesman (by name contains match, case-insensitive)
+        // 2. Inquiries where they are the salesPerson
+        // 3. Legacy: Inquiries where they are listed in salesmen array
         inquiries = await Inquiry.find({
             $or: [
                 { createdBy: req.user._id },
+                { salesPerson: { $regex: req.user.name, $options: "i" } },
                 { "salesmen.name": { $regex: req.user.name, $options: "i" } }
             ]
         }).populate('createdBy', 'email name');
@@ -335,17 +365,29 @@ exports.getFilteredInquiry = catchAsyncErrors(async (req, res, next) => {
         ownerFilter = {
             $or: [
                 { createdBy: req.user._id },
+                { salesPerson: { $regex: req.user.name, $options: "i" } },
                 { "salesmen.name": { $regex: req.user.name, $options: "i" } }
             ]
         };
     }
 
-    const inquiries = await Inquiry.find({
+    // Build query based on whether salesman filter is applied
+    // If salesman is "all", don't filter by salesperson
+    let query = {
         ...ownerFilter,
         date: { "$gte": startdate, "$lt": endDate },
-        "salesmen.name": salesman,
         "branches.branchname": branch
-    })
+    };
+
+    // Only add salesPerson filter if not "all"
+    if (salesman !== "all") {
+        query.$or = [
+            { salesPerson: salesman },
+            { "salesmen.name": salesman }
+        ];
+    }
+
+    const inquiries = await Inquiry.find(query);
     res.status(200).json({
         inquiries: normalizeInquiriesArray(inquiries),
         success: true

@@ -9,7 +9,6 @@ import axios from 'axios';
 import CustomerEditForm from '../../Forms/CustomerEditForm';
 import DummyEditForm from '../../Forms/DummyEditForm';
 import { toast, ToastContainer } from 'react-toastify'
-import Select from 'react-select'
 import TextField from '@mui/material/TextField';
 import { dateformater } from '../Utils/util';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
@@ -41,8 +40,6 @@ const CustomerTable = ({ modalHandler, refresh, isOpen }) => {
   const [startDate, setStartDate] = useState(new Date('2022-08-01'));
   const [endDate, setEndDate] = useState(new Date());
   const [isLoading, setIsLoading] = useState(false);
-  let [selectedSalesman, setSelectedSalesman] = useState(null);
-  let [tempSalesman, setTempSalesman] = useState(null);
 
   const modifyData = (data) => {
     let datass1 = data.map((d) => {
@@ -94,23 +91,8 @@ const CustomerTable = ({ modalHandler, refresh, isOpen }) => {
   }
 
   const submitDateRangeHandler = (e) => {
-    // Apply tempSalesman to selectedSalesman on submit
-    setSelectedSalesman(tempSalesman);
-    
-    // Filter from original data
+    // Filter from original data - only apply date filter
     let filteredData = originalData.filter((item) => {
-      // Apply salesman filter
-      let isSalesman = false;
-      if (item.salesmen.length === 0 && tempSalesman === null) {
-        isSalesman = true;
-      }
-      item.salesmen.forEach((salesmanObj) => {
-        if (Object.values(salesmanObj).includes(tempSalesman) || tempSalesman === null || tempSalesman === "") {
-          isSalesman = true;
-        }
-      });
-      if (!isSalesman) return false;
-      
       // Apply date filter
       if (item.date) {
         let date = new Date(item.date);
@@ -123,6 +105,11 @@ const CustomerTable = ({ modalHandler, refresh, isOpen }) => {
     
     let data = filteredData.map((item) => {
       let formateddate = item.date ? item.date : ' ';
+      // Compute salesPerson: prioritize salesPerson field, then legacy salesmen[0].name
+      let salesPersonValue = item.salesPerson || '';
+      if (!salesPersonValue && item.salesmen && item.salesmen.length > 0) {
+        salesPersonValue = item.salesmen.map((req) => req.name).join('-');
+      }
       return {
         date: formateddate,
         followupdate: item.followupdate || '',
@@ -138,9 +125,8 @@ const CustomerTable = ({ modalHandler, refresh, isOpen }) => {
         pmc: item.pmcName && item.pmcNumber ? item.pmcName + ' - ' + item.pmcNumber : '',
         dealer: item.dealerName && item.dealerNumber ? item.dealerName + ' - ' + item.dealerNumber : '',
         oem: item.oemName && item.oemNumber ? item.oemName + ' - ' + item.oemNumber : '',
-        salesmen: item.salesmen.map((req) => req.name).join('-'),
+        salesPerson: salesPersonValue,
         remarks: item.remarks,
-        createdBy: item.createdBy?.email || 'N/A',
       };
     });
     setCustomers(modifyData(data));
@@ -153,6 +139,11 @@ const CustomerTable = ({ modalHandler, refresh, isOpen }) => {
     let modifiedData = modifyData(data.customers);
     const newCustomers = modifiedData.map((item) => {
       let formateddate = item.date ? item.date : ' ';
+      // Compute salesPerson: prioritize salesPerson field, then legacy salesmen[0].name
+      let salesPersonValue = item.salesPerson || '';
+      if (!salesPersonValue && item.salesmen && item.salesmen.length > 0) {
+        salesPersonValue = item.salesmen.map((req)=>req.name).join('-');
+      }
 
       return {
         date: formateddate,
@@ -170,9 +161,8 @@ const CustomerTable = ({ modalHandler, refresh, isOpen }) => {
         pmc: item.pmcName && item.pmcNumber ? item.pmcName + ' - ' + item.pmcNumber : '',
         dealer: item.dealerName && item.dealerNumber ? item.dealerName + ' - ' + item.dealerNumber : '',
         oem: item.oemName && item.oemNumber ? item.oemName + ' - ' + item.oemNumber : '',
-        salesmen:item.salesmen.map((req)=>req.name).join('-'),
+        salesPerson: salesPersonValue,
         remarks:item.remarks,
-        createdBy:item.createdBy?.email || 'N/A',
       }
     });
     setOriginalData(modifiedData);
@@ -184,80 +174,8 @@ const CustomerTable = ({ modalHandler, refresh, isOpen }) => {
     return new Promise(resolve => setTimeout(resolve, time));
   };
 
-  const fetchFilteredCustomers = (salesman) => {
-
-    let filteredData = originalData.filter((item) => {
-      let isSalesman = false;
-
-      if (item.salesmen.length === 0 && salesman === null) {
-        isSalesman = true;
-      }
-
-      item.salesmen.forEach((salesmanObj) => {
-        if (Object.values(salesmanObj).includes(salesman) || salesman === null) {
-          isSalesman = true;
-        }
-      })
-
-      console.log(isSalesman)
-      if (isSalesman) {
-        return true
-      }
-    })
-    console.log(filteredData);
-    let data = filteredData.map((item) => {
-      let formateddate = item.date ? item.date : ' ';
-      return {
-        date: formateddate,
-        followupdate: item.followupdate || '',
-        name: item.name,
-        address: item.address,
-        area:item.area,
-        mobileno: item.mobileno,
-        scale: item.scale || 'N/A',
-        requirement: item.requirement ? item.requirement.map((req)=>req.requirement).join('-') : '',
-        rewardPoints: item.rewardPoints || '',
-        // tag:item.tag
-        mistry: item.mistryName && item.mistryNumber ? item.mistryName + ' - ' + item.mistryNumber : '',
-        architect: item.architectName && item.architectNumber ? item.architectName + ' - ' + item.architectNumber : '',
-        pmc: item.pmcName && item.pmcNumber ? item.pmcName + ' - ' + item.pmcNumber : '',
-        dealer: item.dealerName && item.dealerNumber ? item.dealerName + ' - ' + item.dealerNumber : '',
-        oem: item.oemName && item.oemNumber ? item.oemName + ' - ' + item.oemNumber : '',
-        salesmen:item.salesmen.map((req)=>req.name).join('-'),
-        remarks:item.remarks,
-        createdBy:item.createdBy?.email || 'N/A',
-      }
-    })
-
-    setCustomers(modifyData(data));
-    setTableData(modifyData(data));
-  }
-  const [salesman, setSalesman] = useState([]);
-  const fetchSalesmen = async () => {
-    const { data } = await axios.get("/api/v1/salesman/getall");
-
-    const salesmen = data.salesmans.map((branch) => (
-      {
-        name: branch.name,
-        value: branch.name,
-        label: branch.name
-
-      }
-    ))
-    setSalesman(salesmen);
-  }
-  const handlesalesman = (selected) => {
-    if (selected) {
-      setTempSalesman(selected.value);
-    } else {
-      setTempSalesman(null);
-    }
-  }
-
-
   useEffect(() => {
     fetchCustomers();
-    fetchSalesmen();
   }, [refresh]);
 
   // Removed auto-apply useEffect - filters now only apply on Submit button click
@@ -278,39 +196,6 @@ const CustomerTable = ({ modalHandler, refresh, isOpen }) => {
     setEditModal(true);
   }
 
-  const customStyles = {
-    control: base => ({
-      ...base,
-      minHeight: 44,
-      borderRadius: 999,
-      borderColor: 'rgba(148,163,184,0.7)',
-      boxShadow: '0 0 0 1px rgba(148,163,184,0.25)',
-      '&:hover': {
-        borderColor: '#2563eb'
-      }
-    }),
-    dropdownIndicator: base => ({
-      ...base,
-      padding: 4
-    }),
-    clearIndicator: base => ({
-      ...base,
-      padding: 4
-    }),
-    multiValue: base => ({
-      ...base,
-      // backgroundColor: variables.colorPrimaryLighter
-    }),
-    valueContainer: base => ({
-      ...base,
-      padding: '0px 6px'
-    }),
-    input: base => ({
-      ...base,
-      margin: 0,
-      padding: 0
-    })
-  };
   const columns = useMemo(
     () => {
       const baseColumns = [
@@ -329,13 +214,9 @@ const CustomerTable = ({ modalHandler, refresh, isOpen }) => {
         { header: 'PMC Name', accessorKey: 'pmc' },
         { header: 'Dealer Name', accessorKey: 'dealer' },
         { header: 'OEM Name', accessorKey: 'oem' },
-        { header: 'Salesman', accessorKey: 'salesmen' },
+        { header: 'Sales Person', accessorKey: 'salesPerson' },
         { header: 'Remarks', accessorKey: 'remarks' },
       ];
-      
-      if (user?.role === 'admin') {
-        baseColumns.push({ header: 'Created By', accessorKey: 'createdBy' });
-      }
       
       return baseColumns;
     },
@@ -352,18 +233,8 @@ const CustomerTable = ({ modalHandler, refresh, isOpen }) => {
     // { header: 'Tag', accessorKey:'tag'},
     { header: 'Mistry Name', accessorKey: 'mistry' },
     { header: 'Architect Name', accessorKey: 'architect' },
+    { header: 'Sales Person', accessorKey: 'salesPerson' },
     { header: 'Remarks', accessorKey: 'remarks' },
-    { header: 'Created By', accessorKey: 'createdBy' },
-    // { header: 'Email', accessorKey: 'Email', },
-    // { header: 'Company_Name', accessorKey: 'companyName', },
-    // { header: 'Birth_Date', accessorKey: 'birthdate', },
-    // { header: 'Marriage_Date', accessorKey: 'marriagedate', },
-    // { header: 'Remarks', accessorKey: 'remarks', },
-    // { header: 'Bank_Name', accessorKey: 'bankname', },
-    // { header: 'IFS_Code', accessorKey: 'IFSCcode', },
-    // { header: 'Branch_Name', accessorKey: 'branchname', },
-    // { header: 'Adhar_Card', accessorKey: 'adharcard', },
-    // { header: 'Pan_Card', accessorKey: 'pancard', columnVisibility: 'false' },
   ]
   const csvOptions = {
     fieldSeparator: ',',
@@ -415,9 +286,6 @@ const CustomerTable = ({ modalHandler, refresh, isOpen }) => {
         <div className={Styles.Yellow}>
           <div className={Styles.DateRangeContainer}>
             {/* <label>Branche</label> */}
-            <label>Salesman Filter</label>
-            <Select styles={customStyles} onChange={(e) => handlesalesman(e)} options={salesman} />
-
             <TextField
               className={Styles.InputDate}
               id="start-date"
@@ -430,7 +298,7 @@ const CustomerTable = ({ modalHandler, refresh, isOpen }) => {
                 width: 180,
                 margin: 1,
                 '& .MuiOutlinedInput-root': {
-                  borderRadius: 999,
+                  borderRadius: 8,
                   backgroundColor: '#ffffff',
                   '& fieldset': {
                     borderColor: 'rgba(148,163,184,0.7)',
@@ -466,7 +334,7 @@ const CustomerTable = ({ modalHandler, refresh, isOpen }) => {
                 width: 180,
                 margin: 1,
                 '& .MuiOutlinedInput-root': {
-                  borderRadius: 999,
+                  borderRadius: 8,
                   backgroundColor: '#ffffff',
                   '& fieldset': {
                     borderColor: 'rgba(148,163,184,0.7)',

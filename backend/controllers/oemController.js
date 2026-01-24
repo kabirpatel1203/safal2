@@ -17,11 +17,13 @@ exports.createOEM = catchAsyncErrors(async(req, res, next)=>{
     let t = req.body;
     t = {
         ...t,
-        date : t.date.substr(0,10)
+        date : t.date ? t.date.substr(0,10) : null
     }
     const oem = await OEM.create({
         ...t,
-        createdBy: req.user._id
+        createdBy: req.user._id,
+        salesPerson: req.user.name,
+        salesmen: []
     })
     console.log(oem);
     res.status(200).json({
@@ -84,8 +86,17 @@ exports.getAllOEM = catchAsyncErrors(async(req, res, next)=>{
     const filter = req.user.role === "admin" ? {} : { createdBy: req.user._id };
     const oems = await OEM.find(filter).populate('createdBy', 'email name');
 
+    // Normalize salesPerson for each OEM
+    const normalizedOems = oems.map(o => {
+        const oObj = o.toObject();
+        if (!oObj.salesPerson && oObj.salesmen && oObj.salesmen.length > 0) {
+            oObj.salesPerson = oObj.salesmen[0].name || '';
+        }
+        return oObj;
+    });
+
     res.status(200).json({
-        oems,
+        oems: normalizedOems,
         success:true
        })
 })

@@ -20,7 +20,7 @@
 
 .section {
     background: white;
-    border-radius: 16px;
+    border-radius: 8px;
     padding: 2rem;
     margin-bottom: 2rem;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -50,7 +50,7 @@
     margin-bottom: 2rem;
     padding: 1rem;
     background: #f8fafc;
-    border-radius: 12px;
+    border-radius: 6px;
 }
 
 .tableContainer {

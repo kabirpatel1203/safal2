@@ -8,29 +8,6 @@ import Select from 'react-select'
 import { default as ReactSelect } from "react-select";
 import { useSelector } from 'react-redux'
 const CustomerEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
-  const [Salesmen, setSalesmen] = useState([]);
-  const [selectedSalesman, setselectedSalesman] = useState(data.salesmen);
-  const arr2 = selectedSalesman.map(object => {
-    console.log(object);
-    return { ...object, value: object.name, label: object.name };
-  })
-  const getAllsalesmen = async () => {
-    const { data } = await axios.get("/api/v1/salesman/getall");
-    const salesmen = data.salesmans.map((branch) => (
-      {
-        name: branch.name,
-        value: branch.name,
-        label: branch.name
-      }
-    ))
-    setSalesmen(salesmen);
-  }
-  const Salesmenchangehandler = (selected) => {
-
-    setselectedSalesman(selected);
-    console.log(selected);
-    setFormData({ ...formData, selectedSalesman })
-  };
   const [architects, setArchitects] = useState([]);
   const [defalutArchitect, setDefaultArchitect] = useState(() => data.architectTag ? { value: data.architectTag, label: `${data.architectName}-${data.architectNumber}` } : "");
   const [defaultMistry, setDefaultMistry] = useState(() => data.mistryTag ? { value: data.mistryTag, label: `${data.mistryName}-${data.mistryNumber}` } : "");
@@ -74,7 +51,6 @@ const CustomerEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => 
     date: data.date ? data.date.substr(0, 10) : null,
     followupdate: data.followupdate ? data.followupdate.substr(0, 10) : null,
     requirement: data.requirement ? data.requirement.map(r => typeof r === 'object' ? r.requirement : r) : [],
-    salesmen: data.salesmen
 
 
   }
@@ -93,9 +69,6 @@ const CustomerEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => 
     },
   ]
   const [formData, setFormData] = useState(initialState)
-  useEffect(() => {
-    getAllsalesmen();
-  }, []);
   const formHandler = (e) => {
     e.preventDefault();
     setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -139,7 +112,6 @@ const CustomerEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => 
       oemTag: formData.oemTag,
       oemName: formData.oemName,
       oemNumber: formData.oemNumber,
-      salesmen: selectedSalesman
 
 
     }
@@ -291,23 +263,6 @@ const CustomerEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => 
 
           <label htmlFor='name'>Annivarsary</label>
           <input className={Styles.inputTag} type="date" name="marriagedate" value={formData.marriagedate} onChange={(e) => formHandler(e)} placeholder='Annivarsary' disabled={user.role !== "admin"} />
-
-          {/* <label htmlFor='name'>Sales Person</label>
-          <input className={Styles.inputTag} name="salesPerson" value={formData.salesPerson} onChange={(e) => formHandler(e)} placeholder='Sales Person' /> */}
-          <label>Salesmen</label>
-          <ReactSelect lassName={Styles.inputTag}
-            options={Salesmen}
-            isMulti
-            closeMenuOnSelect={false}
-            hideSelectedOptions={false}
-            components={{
-              Option
-            }}
-            onChange={Salesmenchangehandler}
-            allowSelectAll={true}
-            value={arr2}
-            isDisabled={user.role !== "admin"}
-          />
         </div>
       </div>
 

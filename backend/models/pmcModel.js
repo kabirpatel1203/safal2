@@ -20,7 +20,7 @@ const pmcSchema = new mongoose.Schema({
     },
     grade: {
         type: String,
-        enum: ['A', 'B', 'C'],
+        enum: ['A', 'B', 'C', null, ''],
         default: null
     },
     companyName:String,
@@ -38,6 +38,10 @@ const pmcSchema = new mongoose.Schema({
         {branchname:String}
     ],
     salesmen:[{name:String}],
+    salesPerson: {
+        type: String,
+        default: ""
+    },
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"

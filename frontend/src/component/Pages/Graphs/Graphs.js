@@ -230,7 +230,7 @@ const Graphs = () => {
     control: base => ({
       ...base,
       minHeight: 44,
-      borderRadius: 999,
+      borderRadius: 8,
       borderColor: 'rgba(148,163,184,0.7)',
       boxShadow: '0 0 0 1px rgba(148,163,184,0.25)',
       '&:hover': {

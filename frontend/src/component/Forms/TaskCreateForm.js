@@ -4,8 +4,6 @@ import { toast, ToastContainer } from 'react-toastify'
 import Styles from './ArchitectCreateForm.module.css'
 import axios from 'axios'
 import Select from 'react-select'
-import { default as ReactSelect } from "react-select";
-import Option from '../DropDown/Options'
 import { useSelector } from 'react-redux'
 const TaskCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
     const [architects, setArchitects] = useState([]);
@@ -13,14 +11,12 @@ const TaskCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
     const [Dealers, setDealers] = useState([]);
     const [PMCs, setPMCs] = useState([]);
     const [OEMs, setOEMs] = useState([]);
-    const [Salesmen, setSalesmen] = useState([]);
-    const [salesmanId, setSalesmanId] = useState("")
+    // No Salesmen state
     const { user, isAuthenticated } = useSelector((state) => state.user);
 
     let initialState = {
         remarks: "",
         date: "",
-        salesmanId,
         mistryTag: null,
         architectTag: null,
         dealerTag: null,
@@ -29,21 +25,10 @@ const TaskCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
     }
     const [formData, setFormData] = useState(initialState)
 
-    const getAllsalesmen = async () => {
-        const { data } = await axios.get("/api/v1/salesman/getall");
-        const salesmen = data.salesmans.map((salesman) => ({ value: salesman._id, label: `${salesman.name}-${salesman.mobileno}` }))
-        setSalesmen(salesmen);
-    }
-    const Salesmenchangehandler = (selected) => {
-        console.log(selected);
-        setSalesmanId(selected);
-        setFormData({ ...formData, salesmanId })
-    };
+    // No salesman fetching or change handler
 
     const [isDisabled, setIsDisabled] = useState(false);
-    useEffect(() => {
-        getAllsalesmen();
-    }, []);
+    // No salesman effect
     const formHandler = (e) => {
         e.preventDefault();
         setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -55,7 +40,6 @@ const TaskCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
         let data1 = {
             remarks: formData.remarks,
             date: formData.date,
-            salesmanId: salesmanId.value,
             mistryTag: formData.mistryTag,
             architectTag: formData.architectTag,
             dealerTag: formData.dealerTag,
@@ -131,8 +115,6 @@ const TaskCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
     }
 
     useEffect(() => {
-        getAllsalesmen()
-
         getAllArchitects();
         getAllDealer();
         getAllMistry();
@@ -159,12 +141,8 @@ const TaskCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
                     <label htmlFor='name'>Created At</label>
                     <input className={Styles.inputTag} required type="date" name="date" value={formData.date} onChange={(e) => formHandler(e)} placeholder='Created At' />
 
-                    <label>Salesmen</label>
-                    <ReactSelect className={Styles.inputTag}
-                        options={Salesmen}
-                        onChange={Salesmenchangehandler}
-                        value={salesmanId}
-                    />
+                    <label>Sales Person</label>
+                    <input className={Styles.inputTag} value={user?.name || ''} disabled={true} />
                 </div>
             </div>
             <div className={Styles.bankDetails}>

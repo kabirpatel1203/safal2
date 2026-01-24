@@ -4,7 +4,6 @@ import Add from '../../../Assets/Add.svg'
 import Modal from '../../Layout/Modal/Modal';
 import axios from 'axios';
 import { toast } from 'react-toastify'
-import Select from 'react-select'
 import TextField from '@mui/material/TextField';
 import InquiryEditForm from '../../Forms/InquiryEditForm';
 import { dateformater,dateParser } from '../Utils/util';
@@ -30,31 +29,7 @@ const InquiryTable = ({ modalHandler ,modalHandler2,refresh,isOpen}) => {
   const [startDate, setStartDate] = useState(new Date('2022-08-01'));
   const [endDate, setEndDate] = useState(new Date());
   const [isLoading, setIsLoading] = useState(false);
-  const [salesman, setSalesman] = useState([]);
-  let [selectedSalesman,setSelectedSalesman] = useState(null);
-  let [tempSalesman,setTempSalesman] = useState(null);
   const { user, isAuthenticated } = useSelector((state) => state.user);
-
-  const fetchSalesmen = async () => {
-    const { data } = await axios.get("/api/v1/salesman/getall");
-    const salesmen = data.salesmans.map((salesman) => (
-      {
-        name: salesman.name,
-        value: salesman.name,
-        label: salesman.name
-
-      }
-    ))
-    setSalesman(salesmen);
-  }
-
-  const handlesalesman = (selected) => {
-    if (selected) {
-      setTempSalesman(selected.value);
-    } else {
-      setTempSalesman(null);
-    }
-  }
 
   const modifyData = (data) => {
     let datass1 = data.map((d) => {
@@ -113,28 +88,10 @@ const InquiryTable = ({ modalHandler ,modalHandler2,refresh,isOpen}) => {
 
   const submitDateRangeHandler = () => {
 
-    // Apply salesman filter first
-    let baseData;
-    if (tempSalesman) {
-      setSelectedSalesman(tempSalesman);
-      baseData = originalData.filter((item)=>{
-        let isSalesman = false;
-        item.salesmen.forEach((salesmanObj)=>{
-          if(Object.values(salesmanObj).includes(tempSalesman)){
-            isSalesman = true;
-          }
-        });
-        return isSalesman;
-      });
-    } else {
-      setSelectedSalesman(null);
-      baseData = originalData;
-    }
-
-    // Then apply date filter if dates are provided
+    // Apply date filter if dates are provided
     let filteredData;
     if(startDate && endDate){
-      filteredData = baseData.filter((item) => {
+      filteredData = originalData.filter((item) => {
         let date = (item.followupdate);
         date = new Date(date);
         
@@ -151,15 +108,19 @@ const InquiryTable = ({ modalHandler ,modalHandler2,refresh,isOpen}) => {
         }
       })
     } else {
-      filteredData = baseData;
+      filteredData = originalData;
     }
     
     setTableData(getInquiry(filteredData));
   }
 
-
   function getInquiry(data){
     let inquires = data.map((item)=>{
+      // Compute salesPerson: prioritize salesPerson field, then legacy salesmen[0].name
+      let salesPersonValue = item.salesPerson || '';
+      if (!salesPersonValue && item.salesmen && item.salesmen.length > 0) {
+        salesPersonValue = item.salesmen.map((req)=>req.name).join('-');
+      }
       return {
         date:item.date,
         name:item.name,
@@ -168,9 +129,8 @@ const InquiryTable = ({ modalHandler ,modalHandler2,refresh,isOpen}) => {
         scale:item.scale || 'N/A',
         mobileno:item.mobileno,
         requirement:item.requirement.map((req)=>req.requirement).join('-'),
-        salesmen:item.salesmen.map((req)=>req.name).join('-'),
+        salesPerson: salesPersonValue,
         remarks:item.remarks,
-        createdBy:item.createdBy?.email || 'N/A',
       }
     })
 
@@ -184,6 +144,11 @@ const InquiryTable = ({ modalHandler ,modalHandler2,refresh,isOpen}) => {
       const { data } = await axios.get("/api/v1/inquiry/getall");
       setOriginalData(data.inquiries);
       let inquires = data.inquiries.map((item)=>{
+        // Compute salesPerson: prioritize salesPerson field, then legacy salesmen[0].name
+        let salesPersonValue = item.salesPerson || '';
+        if (!salesPersonValue && item.salesmen && item.salesmen.length > 0) {
+          salesPersonValue = item.salesmen.map((req)=>req.name).join('-');
+        }
         return {
           date:item.date,
           name:item.name,
@@ -191,10 +156,9 @@ const InquiryTable = ({ modalHandler ,modalHandler2,refresh,isOpen}) => {
           stage:item.stage,
           scale:item.scale || 'N/A',
           requirement:item.requirement.map((req)=>req.requirement).join('-'),
-          salesmen:item.salesmen.map((req)=>req.name).join('-'),
+          salesPerson: salesPersonValue,
           mobileno:item.mobileno,
           remarks:item.remarks,
-          createdBy:item.createdBy?.email || 'N/A',
         }
       })
       const modifiedInquiries = modifyData(inquires);
@@ -211,25 +175,27 @@ const InquiryTable = ({ modalHandler ,modalHandler2,refresh,isOpen}) => {
   };
 
 
-  const fetchFilteredInquiries = async (salesman) => {
+  const fetchFilteredInquiries = async (salesPersonFilter) => {
 
     let filteredData = originalData.filter((item)=>{
-      let isSalesman = false;
+      // Check salesPerson field first, then legacy salesmen array
+      let salesPersonValue = item.salesPerson || '';
+      if (!salesPersonValue && item.salesmen && item.salesmen.length > 0) {
+        salesPersonValue = item.salesmen.map((s)=>s.name).join('-');
+      }
 
-      if(item.salesmen.length === 0 && salesman===null){
-        isSalesman = true;
+      if(salesPersonFilter === null || salesPersonFilter === ''){
+        return true;
       }
       
-      item.salesmen.forEach((salesmanObj)=>{
-        if(Object.values(salesmanObj).includes(salesman) || salesman===null){
-        isSalesman = true;
-      }})
-
-      if(isSalesman){
-        return true
-      }
+      return salesPersonValue.toLowerCase().includes(salesPersonFilter.toLowerCase());
     })
     let data = filteredData.map((item)=>{
+        // Compute salesPerson: prioritize salesPerson field, then legacy salesmen[0].name
+        let salesPersonValue = item.salesPerson || '';
+        if (!salesPersonValue && item.salesmen && item.salesmen.length > 0) {
+          salesPersonValue = item.salesmen.map((req)=>req.name).join('-');
+        }
         return {
           date:item.date,
           name:item.name,
@@ -237,10 +203,9 @@ const InquiryTable = ({ modalHandler ,modalHandler2,refresh,isOpen}) => {
           stage:item.stage,
           scale:item.scale || 'N/A',
           requirement:item.requirement.map((req)=>req.requirement).join('-'),
-          salesmen:item.salesmen.map((req)=>req.name).join('-'),
+          salesPerson: salesPersonValue,
           mobileno:item.mobileno,
           remarks:item.remarks,
-          createdBy:item.createdBy?.email || 'N/A',
         }
       })
     setInquiries(modifyData(data));
@@ -249,7 +214,6 @@ const InquiryTable = ({ modalHandler ,modalHandler2,refresh,isOpen}) => {
 
   useEffect(() => {
     fetchInquiry();
-    fetchSalesmen();
     
   }, [refresh]);
 
@@ -260,39 +224,6 @@ const InquiryTable = ({ modalHandler ,modalHandler2,refresh,isOpen}) => {
 
   }
 
-  const customStyles = {
-    control: base => ({
-        ...base,
-        minHeight: 44,
-        borderRadius: 999,
-        borderColor: 'rgba(148,163,184,0.7)',
-        boxShadow: '0 0 0 1px rgba(148,163,184,0.25)',
-        '&:hover': {
-          borderColor: '#2563eb'
-        }
-    }),
-    dropdownIndicator: base => ({
-        ...base,
-        padding: 4
-    }),
-    clearIndicator: base => ({
-        ...base,
-        padding: 4
-    }),
-    multiValue: base => ({
-        ...base,
-        
-    }),
-    valueContainer: base => ({
-        ...base,
-        padding: '0px 6px'
-    }),
-    input: base => ({
-        ...base,
-        margin: 0,
-        padding: 0
-    })
-};
 const columns = useMemo(
   () => {
     const baseColumns = [
@@ -303,14 +234,10 @@ const columns = useMemo(
       {header: 'Stage', accessorKey:'stage'},
       {header: 'Scale', accessorKey:'scale'},
       {header: 'Requirement', accessorKey: 'requirement'},
-      {header: 'Salesman', accessorKey:'salesmen'},
+      {header: 'Sales Person', accessorKey:'salesPerson'},
       { header: 'Mobile Number', accessorKey: 'mobileno' },
       { header: 'Remarks', accessorKey: 'remarks' },
     ];
-    
-    if (user?.role === 'admin') {
-      baseColumns.push({ header: 'Created By', accessorKey: 'createdBy' });
-    }
     
     return baseColumns;
   },
@@ -323,10 +250,9 @@ const ops = [
   {header: 'Stage', accessorKey:'stage'},
   {header: 'Scale', accessorKey:'scale'},
   {header: 'Requirement', accessorKey: 'requirement'},
-  {header: 'Salesman', accessorKey:'salesmen'},
+  {header: 'Sales Person', accessorKey:'salesPerson'},
   { header: 'Mobile Number', accessorKey: 'mobileno' },
   { header: 'Remarks', accessorKey: 'remarks' },
-  { header: 'Created By', accessorKey: 'createdBy' },
 ]
 const csvOptions = {
   fieldSeparator: ',',
@@ -379,10 +305,6 @@ const handleExportRows = (rows) => {
         {/* = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate(); */}
         <div className={Styles.Yellow}>
           <div className={Styles.DateRangeContainer}>
-            {/* <label>Branche</label> */}
-            <label>Salesman Filter</label>
-            <Select styles={customStyles} onChange={(e) => handlesalesman(e)} options={salesman} />
-
             <TextField
               className={Styles.InputDate}
               id="start-date"
@@ -395,7 +317,7 @@ const handleExportRows = (rows) => {
                 width: 180,
                 margin: 1,
                 '& .MuiOutlinedInput-root': {
-                  borderRadius: 999,
+                  borderRadius: 8,
                   backgroundColor: '#ffffff',
                   '& fieldset': {
                     borderColor: 'rgba(148,163,184,0.7)',
@@ -431,7 +353,7 @@ const handleExportRows = (rows) => {
                 width: 180,
                 margin: 1,
                 '& .MuiOutlinedInput-root': {
-                  borderRadius: 999,
+                  borderRadius: 8,
                   backgroundColor: '#ffffff',
                   '& fieldset': {
                     borderColor: 'rgba(148,163,184,0.7)',

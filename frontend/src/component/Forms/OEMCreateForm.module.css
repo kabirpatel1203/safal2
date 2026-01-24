@@ -71,7 +71,7 @@ label{
 
 .inputTag{
     border: 1px solid rgba(191, 219, 254, 0.75);
-    border-radius: 999px;
+    border-radius: 8px;
     padding: 8px 18px;
     margin: 2px 0;
     width: 95%;
@@ -83,7 +83,7 @@ label{
 .submitButton{
     padding: 9px 22px;
     background: #0f172a;
-    border-radius: 999px;
+    border-radius: 8px;
     margin-left: auto;
     border: none;
     display: block;
@@ -95,7 +95,7 @@ label{
 
 .disable{
     padding: 9px 22px;
-    border-radius: 999px;
+    border-radius: 8px;
     margin-left: auto;
     border: none;
     display: block;
