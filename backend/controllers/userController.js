@@ -30,14 +30,14 @@ exports.loginUser = catchAsyncErrors(async (req, res, next) => {
   const user = await User.findOne({ email }).select("+password");
 
   if (!user) {
-    return next(new ErrorHander("Your Email or Pwd is incorrect. Try Again.", 401))
+    return next(new ErrorHander("Your Email or Password is incorrect. Try Again.", 401))
   }
 
   const isPasswordMatched = await user.comparePassword(password)
   console.log(isPasswordMatched);
 
   if (!isPasswordMatched) {
-    return next(new ErrorHander("Your Email or Pwd is incorrect. Try Again.", 401))
+    return next(new ErrorHander("Your Email or Password is incorrect. Try Again.", 401))
   }
 
   sendToken(user, 200, res);

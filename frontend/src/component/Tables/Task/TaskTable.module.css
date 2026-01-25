@@ -77,9 +77,9 @@
 
 .DateRangeContainer {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 20px;
+  justify-content: center; /* center the items horizontally */
+  gap: 4px; /* further reduced gap for closer spacing */
 }
 
 .InputDate {
@@ -96,4 +96,3 @@
   font-size: 0.88rem;
   font-weight: 500;
 }
-  

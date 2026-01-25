@@ -240,6 +240,41 @@ const TaskTable = ({ modalHandler, refresh, isOpen, doRefresh }) => {
         ],
         [],
     );
+    // --- Export logic (copying pattern from other categories) ---
+    const ops = [
+        { header: 'Date', accessorKey: 'date', type: "date", dateSetting: { locale: "en-GB" } },
+        { header: 'Remarks', accessorKey: 'remarks' },
+        { header: 'Sales Person', accessorKey: 'salesPerson' },
+        { header: 'Agent Name', accessorKey: 'agentName' },
+    ];
+    const csvOptions = {
+        fieldSeparator: ',',
+        quoteStrings: '"',
+        decimalSeparator: '.',
+        showLabels: true,
+        useBom: true,
+        useKeysAsHeaders: false,
+        headers: ops.map((c) => c.header),
+        keys: ops.map((c) => c.accessorKey),
+    };
+    const csvExporter = new ExportToCsv(csvOptions);
+    const handleExportData = () => {
+        const exportData = tabledata.map(row => {
+            const exportRow = {};
+            ops.forEach(col => {
+                let value = row[col.accessorKey] || '';
+                if (col.type === 'date' && value) {
+                    try {
+                        value = new Date(value).toLocaleDateString('en-GB');
+                    } catch (e) {}
+                }
+                exportRow[col.accessorKey] = value;
+            });
+            return exportRow;
+        });
+        csvExporter.generateCsv(exportData);
+    };
+
     return (
         <div className={Styles.container}>
             <div className={Styles.table}>
@@ -405,9 +440,25 @@ const TaskTable = ({ modalHandler, refresh, isOpen, doRefresh }) => {
                                     width: '100%',
                                 }}
                             >
-                                {/* Export Data button removed */}
-                            </Box>)}
-
+                                <Button
+                                    onClick={handleExportData}
+                                    startIcon={<FileDownloadIcon />}
+                                    variant="contained"
+                                    color="primary"
+                                    sx={{
+                                        backgroundColor: 'rgba(37,99,235,0.08)',
+                                        color: '#1d4ed8',
+                                        boxShadow: 'none',
+                                        '&:hover': {
+                                            backgroundColor: 'rgba(37,99,235,0.16)',
+                                            boxShadow: 'none',
+                                        },
+                                    }}
+                                >
+                                    Export Data
+                                </Button>
+                            </Box>
+                        )}
                     />
                 }
 
