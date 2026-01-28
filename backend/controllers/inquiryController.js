@@ -205,7 +205,8 @@ exports.updateInquiry = catchAsyncErrors(async (req, res, next) => {
             stage: req.body.stage,
             requirement: req.body.requirement,
             scale: req.body.scale,
-            remarks: req.body.remarks
+            remarks: req.body.remarks,
+            followupdate: req.body.followupdate ? new Date(req.body.followupdate) : undefined
         };
     }
     
