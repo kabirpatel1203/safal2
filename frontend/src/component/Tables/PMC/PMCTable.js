@@ -75,6 +75,7 @@ const PMCTable = ({ modalHandler, refresh,isOpen }) => {
         remarks: item.remarks,
       };
     });
+    // Removed broken salesPersonFilter logic (handled by filterFn in column definition)
     setPMC(data);
     setTableData(data);
   }
@@ -88,7 +89,16 @@ const PMCTable = ({ modalHandler, refresh,isOpen }) => {
         { header: 'area', accessorKey: 'area' },
         { header: 'Mobile Number', accessorKey: 'mobileno' },
         { header: 'Grade', accessorKey: 'grade' },
-        { header: 'Sales Person', accessorKey: 'salesPerson' },
+        {
+          header: 'Sales Person',
+          accessorKey: 'salesPerson',
+          filterFn: (row, id, filterValue) => {
+            if (!filterValue) return true;
+            // Exact, case-sensitive match only
+            return row.getValue(id) === filterValue;
+          },
+          filterVariant: 'text',
+        },
         { header: 'Remarks', accessorKey: 'remarks' },
       ];
       

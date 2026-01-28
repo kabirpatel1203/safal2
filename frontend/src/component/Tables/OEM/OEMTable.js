@@ -72,6 +72,10 @@ const OEMTable = ({ modalHandler, refresh, isOpen }) => {
         remarks: item.remarks,
       };
     });
+    // If you have a SalesPerson filter, apply it here with exact, case-sensitive match
+    if (typeof salesPersonFilter === 'string' && salesPersonFilter.length > 0) {
+      data = data.filter(item => item.salesPerson === salesPersonFilter);
+    }
     setOEMs(data);
     setTableData(data);
   }
@@ -179,7 +183,16 @@ const OEMTable = ({ modalHandler, refresh, isOpen }) => {
         { header: 'Area', accessorKey: 'area' },
         { header: 'Mobile Number', accessorKey: 'mobileno' },
         { header: 'Grade', accessorKey: 'grade' },
-        {header: 'Sales Person', accessorKey:'salesPerson'},
+        {
+          header: 'Sales Person',
+          accessorKey: 'salesPerson',
+          filterFn: (row, id, filterValue) => {
+            if (!filterValue) return true;
+            // Exact, case-sensitive match only
+            return row.getValue(id) === filterValue;
+          },
+          filterVariant: 'text',
+        },
         { header: 'Remarks', accessorKey: 'remarks' },
       ];
       

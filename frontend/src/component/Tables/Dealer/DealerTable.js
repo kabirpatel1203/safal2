@@ -159,7 +159,16 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
         { header: 'Grade', accessorKey: 'grade' },
         { header: 'L', accessorKey: 'L', Cell: ({cell})=>(cell.getValue() !== null && cell.getValue() !== undefined ? cell.getValue() : '') },
         { header: 'SS', accessorKey: 'SS' },
-        { header: 'Sales Person', accessorKey: 'salesPerson' },
+        {
+          header: 'Sales Person',
+          accessorKey: 'salesPerson',
+          filterFn: (row, id, filterValue) => {
+            if (!filterValue) return true;
+            // Exact, case-sensitive match only
+            return row.getValue(id) === filterValue;
+          },
+          filterVariant: 'text',
+        },
         { header: 'Remarks', accessorKey: 'remarks' },
       ];
       

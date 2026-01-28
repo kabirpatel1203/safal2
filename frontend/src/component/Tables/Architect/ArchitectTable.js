@@ -63,13 +63,18 @@ const ArchitecTable = ({ modalHandler, refresh, isOpen }) => {
     
     let data = filteredData.map((item) => {
       let formateddate = item.date ? item.date : '01/01/1799';
+      // Only use the first salesPerson value for exact match filtering
+      let salesPersonValue = item.salesPerson || '';
+      if (!salesPersonValue && item.salesmen && item.salesmen.length > 0) {
+        salesPersonValue = item.salesmen[0].name;
+      }
       return {
         date: formateddate,
         name: item.name,
         address: item.address,
         area: item.area,
         mobileno: item.mobileno,
-        salesPerson: item.salesPerson || (item.salesmen && item.salesmen.length > 0 ? item.salesmen[0].name : ''),
+        salesPerson: salesPersonValue,
         remarks: item.remarks,
       };
     });
@@ -181,7 +186,16 @@ const ArchitecTable = ({ modalHandler, refresh, isOpen }) => {
         { header: 'Area', accessorKey: 'area' },
         { header: 'Mobile Number', accessorKey: 'mobileno' },
         { header: 'Grade', accessorKey: 'grade' },
-        {header: 'Sales Person', accessorKey:'salesPerson'},
+        {
+          header: 'Sales Person',
+          accessorKey: 'salesPerson',
+          filterFn: (row, id, filterValue) => {
+            if (!filterValue) return true;
+            // Exact, case-sensitive match only
+            return row.getValue(id) === filterValue;
+          },
+          filterVariant: 'text',
+        },
         { header: 'Remarks', accessorKey: 'remarks' },
       ];
       

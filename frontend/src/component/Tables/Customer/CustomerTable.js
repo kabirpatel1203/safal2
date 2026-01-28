@@ -129,6 +129,7 @@ const CustomerTable = ({ modalHandler, refresh, isOpen }) => {
         remarks: item.remarks,
       };
     });
+    // Removed broken salesPersonFilter logic (handled by filterFn in column definition)
     setCustomers(modifyData(data));
     setTableData(modifyData(data));
   }
@@ -214,7 +215,16 @@ const CustomerTable = ({ modalHandler, refresh, isOpen }) => {
         { header: 'PMC Name', accessorKey: 'pmc' },
         { header: 'Dealer Name', accessorKey: 'dealer' },
         { header: 'OEM Name', accessorKey: 'oem' },
-        { header: 'Sales Person', accessorKey: 'salesPerson' },
+        {
+          header: 'Sales Person',
+          accessorKey: 'salesPerson',
+          filterFn: (row, id, filterValue) => {
+            if (!filterValue) return true;
+            // Exact, case-sensitive match only
+            return row.getValue(id) === filterValue;
+          },
+          filterVariant: 'text',
+        },
         { header: 'Remarks', accessorKey: 'remarks' },
       ];
       

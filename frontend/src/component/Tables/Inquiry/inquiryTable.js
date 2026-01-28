@@ -188,7 +188,8 @@ const InquiryTable = ({ modalHandler ,modalHandler2,refresh,isOpen}) => {
         return true;
       }
       
-      return salesPersonValue.toLowerCase().includes(salesPersonFilter.toLowerCase());
+      // Exact, case-sensitive match for Sales Person
+      return salesPersonValue === salesPersonFilter;
     })
     let data = filteredData.map((item)=>{
         // Compute salesPerson: prioritize salesPerson field, then legacy salesmen[0].name
@@ -243,7 +244,16 @@ const columns = useMemo(
       },
       { header: 'Scale', accessorKey: 'scale' },
       { header: 'Requirement', accessorKey: 'requirement' },
-      { header: 'Sales Person', accessorKey: 'salesPerson' },
+      {
+        header: 'Sales Person',
+        accessorKey: 'salesPerson',
+        filterFn: (row, id, filterValue) => {
+          if (!filterValue) return true;
+          // Exact, case-sensitive match only
+          return row.getValue(id) === filterValue;
+        },
+        filterVariant: 'text',
+      },
       { header: 'Mobile Number', accessorKey: 'mobileno' },
       { header: 'Remarks', accessorKey: 'remarks' },
     ];

@@ -235,7 +235,16 @@ const TaskTable = ({ modalHandler, refresh, isOpen, doRefresh }) => {
                 Cell: ({ cell }) => (dateformater(cell.getValue()))
             },
             { header: 'Remarks', accessorKey: 'remarks', },
-            { header: 'Sales Person', accessorKey: 'salesPerson' },
+            {
+                header: 'Sales Person',
+                accessorKey: 'salesPerson',
+                filterFn: (row, id, filterValue) => {
+                    if (!filterValue) return true;
+                    // Exact, case-sensitive match only
+                    return row.getValue(id) === filterValue;
+                },
+                filterVariant: 'text',
+            },
             { header: 'Agent Name', accessorKey: 'agentName' },
         ],
         [],

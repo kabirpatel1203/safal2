@@ -16,13 +16,14 @@ mongoose.connect(DB_URI, {
 
 async function updateScaleValues() {
     try {
-        // Update all inquiries that have scale set to "Medium" (the old default) to null
+        // Update all inquiries that have scale set to "Medium" (the old default) to null (case-sensitive, exact match)
+        // Example: to update only exact, case-sensitive matches for any field (like Stage), use the same approach
         const result = await Inquiry.updateMany(
-            { scale: "Medium" },
-            { $unset: { scale: "" } }
+            { scale: { $eq: "Medium" } }, // $eq is case-sensitive and exact
+            { $set: { scale: null } }
         );
         
-        console.log(`Updated ${result.modifiedCount} inquiries - set scale to null/undefined`);
+        console.log(`Updated ${result.modifiedCount} inquiries - set scale to null (case-sensitive, exact match)`);
         process.exit(0);
     } catch (error) {
         console.error('Error updating scale values:', error);
