@@ -48,12 +48,18 @@ exports.getMistry = catchAsyncErrors(async(req, res, next)=>{
 exports.updateMistry = catchAsyncErrors(async(req, res, next)=>{
     const filter = req.user.role === "admin" ? { _id: req.params.id } : { _id: req.params.id, createdBy: req.user._id };
     
-    // For non-admin users, only allow updating remarks field
+    // For non-admin users, allow updating grade and remarks
     let updateData = req.body;
     if (req.user.role !== "admin") {
-        updateData = {
-            remarks: req.body.remarks
-        };
+        // Only allow non-admins to update grade, remarks
+        const mistry = await Mistry.findOne(filter);
+        if (!mistry) {
+            return next(new ErrorHander("Mistry not found", 404));
+        }
+        mistry.grade = req.body.grade ?? mistry.grade;
+        mistry.remarks = req.body.remarks ?? mistry.remarks;
+        await mistry.save();
+        return res.status(200).json({ mistry, success: true });
     }
 
     const mistry = await Mistry.findOneAndUpdate(filter, updateData, {

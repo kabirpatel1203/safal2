@@ -32,7 +32,10 @@ const normalizeInquiryDoc = (doc) => {
     );
     plain.rewardPoints = rewardValue;
     plain.revenue = rewardValue;
-    
+
+    // Always include scale field
+    plain.scale = doc.scale ?? plain.scale ?? "N/A";
+
     // Compute salesPerson: prioritize existing salesPerson, then legacy salesmen[0].name, then createdBy.name
     if (!plain.salesPerson || plain.salesPerson === "") {
         if (plain.salesmen && plain.salesmen.length > 0 && plain.salesmen[0].name) {
@@ -41,7 +44,7 @@ const normalizeInquiryDoc = (doc) => {
             plain.salesPerson = plain.createdBy.name;
         }
     }
-    
+
     return plain;
 };
 
@@ -195,12 +198,14 @@ exports.updateInquiry = catchAsyncErrors(async (req, res, next) => {
         return next(new ErrorHander("Inquiry not found", 404));
     }
 
-    // For non-admin users, only allow updating stage and requirement fields
+    // For non-admin users, only allow updating stage, requirement, and scale fields
     let updateData = req.body;
     if (req.user.role !== "admin") {
         updateData = {
             stage: req.body.stage,
-            requirement: req.body.requirement
+            requirement: req.body.requirement,
+            scale: req.body.scale,
+            remarks: req.body.remarks
         };
     }
     

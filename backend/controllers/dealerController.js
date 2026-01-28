@@ -47,12 +47,20 @@ exports.getDealer = catchAsyncErrors(async(req, res, next)=>{
 exports.updateDealer = catchAsyncErrors(async(req, res, next)=>{
     const filter = req.user.role === "admin" ? { _id: req.params.id } : { _id: req.params.id, createdBy: req.user._id };
     
-    // For non-admin users, only allow updating remarks field
+    // For non-admin users, allow updating SS, L, Grade, and remarks
     let updateData = req.body;
     if (req.user.role !== "admin") {
-        updateData = {
-            remarks: req.body.remarks
-        };
+        // Only allow non-admins to update SS, L, grade, remarks
+        const dealer = await Dealer.findOne(filter);
+        if (!dealer) {
+            return next(new ErrorHander("Dealer not found", 404));
+        }
+        dealer.SS = req.body.SS ?? dealer.SS;
+        dealer.L = req.body.L ?? dealer.L;
+        dealer.grade = req.body.grade ?? dealer.grade;
+        dealer.remarks = req.body.remarks ?? dealer.remarks;
+        await dealer.save();
+        return res.status(200).json({ dealer, success: true });
     }
 
     const dealer = await Dealer.findOneAndUpdate(filter, updateData, {

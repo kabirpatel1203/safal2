@@ -46,7 +46,6 @@ const DealerEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
     };
 
     const formHandler = (e) => {
-        e.preventDefault();
         setFormData({ ...formData, [e.target.name]: e.target.value })
     }
     const submitHandler = async (e) => {
@@ -128,7 +127,7 @@ pauseOnHover
                     <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.area} value={formData.area} name="area" placeholder='area' disabled={user.role !== "admin"} />
 
                     <label htmlFor='grade'>Grade</label>
-                    <select className={Styles.inputTag} onChange={(e) => { formHandler(e) }} value={formData.grade} name="grade" disabled={user.role !== "admin"}>
+                    <select className={Styles.inputTag} onChange={(e) => { formHandler(e) }} value={formData.grade} name="grade">
                         <option value="">Select Grade</option>
                         <option value="A">A</option>
                         <option value="B">B</option>
@@ -136,7 +135,7 @@ pauseOnHover
                     </select>
 
                     <label htmlFor='L'>L</label>
-                    <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.L} value={formData.L} name="L" type="number" placeholder='L (numbers only)' disabled={user.role !== "admin"} />
+                    <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.L} value={formData.L} name="L" type="number" placeholder='L (numbers only)' />
 
                     <label htmlFor='SS'>SS</label>
                     <ReactSelect className={Styles.inputTag}
@@ -144,13 +143,9 @@ pauseOnHover
                         isMulti
                         closeMenuOnSelect={false}
                         hideSelectedOptions={false}
-                        components={{
-                            Option
-                        }}
                         onChange={SSchangehandler}
                         allowSelectAll={true}
                         value={selectedSS}
-                        isDisabled={user.role !== "admin"}
                     />
 
                     

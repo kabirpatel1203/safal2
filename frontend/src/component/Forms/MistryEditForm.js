@@ -110,7 +110,7 @@ pauseOnHover
                     <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.area} value={formData.area} name="area" placeholder='area' disabled={user.role !== "admin"} />
 
                     <label htmlFor='grade'>Grade</label>
-                    <select className={Styles.inputTag} onChange={(e) => { formHandler(e) }} value={formData.grade} name="grade" disabled={user.role !== "admin"}>
+                    <select className={Styles.inputTag} onChange={(e) => { formHandler(e) }} value={formData.grade} name="grade">
                         <option value="">Select Grade</option>
                         <option value="A">A</option>
                         <option value="B">B</option>

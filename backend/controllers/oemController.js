@@ -49,12 +49,18 @@ exports.getOEM = catchAsyncErrors(async(req, res, next)=>{
 exports.updateOEM = catchAsyncErrors(async(req, res, next)=>{
     const filter = req.user.role === "admin" ? { _id: req.params.id } : { _id: req.params.id, createdBy: req.user._id };
     
-    // For non-admin users, only allow updating remarks field
+    // For non-admin users, allow updating grade and remarks
     let updateData = req.body;
     if (req.user.role !== "admin") {
-        updateData = {
-            remarks: req.body.remarks
-        };
+        // Only allow non-admins to update grade, remarks
+        const oem = await OEM.findOne(filter);
+        if (!oem) {
+            return next(new ErrorHander("OEM not found", 404));
+        }
+        oem.grade = req.body.grade ?? oem.grade;
+        oem.remarks = req.body.remarks ?? oem.remarks;
+        await oem.save();
+        return res.status(200).json({ oem, success: true });
     }
     
     const oem = await OEM.findOneAndUpdate(filter, updateData, {

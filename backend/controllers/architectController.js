@@ -49,12 +49,18 @@ exports.getArchitect = catchAsyncErrors(async(req, res, next)=>{
 exports.updateArchitect = catchAsyncErrors(async(req, res, next)=>{
     const filter = req.user.role === "admin" ? { _id: req.params.id } : { _id: req.params.id, createdBy: req.user._id };
     
-    // For non-admin users, only allow updating remarks field
+    // For non-admin users, allow updating grade and remarks
     let updateData = req.body;
     if (req.user.role !== "admin") {
-        updateData = {
-            remarks: req.body.remarks
-        };
+        // Only allow non-admins to update grade, remarks
+        const architect = await Architect.findOne(filter);
+        if (!architect) {
+            return next(new ErrorHander("Architect not found", 404));
+        }
+        architect.grade = req.body.grade ?? architect.grade;
+        architect.remarks = req.body.remarks ?? architect.remarks;
+        await architect.save();
+        return res.status(200).json({ architect, success: true });
     }
     
     const architect = await Architect.findOneAndUpdate(filter, updateData, {

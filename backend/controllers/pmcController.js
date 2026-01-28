@@ -48,12 +48,18 @@ exports.getPMC = catchAsyncErrors(async(req, res, next)=>{
 exports.updatePMC = catchAsyncErrors(async(req, res, next)=>{
     const filter = req.user.role === "admin" ? { _id: req.params.id } : { _id: req.params.id, createdBy: req.user._id };
     
-    // For non-admin users, only allow updating remarks field
+    // For non-admin users, allow updating grade and remarks
     let updateData = req.body;
     if (req.user.role !== "admin") {
-        updateData = {
-            remarks: req.body.remarks
-        };
+        // Only allow non-admins to update grade, remarks
+        const pmc = await PMC.findOne(filter);
+        if (!pmc) {
+            return next(new ErrorHander("PMC not found", 404));
+        }
+        pmc.grade = req.body.grade ?? pmc.grade;
+        pmc.remarks = req.body.remarks ?? pmc.remarks;
+        await pmc.save();
+        return res.status(200).json({ pmc, success: true });
     }
 
     const pmc = await PMC.findOneAndUpdate(filter, updateData, {
