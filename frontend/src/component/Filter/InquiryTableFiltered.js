@@ -294,17 +294,44 @@ const InquiryTableFlitered = ({ modalHandler, refresh }) => {
 
                     ]}
                     data={tabledata}
-                    options={{
-                        sorting: true,
-                        headerStyle: {
-                            zIndex: 0
-                        },
-                        showTitle: false,
-                        actionsColumnIndex: -1,
-                        filtering: true,
-                        exportButton:true
-
-                    }}
+                                        options={{
+                                                sorting: true,
+                                                headerStyle: {
+                                                        zIndex: 0
+                                                },
+                                                showTitle: false,
+                                                actionsColumnIndex: -1,
+                                                filtering: true,
+                                                exportButton: true,
+                                                exportCsv: (columns, data) => {
+                                                    // Only export the currently displayed (filtered) data
+                                                    const csvRows = [];
+                                                    const headers = columns.map(col => '"' + col.title + '"').join(',');
+                                                    csvRows.push(headers);
+                                                    data.forEach(row => {
+                                                        const values = columns.map(col => {
+                                                            let value = row[col.field];
+                                                            if (value === undefined || value === null) value = '';
+                                                            // Format date if needed
+                                                            if (col.type === 'date' && value) {
+                                                                try {
+                                                                    value = new Date(value).toLocaleDateString('en-GB');
+                                                                } catch (e) {}
+                                                            }
+                                                            return '"' + value + '"';
+                                                        });
+                                                        csvRows.push(values.join(','));
+                                                    });
+                                                    const csvContent = csvRows.join('\n');
+                                                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                                                    const link = document.createElement('a');
+                                                    link.href = URL.createObjectURL(blob);
+                                                    link.setAttribute('download', 'inquiries.csv');
+                                                    document.body.appendChild(link);
+                                                    link.click();
+                                                    document.body.removeChild(link);
+                                                }
+                                        }}
                     components={{
                         Container: props => <Paper {...props}
                             elevation={0}

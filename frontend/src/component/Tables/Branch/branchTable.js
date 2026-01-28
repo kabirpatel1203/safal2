@@ -185,35 +185,65 @@ const BranchTable = ({ modalHandler, refresh ,isOpen}) => {
                                 </Tooltip>
                             </Box>
                         )}
-                        renderTopToolbarCustomActions={({ table }) => (
-                            <Box
-                                sx={{
-                                    display: 'flex',
-                                    gap: '1rem',
-                                    p: '0.5rem',
-                                    flexWrap: 'wrap',
-                                    justifyContent: 'center',
-                                    width: '100%',
-                                }}
-                            >
-                                <Button
-                                    onClick={handleExportData}
-                                    startIcon={<FileDownloadIcon />}
-                                    variant="contained"
-                                    color="primary"
+                        renderTopToolbarCustomActions={({ table }) => {
+                              const visibleRows = table.getFilteredRowModel().rows.map(row => row.original);
+                            return (
+                                <Box
                                     sx={{
-                                        backgroundColor: 'rgba(37,99,235,0.08)',
-                                        color: '#1d4ed8',
-                                        boxShadow: 'none',
-                                        '&:hover': {
-                                            backgroundColor: 'rgba(37,99,235,0.16)',
-                                            boxShadow: 'none',
-                                        },
+                                        display: 'flex',
+                                        gap: '1rem',
+                                        p: '0.5rem',
+                                        flexWrap: 'wrap',
+                                        justifyContent: 'center',
+                                        width: '100%',
                                     }}
                                 >
-                                    Export Data
-                                </Button>
-                            </Box>)}
+                                    <Button
+                                        onClick={() => {
+                                            const columnsToExport = ops;
+                                            const csvRows = [];
+                                            const headers = columnsToExport.map(col => '"' + col.header + '"').join(',');
+                                            csvRows.push(headers);
+                                            visibleRows.forEach(row => {
+                                                const values = columnsToExport.map(col => {
+                                                    let value = row[col.accessorKey];
+                                                    if (value === undefined || value === null) value = '';
+                                                    if (col.type === 'date' && value) {
+                                                        try {
+                                                            value = new Date(value).toLocaleDateString('en-GB');
+                                                        } catch (e) {}
+                                                    }
+                                                    return '"' + value + '"';
+                                                });
+                                                csvRows.push(values.join(','));
+                                            });
+                                            const csvContent = csvRows.join('\n');
+                                            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                                            const link = document.createElement('a');
+                                            link.href = URL.createObjectURL(blob);
+                                            link.setAttribute('download', 'branches.csv');
+                                            document.body.appendChild(link);
+                                            link.click();
+                                            document.body.removeChild(link);
+                                        }}
+                                        startIcon={<FileDownloadIcon />}
+                                        variant="contained"
+                                        color="primary"
+                                        sx={{
+                                            backgroundColor: 'rgba(37,99,235,0.08)',
+                                            color: '#1d4ed8',
+                                            boxShadow: 'none',
+                                            '&:hover': {
+                                                backgroundColor: 'rgba(37,99,235,0.16)',
+                                                boxShadow: 'none',
+                                            },
+                                        }}
+                                    >
+                                        Export Data
+                                    </Button>
+                                </Box>
+                            );
+                        }}
 
                     />
                 }
