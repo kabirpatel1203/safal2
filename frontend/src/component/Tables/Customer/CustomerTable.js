@@ -179,6 +179,20 @@ const CustomerTable = ({ modalHandler, refresh, isOpen }) => {
     fetchCustomers();
   }, [refresh]);
 
+  // Refresh customers when an inquiry is moved into customers elsewhere in the app
+  useEffect(() => {
+    const handler = async (e) => {
+      try {
+        // Prefer fetching fresh list so filtering/normalization stays consistent
+        await fetchCustomers();
+      } catch (err) {
+        console.error('Error refreshing customers after move:', err);
+      }
+    };
+    window.addEventListener('customerMoved', handler);
+    return () => window.removeEventListener('customerMoved', handler);
+  }, []);
+
   // Removed auto-apply useEffect - filters now only apply on Submit button click
 
   const handleCallbackCreate = async (childData) => {

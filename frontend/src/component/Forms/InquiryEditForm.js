@@ -233,6 +233,14 @@ const InquiryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
             
             if (response.data.movedToCustomer) {
                 toast.success("Inquiry qualified and moved to Customers!");
+                // Notify other parts of the app (Customer list) that a new customer was created
+                try {
+                    // include created customer in the event so listeners can update optimally
+                    const created = response.data.customer || null;
+                    window.dispatchEvent(new CustomEvent('customerMoved', { detail: created }));
+                } catch (e) {
+                    // ignore dispatch errors
+                }
             } else {
                 toast.success("Inquiry updated successfully");
             }
