@@ -168,9 +168,7 @@ const ArchitecTable = ({ modalHandler, refresh, isOpen }) => {
   const handleCallbackCreate = async(childData) => {
 
     toast.success("Architect edited");
-    const { data } = await axios.get("/api/v1/architect/getall");
-    setOriginalData(data.architects);
-    // fetchArchitect();
+    await fetchArchitect();
     window.scrollTo(0, 0)
   }
 

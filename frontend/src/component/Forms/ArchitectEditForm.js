@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import Select from 'react-select';
 import Styles from './ArchitectCreateForm.module.css'
 import { AiFillCloseCircle } from 'react-icons/ai'
 import axios from "axios"
@@ -24,6 +25,23 @@ const ArchitectEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) =>
     let id = data._id;
     const [formData, setFormData] = useState(initialState)
     const [isDisabled, setIsDisabled] = useState(false);
+    const [salesPersons, setSalesPersons] = useState([]);
+    const [selectedSalesPerson, setSelectedSalesPerson] = useState((data.createdBy && data.createdBy._id) ? data.createdBy._id : null);
+    const salesPersonDisplayName = data.salesPerson || (data.createdBy && data.createdBy.name) || (data.salesmen && data.salesmen.length > 0 ? data.salesmen[0].name : '');
+    // Fetch all users with 'user' role for dropdown
+    useEffect(() => {
+        if (user.role === "admin") {
+            axios.get('/api/v1/salespersons', { withCredentials: true })
+                .then(res => {
+                    console.log('salespersons api res', res);
+                    setSalesPersons(res.data.users.map(u => ({ value: u._id, label: u.name })));
+                })
+                .catch((err) => {
+                    console.error('failed to load salespersons', err);
+                    setSalesPersons([]);
+                });
+        }
+    }, [user]);
 
     const formHandler = (e) => {
         e.preventDefault();
@@ -32,12 +50,12 @@ const ArchitectEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) =>
     const submitHandler = async (e) => {
         e.preventDefault();
         setIsDisabled(true);
-        let data = {
+        let dataToUpdate = {
             name: formData.name,
             email: formData.email,
             mobileno: formData.mobileno,
             address: formData.address,
-            area:formData.area,
+            area: formData.area,
             grade: formData.grade || null,
             companyName: formData.companyName,
             birthdate: formData.birthdate,
@@ -49,22 +67,26 @@ const ArchitectEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) =>
             pancard: formData.pancard,
             date: formData.date,
             IFSCcode: formData.IFSCcode
-        }
-        console.log(data)
+        };
         try {
-            const response = await axios.put(`/api/v1/architect/update/${id}`, data, { headers: { "Content-Type": "application/json" } });
-            console.log(response);
-            // toast.success("Architech is Edited ");
+            // If admin changed sales person, call special API
+            if (user.role === "admin" && selectedSalesPerson && selectedSalesPerson !== (data.createdBy && data.createdBy._id ? data.createdBy._id : null)) {
+                const resp = await axios.put('/api/v1/architect/change-salesperson', {
+                    architectId: data._id,
+                    newSalesPersonId: selectedSalesPerson
+                }, { withCredentials: true });
+                if (resp.data && resp.data.success) {
+                    toast.success(`Reassigned to ${resp.data.newSalesPerson}`);
+                }
+            }
+            // Always update architect details
+            await axios.put(`/api/v1/architect/update/${id}`, dataToUpdate, { headers: { "Content-Type": "application/json" }, withCredentials: true });
             parentCallback();
             setIsOpen(false);
-
-        }
-        catch (e) {
-            toast.error(e.response.data.message);
-            console.log(e.response.data.message)
+        } catch (e) {
+            toast.error(e.response?.data?.message || 'Error updating architect');
             setIsDisabled(false);
         }
-
     }
     
     return (
@@ -132,9 +154,19 @@ pauseOnHover
                     <label htmlFor='companyName'>Company Name</label>
                     <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.companyName} name="companyName" placeholder='Company Name' disabled={user.role !== "admin"} />
 
-                    {/* Sales Person is auto-assigned and cannot be edited */}
                     <label>Sales Person</label>
-                    <input className={Styles.inputTag} value={data.salesPerson || (data.salesmen && data.salesmen.length > 0 ? data.salesmen[0].name : '')} disabled={true} />
+                    {user.role === "admin" ? (
+                        <Select
+                            className={Styles.inputTag}
+                            value={salesPersons.find(opt => opt.value === selectedSalesPerson) || null}
+                            onChange={opt => setSelectedSalesPerson(opt.value)}
+                            options={salesPersons}
+                            isClearable={false}
+                            placeholder="Select Sales Person"
+                        />
+                    ) : (
+                        <input className={Styles.inputTag} value={salesPersonDisplayName} disabled={true} />
+                    )}
                 </div>
             </div>
 

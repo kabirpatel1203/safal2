@@ -12,6 +12,7 @@ const {
   getSingleUser,
   updateUserRole,
   deleteUser,
+  getAllSalesPersons,
 } = require("../controllers/userController");
 const { isAuthenticatedUser, authorizeRoles } = require("../middleware/auth");
 const router = express.Router()
@@ -27,6 +28,9 @@ router.route("/me").get(isAuthenticatedUser, getUserDetails);
 router.route("/password/update").put(isAuthenticatedUser, updatePassword);
 
 router.route("/me/update").put(isAuthenticatedUser, updateProfile);
+
+// Get all users with role 'user' (sales persons)
+router.route("/salespersons").get(isAuthenticatedUser, authorizeRoles("admin"), getAllSalesPersons);
 
 // router
 //   .route("/admin/users")

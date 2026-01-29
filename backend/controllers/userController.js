@@ -243,3 +243,12 @@ exports.deleteUser = catchAsyncErrors(async (req, res, next) => {
     message: "User Deleted Successfully",
   });
 });
+
+// Get all users with role 'user' -- Admin
+exports.getAllSalesPersons = catchAsyncErrors(async (req, res, next) => {
+  const users = await User.find({ role: "user" }, "_id name email");
+  res.status(200).json({
+    success: true,
+    users,
+  });
+});

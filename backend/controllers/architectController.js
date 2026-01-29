@@ -1,6 +1,7 @@
 const ErrorHander = require("../utils/errorhander");
 const catchAsyncErrors = require("../middleware/catchAsyncError");
-const Architect = require("../models/architectModel")
+const Architect = require("../models/architectModel");
+const User = require("../models/userModel");
 
 exports.totalarchitect = catchAsyncErrors(async(req, res, next)=>{
     const filter = req.user.role === "admin" ? {} : { createdBy: req.user._id };
@@ -63,6 +64,13 @@ exports.updateArchitect = catchAsyncErrors(async(req, res, next)=>{
         return res.status(200).json({ architect, success: true });
     }
     
+    // Prevent accidental overwrite of ownership or salesPerson via generic update
+    if (updateData) {
+        delete updateData.createdBy;
+        delete updateData.salesPerson;
+        delete updateData.salesmen;
+    }
+
     const architect = await Architect.findOneAndUpdate(filter, updateData, {
         new:true,
         runValidators:true,
@@ -106,3 +114,44 @@ exports.getAllArchitect = catchAsyncErrors(async(req, res, next)=>{
         success:true
        })
 })
+
+// Admin: Change sales person for an architect
+exports.changeArchitectSalesPerson = catchAsyncErrors(async (req, res, next) => {
+    const { architectId, newSalesPersonId } = req.body;
+    // Find the architect
+    const architect = await Architect.findById(architectId);
+    if (!architect) {
+        return next(new ErrorHander("Architect not found", 404));
+    }
+
+    // Find the new sales person user
+    const newUser = await User.findById(newSalesPersonId);
+    if (!newUser) {
+        return next(new ErrorHander("Sales person user not found", 404));
+    }
+    // Ensure the target user has role 'user'
+    if (newUser.role !== 'user') {
+        return next(new ErrorHander('New sales person must have role "user"', 400));
+    }
+
+    const oldSalesPerson = architect.salesPerson;
+
+    // Update the createdBy (owner) and salesPerson name
+    architect.createdBy = newUser._id;
+    architect.salesPerson = newUser.name;
+
+    await architect.save();
+
+    // re-fetch architect with populated createdBy for clarity
+    const updatedArchitect = await Architect.findById(architect._id).populate('createdBy', 'name email');
+    const oldCreatedBy = architect.createdBy; // before change saved this is newUser._id, so capture old via earlier value isn't available here
+    console.log(`Architect ${architect._id} reassigned to '${newUser.name}' by admin ${req.user && req.user._id}`);
+
+    res.status(200).json({
+        success: true,
+        architect: updatedArchitect,
+        oldSalesPerson,
+        newSalesPerson: newUser.name,
+        newCreatedBy: newUser._id,
+    });
+});
