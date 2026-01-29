@@ -1,6 +1,7 @@
 const ErrorHander = require("../utils/errorhander");
 const catchAsyncErrors = require("../middleware/catchAsyncError");
 const OEM = require("../models/oemModel")
+const User = require("../models/userModel")
 
 exports.totaloem = catchAsyncErrors(async(req, res, next)=>{
     const filter = req.user.role === "admin" ? {} : { createdBy: req.user._id };
@@ -63,6 +64,12 @@ exports.updateOEM = catchAsyncErrors(async(req, res, next)=>{
         return res.status(200).json({ oem, success: true });
     }
     
+    if (updateData) {
+        delete updateData.createdBy;
+        delete updateData.salesPerson;
+        delete updateData.salesmen;
+    }
+
     const oem = await OEM.findOneAndUpdate(filter, updateData, {
         new:true,
         runValidators:true,
@@ -77,6 +84,22 @@ exports.updateOEM = catchAsyncErrors(async(req, res, next)=>{
         success:true
        })
 })
+
+// Admin: Change sales person for an OEM
+exports.changeOemSalesPerson = catchAsyncErrors(async (req, res, next) => {
+    const { oemId, newSalesPersonId } = req.body;
+    const oem = await OEM.findById(oemId);
+    if (!oem) return next(new ErrorHander("OEM not found", 404));
+    const newUser = await User.findById(newSalesPersonId);
+    if (!newUser) return next(new ErrorHander("Sales person user not found", 404));
+    if (newUser.role !== 'user') return next(new ErrorHander('New sales person must have role "user"', 400));
+
+    oem.createdBy = newUser._id;
+    oem.salesPerson = newUser.name;
+    await oem.save();
+    const updated = await OEM.findById(oem._id).populate('createdBy', 'name email');
+    res.status(200).json({ success: true, oem: updated, newSalesPerson: newUser.name, newCreatedBy: newUser._id });
+});
 
 exports.deleteOEM = catchAsyncErrors(async(req, res, next)=>{
     const oem = await OEM.findOneAndDelete({mobileno:req.params.id});

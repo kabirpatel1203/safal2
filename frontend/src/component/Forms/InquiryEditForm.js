@@ -166,6 +166,16 @@ const InquiryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
     const [formData, setFormData] = useState(initialState)
     const [isDisabled, setIsDisabled] = useState(false);
     const { user, isAuthenticated } = useSelector((state) => state.user);
+    const [salesPersons, setSalesPersons] = useState([]);
+    const [selectedSalesPerson, setSelectedSalesPerson] = useState((data.createdBy && data.createdBy._id) ? data.createdBy._id : null);
+
+    useEffect(() => {
+        if (user.role === "admin") {
+            axios.get('/api/v1/salespersons', { withCredentials: true })
+                .then(res => setSalesPersons(res.data.users.map(u => ({ value: u._id, label: u.name }))))
+                .catch(() => setSalesPersons([]));
+        }
+    }, [user]);
     const formHandler = (e) => {
         e.preventDefault();
         setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -182,7 +192,7 @@ const InquiryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
     const submitHandler = async (e) => {
         e.preventDefault();
         setIsDisabled(true);
-        let data = {
+        let payload = {
             name: formData.name,
             email: formData.email,
             mobileno: formData.mobileno,
@@ -213,9 +223,12 @@ const InquiryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
             remarks:formData.remarks
 
         }
-        console.log(data)
+        console.log(payload)
         try {
-            const response = await axios.put(`/api/v1/inquiry/update/${id}`, data, { headers: { "Content-Type": "application/json" } });
+            if (user.role === "admin" && selectedSalesPerson && selectedSalesPerson !== (data.createdBy && data.createdBy._id ? data.createdBy._id : null)) {
+                await axios.put('/api/v1/inquiry/change-salesperson', { inquiryId: id, newSalesPersonId: selectedSalesPerson }, { withCredentials: true });
+            }
+            const response = await axios.put(`/api/v1/inquiry/update/${id}`, payload, { headers: { "Content-Type": "application/json" }, withCredentials: true });
             console.log(response);
             
             if (response.data.movedToCustomer) {
@@ -413,6 +426,19 @@ const InquiryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
                     <label>Stage</label>
                     <Select selectedValue={formData.stage} onChange={(e) => Stagehandler(e)} options={stage} defaultInputValue={initialState.stage} />
                     
+                    <label>Sales Person</label>
+                    {user.role === "admin" ? (
+                        <Select
+                            className={Styles.inputTag}
+                            value={salesPersons.find(opt => opt.value === selectedSalesPerson) || null}
+                            onChange={opt => setSelectedSalesPerson(opt.value)}
+                            options={salesPersons}
+                            isClearable={false}
+                        />
+                    ) : (
+                        <input className={Styles.inputTag} value={data.salesPerson || (data.salesmen && data.salesmen.length > 0 ? data.salesmen[0].name : '')} disabled={true} />
+                    )}
+
                     <label>Scale</label>
                     <Select selectedValue={formData.scale} onChange={(e) => Scalehandler(e)} options={scale} defaultInputValue={initialState.scale} />
                 </div>

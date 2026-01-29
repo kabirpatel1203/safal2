@@ -2,6 +2,7 @@ const ErrorHander = require("../utils/errorhander");
 const catchAsyncErrors = require("../middleware/catchAsyncError");
 const Inquiry = require("../models/inquiryModel")
 const Customer = require("../models/customerModel")
+const User = require("../models/userModel")
 
 const parseRewardValue = (rawValue) => {
     const value = rawValue ?? 0;
@@ -212,6 +213,9 @@ exports.updateInquiry = catchAsyncErrors(async (req, res, next) => {
     
     // Remove salesmen from update data - we don't use it anymore
     delete updateData.salesmen;
+    // Prevent overwriting owner/salesPerson via generic update - admin should use change-salesperson endpoint
+    delete updateData.createdBy;
+    delete updateData.salesPerson;
 
     // Apply incoming changes and save
     Object.assign(existingInquiry, updateData);
@@ -304,6 +308,22 @@ exports.updateInquiry = catchAsyncErrors(async (req, res, next) => {
         success: true
     })
 })
+
+// Admin: Change sales person for an Inquiry
+exports.changeInquirySalesPerson = catchAsyncErrors(async (req, res, next) => {
+    const { inquiryId, newSalesPersonId } = req.body;
+    const inquiry = await Inquiry.findById(inquiryId);
+    if (!inquiry) return next(new ErrorHander("Inquiry not found", 404));
+    const newUser = await User.findById(newSalesPersonId);
+    if (!newUser) return next(new ErrorHander("Sales person user not found", 404));
+    if (newUser.role !== 'user') return next(new ErrorHander('New sales person must have role "user"', 400));
+
+    inquiry.createdBy = newUser._id;
+    inquiry.salesPerson = newUser.name;
+    await inquiry.save();
+    const updated = await Inquiry.findById(inquiry._id).populate('createdBy', 'name email');
+    res.status(200).json({ success: true, inquiry: normalizeInquiryDoc(updated), newSalesPerson: newUser.name, newCreatedBy: newUser._id });
+});
 
 exports.deleteInquiry = catchAsyncErrors(async (req, res, next) => {
     // const inquiry = await Inquiry.findByIdAndDelete(t);

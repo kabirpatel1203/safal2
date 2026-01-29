@@ -1,6 +1,7 @@
 const ErrorHander = require("../utils/errorhander");
 const catchAsyncErrors = require("../middleware/catchAsyncError");
 const Mistry = require("../models/mistryModel")
+const User = require("../models/userModel")
 
 
 exports.totalMistry = catchAsyncErrors(async(req, res, next)=>{
@@ -62,11 +63,16 @@ exports.updateMistry = catchAsyncErrors(async(req, res, next)=>{
         return res.status(200).json({ mistry, success: true });
     }
 
+    if (updateData) {
+        delete updateData.createdBy;
+        delete updateData.salesPerson;
+        delete updateData.salesmen;
+    }
+
     const mistry = await Mistry.findOneAndUpdate(filter, updateData, {
         new:true,
         runValidators:true,
         useFindAndModify:false
- 
     });
 
     if (!mistry) {
@@ -78,6 +84,22 @@ exports.updateMistry = catchAsyncErrors(async(req, res, next)=>{
         success:true
        })
 })
+
+// Admin: Change sales person for a Mistry
+exports.changeMistrySalesPerson = catchAsyncErrors(async (req, res, next) => {
+    const { mistryId, newSalesPersonId } = req.body;
+    const mistry = await Mistry.findById(mistryId);
+    if (!mistry) return next(new ErrorHander("Mistry not found", 404));
+    const newUser = await User.findById(newSalesPersonId);
+    if (!newUser) return next(new ErrorHander("Sales person user not found", 404));
+    if (newUser.role !== 'user') return next(new ErrorHander('New sales person must have role "user"', 400));
+
+    mistry.createdBy = newUser._id;
+    mistry.salesPerson = newUser.name;
+    await mistry.save();
+    const updated = await Mistry.findById(mistry._id).populate('createdBy', 'name email');
+    res.status(200).json({ success: true, mistry: updated, newSalesPerson: newUser.name, newCreatedBy: newUser._id });
+});
 
 exports.deleteMistry = catchAsyncErrors(async(req, res, next)=>{
     const mistery = await Mistry.findOneAndDelete({mobileno:req.params.id});

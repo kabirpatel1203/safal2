@@ -1,6 +1,7 @@
 const ErrorHander = require("../utils/errorhander");
 const catchAsyncErrors = require("../middleware/catchAsyncError");
 const Dealer = require("../models/dealerModel")
+const User = require("../models/userModel")
 
 
 exports.totalDealer = catchAsyncErrors(async(req, res, next)=>{
@@ -63,6 +64,12 @@ exports.updateDealer = catchAsyncErrors(async(req, res, next)=>{
         return res.status(200).json({ dealer, success: true });
     }
 
+    if (updateData) {
+        delete updateData.createdBy;
+        delete updateData.salesPerson;
+        delete updateData.salesmen;
+    }
+
     const dealer = await Dealer.findOneAndUpdate(filter, updateData, {
         new:true,
         runValidators:true,
@@ -78,6 +85,22 @@ exports.updateDealer = catchAsyncErrors(async(req, res, next)=>{
         success:true
        })
 })
+
+// Admin: Change sales person for a Dealer
+exports.changeDealerSalesPerson = catchAsyncErrors(async (req, res, next) => {
+    const { dealerId, newSalesPersonId } = req.body;
+    const dealer = await Dealer.findById(dealerId);
+    if (!dealer) return next(new ErrorHander("Dealer not found", 404));
+    const newUser = await User.findById(newSalesPersonId);
+    if (!newUser) return next(new ErrorHander("Sales person user not found", 404));
+    if (newUser.role !== 'user') return next(new ErrorHander('New sales person must have role "user"', 400));
+
+    dealer.createdBy = newUser._id;
+    dealer.salesPerson = newUser.name;
+    await dealer.save();
+    const updated = await Dealer.findById(dealer._id).populate('createdBy', 'name email');
+    res.status(200).json({ success: true, dealer: updated, newSalesPerson: newUser.name, newCreatedBy: newUser._id });
+});
 
 exports.deleteDealer = catchAsyncErrors(async(req, res, next)=>{
     const dealer = await Dealer.findByIdAndDelete(req.params.id);

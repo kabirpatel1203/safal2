@@ -3,6 +3,7 @@ import Styles from './ArchitectCreateForm.module.css'
 import { AiFillCloseCircle } from 'react-icons/ai'
 import axios from "axios"
 import { ToastContainer, toast } from 'react-toastify'
+import Select from 'react-select';
 import { useSelector } from 'react-redux'
 
 const MistryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
@@ -29,6 +30,16 @@ const MistryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
     let id = data._id;
     const [formData, setFormData] = useState(initialState)
     const [isDisabled, setIsDisabled] = useState(false);
+    const [salesPersons, setSalesPersons] = useState([]);
+    const [selectedSalesPerson, setSelectedSalesPerson] = useState((data.createdBy && data.createdBy._id) ? data.createdBy._id : null);
+
+    useEffect(() => {
+        if (user.role === "admin") {
+            axios.get('/api/v1/salespersons', { withCredentials: true })
+                .then(res => setSalesPersons(res.data.users.map(u => ({ value: u._id, label: u.name }))))
+                .catch(() => setSalesPersons([]));
+        }
+    }, [user]);
     const formHandler = (e) => {
         e.preventDefault();
         setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -37,7 +48,7 @@ const MistryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
     const submitHandler = async (e) => {
         e.preventDefault();
         setIsDisabled(true);
-        let data = {
+        let payload = {
             name: formData.name,
             email: formData.email,
             mobileno: formData.mobileno,
@@ -56,9 +67,12 @@ const MistryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
             branchname: formData.branchname
 
         }
-        console.log(data)
+        console.log(payload)
         try {
-            const response = await axios.put(`/api/v1/mistry/update/${id}`, data, { headers: { "Content-Type": "application/json" } });
+            if (user.role === "admin" && selectedSalesPerson && selectedSalesPerson !== (data.createdBy && data.createdBy._id ? data.createdBy._id : null)) {
+                await axios.put('/api/v1/mistry/change-salesperson', { mistryId: id, newSalesPersonId: selectedSalesPerson }, { withCredentials: true });
+            }
+            const response = await axios.put(`/api/v1/mistry/update/${id}`, payload, { headers: { "Content-Type": "application/json" }, withCredentials: true });
             console.log(response);
             // toast.success("Mistrty is Edited ");
             parentCallback();
@@ -135,9 +149,18 @@ pauseOnHover
                     <label htmlFor='companyName'>Company Name</label>
                     <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.companyName} name="companyName" placeholder='Company Name' disabled={user.role !== "admin"} />
 
-                    {/* Sales Person is auto-assigned and cannot be edited */}
                     <label>Sales Person</label>
-                    <input className={Styles.inputTag} value={data.salesPerson || (data.salesmen && data.salesmen.length > 0 ? data.salesmen[0].name : '')} disabled={true} />
+                    {user.role === "admin" ? (
+                        <Select
+                            className={Styles.inputTag}
+                            value={salesPersons.find(opt => opt.value === selectedSalesPerson) || null}
+                            onChange={opt => setSelectedSalesPerson(opt.value)}
+                            options={salesPersons}
+                            isClearable={false}
+                        />
+                    ) : (
+                        <input className={Styles.inputTag} value={data.salesPerson || (data.salesmen && data.salesmen.length > 0 ? data.salesmen[0].name : '')} disabled={true} />
+                    )}
                 </div>
             </div>
 

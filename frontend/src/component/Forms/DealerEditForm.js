@@ -33,6 +33,16 @@ const DealerEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
     let id = data._id;
     const [formData, setFormData] = useState(initialState)
     const [isDisabled, setIsDisabled] = useState(false);
+    const [salesPersons, setSalesPersons] = useState([]);
+    const [selectedSalesPerson, setSelectedSalesPerson] = useState((data.createdBy && data.createdBy._id) ? data.createdBy._id : null);
+
+    useEffect(() => {
+        if (user.role === "admin") {
+            axios.get('/api/v1/salespersons', { withCredentials: true })
+                .then(res => setSalesPersons(res.data.users.map(u => ({ value: u._id, label: u.name }))))
+                .catch(() => setSalesPersons([]));
+        }
+    }, [user]);
     const [selectedSS, setSelectedSS] = useState(
         (data.SS || []).map(item => ({ value: item, label: item }))
     );
@@ -51,7 +61,7 @@ const DealerEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
     const submitHandler = async (e) => {
         e.preventDefault();
         setIsDisabled(true);
-        let data = {
+        let payload = {
             name: formData.name,
             email: formData.email,
             mobileno: formData.mobileno,
@@ -72,9 +82,12 @@ const DealerEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
             IFSCcode: formData.IFSCcode
 
         }
-        console.log(data)
+        console.log(payload)
         try {
-            const response = await axios.put(`/api/v1/dealer/update/${id}`, data, { headers: { "Content-Type": "application/json" } });
+            if (user.role === "admin" && selectedSalesPerson && selectedSalesPerson !== (data.createdBy && data.createdBy._id ? data.createdBy._id : null)) {
+                await axios.put('/api/v1/dealer/change-salesperson', { dealerId: id, newSalesPersonId: selectedSalesPerson }, { withCredentials: true });
+            }
+            const response = await axios.put(`/api/v1/dealer/update/${id}`, payload, { headers: { "Content-Type": "application/json" }, withCredentials: true });
             console.log(response);
             // toast.success("dealer is Edited ");
             parentCallback();
@@ -167,9 +180,19 @@ pauseOnHover
                     <label htmlFor='companyName'>Company Name</label>
                     <input className={Styles.inputTag} onChange={(e) => { formHandler(e) }} defaultValue={formData.companyName} name="companyName" placeholder='Company Name' disabled={user.role !== "admin"} />
 
-                    {/* Sales Person is auto-assigned and cannot be edited */}
+                    {/* Sales Person */}
                     <label>Sales Person</label>
-                    <input className={Styles.inputTag} value={data.salesPerson || (data.salesmen && data.salesmen.length > 0 ? data.salesmen[0].name : '')} disabled={true} />
+                    {user.role === "admin" ? (
+                        <Select
+                            className={Styles.inputTag}
+                            value={salesPersons.find(opt => opt.value === selectedSalesPerson) || null}
+                            onChange={opt => setSelectedSalesPerson(opt.value)}
+                            options={salesPersons}
+                            isClearable={false}
+                        />
+                    ) : (
+                        <input className={Styles.inputTag} value={data.salesPerson || (data.salesmen && data.salesmen.length > 0 ? data.salesmen[0].name : '')} disabled={true} />
+                    )}
                 </div>
             </div>
 

@@ -1,6 +1,7 @@
 const ErrorHander = require("../utils/errorhander");
 const catchAsyncErrors = require("../middleware/catchAsyncError");
 const PMC = require("../models/pmcModel")
+const User = require("../models/userModel")
 
 
 exports.totalPMC = catchAsyncErrors(async(req, res, next)=>{
@@ -62,6 +63,12 @@ exports.updatePMC = catchAsyncErrors(async(req, res, next)=>{
         return res.status(200).json({ pmc, success: true });
     }
 
+    if (updateData) {
+        delete updateData.createdBy;
+        delete updateData.salesPerson;
+        delete updateData.salesmen;
+    }
+
     const pmc = await PMC.findOneAndUpdate(filter, updateData, {
         new:true,
         runValidators:true,
@@ -78,6 +85,22 @@ exports.updatePMC = catchAsyncErrors(async(req, res, next)=>{
         success:true
        })
 })
+
+// Admin: Change sales person for a PMC
+exports.changePMCSalesPerson = catchAsyncErrors(async (req, res, next) => {
+    const { pmcId, newSalesPersonId } = req.body;
+    const pmc = await PMC.findById(pmcId);
+    if (!pmc) return next(new ErrorHander("PMC not found", 404));
+    const newUser = await User.findById(newSalesPersonId);
+    if (!newUser) return next(new ErrorHander("Sales person user not found", 404));
+    if (newUser.role !== 'user') return next(new ErrorHander('New sales person must have role "user"', 400));
+
+    pmc.createdBy = newUser._id;
+    pmc.salesPerson = newUser.name;
+    await pmc.save();
+    const updated = await PMC.findById(pmc._id).populate('createdBy', 'name email');
+    res.status(200).json({ success: true, pmc: updated, newSalesPerson: newUser.name, newCreatedBy: newUser._id });
+});
 
 exports.deletePMC = catchAsyncErrors(async(req, res, next)=>{
     const pmc = await PMC.findByIdAndDelete(req.params.id);
