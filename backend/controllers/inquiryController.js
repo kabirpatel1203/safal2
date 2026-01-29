@@ -97,7 +97,16 @@ exports.createInquiry = catchAsyncErrors(async (req, res, next) => {
         // Check if customer already exists
         let existingCustomer = await Customer.findOne({ mobileno: inquiryData.mobileno });
         
-        if (!existingCustomer) {
+        if (existingCustomer) {
+            console.log(`Customer already exists for ${inquiryData.mobileno}, returning existing customer`);
+            return res.status(200).json({
+                success: true,
+                movedToCustomer: true,
+                customer: existingCustomer
+            });
+        }
+
+        try {
             const createdCustomer = await Customer.create({
                 name: inquiryData.name,
                 email: inquiryData.email,
@@ -141,6 +150,9 @@ exports.createInquiry = catchAsyncErrors(async (req, res, next) => {
                 movedToCustomer: true,
                 customer: createdCustomer
             });
+        } catch (err) {
+            console.error('Failed creating customer from qualified inquiry', err);
+            return next(new ErrorHander('Failed to create customer from qualified inquiry', 500));
         }
 
     }
@@ -236,9 +248,9 @@ exports.updateInquiry = catchAsyncErrors(async (req, res, next) => {
 
     console.log(`Inquiry stage after save: "${inquiry.stage}"`);
 
-    // If inquiry is (now) qualified, move it to Customer using a transaction
+    // If inquiry is (now) qualified, move it to Customer (non-transactional fallback)
     if (inquiry.stage === "Qualified") {
-        console.log(`Moving inquiry ${inquiry._id} to Customer (transaction)...`);
+        console.log(`Moving inquiry ${inquiry._id} to Customer...`);
 
         const rewardValue = parseRewardValue(
             inquiry.rewardPoints ??
@@ -253,75 +265,65 @@ exports.updateInquiry = catchAsyncErrors(async (req, res, next) => {
             salesPersonValue = inquiry.salesmen[0].name;
         }
 
-        const session = await mongoose.startSession();
-        let responseCustomer = null;
         try {
-            await session.withTransaction(async () => {
-                // Re-check for existing customer inside transaction/session
-                const existingCustomer = await Customer.findOne({ mobileno: inquiry.mobileno }).session(session);
-                if (existingCustomer) {
-                    responseCustomer = existingCustomer;
-                    console.log(`Customer already exists for ${inquiry.mobileno}`);
-                } else {
-                    // create new customer within session
-                    const createdArr = await Customer.create([
-                        {
-                            name: inquiry.name,
-                            email: inquiry.email,
-                            mobileno: inquiry.mobileno,
-                            address: inquiry.address,
-                            area: inquiry.area,
-                            birthdate: inquiry.birthdate,
-                            marriagedate: inquiry.marriagedate,
-                            revenue: rewardValue,
-                            rewardPoints: rewardValue,
-                            date: inquiry.date,
-                            followupdate: inquiry.followupdate,
-                            requirement: inquiry.requirement,
-                            remarks: inquiry.remarks,
-                            scale: inquiry.scale,
-                            mistryTag: inquiry.mistryTag,
-                            mistryName: inquiry.mistryName,
-                            mistryNumber: inquiry.mistryNumber,
-                            architectTag: inquiry.architectTag,
-                            architectName: inquiry.architectName,
-                            architectNumber: inquiry.architectNumber,
-                            dealerTag: inquiry.dealerTag,
-                            dealerName: inquiry.dealerName,
-                            dealerNumber: inquiry.dealerNumber,
-                            pmcTag: inquiry.pmcTag,
-                            pmcName: inquiry.pmcName,
-                            pmcNumber: inquiry.pmcNumber,
-                            oemTag: inquiry.oemTag,
-                            oemName: inquiry.oemName,
-                            oemNumber: inquiry.oemNumber,
-                            branches: inquiry.branches,
-                            salesmen: [],
-                            salesPerson: salesPersonValue,
-                            // set the actor performing the move as the owner of the new customer
-                            createdBy: req.user._id,
-                        }
-                    ], { session });
-                    responseCustomer = createdArr[0];
-                    console.log(`Created customer ${responseCustomer._id} from inquiry ${inquiry.mobileno}`);
-                }
+            // Re-check for existing customer
+            let responseCustomer = await Customer.findOne({ mobileno: inquiry.mobileno });
+            if (responseCustomer) {
+                console.log(`Customer already exists for ${inquiry.mobileno}`);
+            } else {
+                // create new customer
+                responseCustomer = await Customer.create({
+                    name: inquiry.name,
+                    email: inquiry.email,
+                    mobileno: inquiry.mobileno,
+                    address: inquiry.address,
+                    area: inquiry.area,
+                    birthdate: inquiry.birthdate,
+                    marriagedate: inquiry.marriagedate,
+                    revenue: rewardValue,
+                    rewardPoints: rewardValue,
+                    date: inquiry.date,
+                    followupdate: inquiry.followupdate,
+                    requirement: inquiry.requirement,
+                    remarks: inquiry.remarks,
+                    scale: inquiry.scale,
+                    mistryTag: inquiry.mistryTag,
+                    mistryName: inquiry.mistryName,
+                    mistryNumber: inquiry.mistryNumber,
+                    architectTag: inquiry.architectTag,
+                    architectName: inquiry.architectName,
+                    architectNumber: inquiry.architectNumber,
+                    dealerTag: inquiry.dealerTag,
+                    dealerName: inquiry.dealerName,
+                    dealerNumber: inquiry.dealerNumber,
+                    pmcTag: inquiry.pmcTag,
+                    pmcName: inquiry.pmcName,
+                    pmcNumber: inquiry.pmcNumber,
+                    oemTag: inquiry.oemTag,
+                    oemName: inquiry.oemName,
+                    oemNumber: inquiry.oemNumber,
+                    branches: inquiry.branches,
+                    salesmen: [],
+                    salesPerson: salesPersonValue,
+                    // set the actor performing the move as the owner of the new customer
+                    createdBy: req.user._id,
+                });
+                console.log(`Created customer ${responseCustomer._id} from inquiry ${inquiry.mobileno}`);
+            }
 
-                // Delete the inquiry inside the same transaction
-                await Inquiry.findByIdAndDelete(inquiry._id, { session });
-                console.log(`Deleted inquiry ${inquiry._id} in transaction`);
+            // Delete the inquiry after customer creation (best-effort)
+            await Inquiry.findByIdAndDelete(inquiry._id);
+            console.log(`Deleted inquiry ${inquiry._id}`);
+
+            return res.status(200).json({
+                success: true,
+                movedToCustomer: true,
+                customer: responseCustomer
             });
         } catch (err) {
-            console.error('Transaction failed moving inquiry to customer', err);
-            await session.endSession();
+            console.error('Failed moving inquiry to customer', err);
             return next(new ErrorHander('Failed to move inquiry to customer', 500));
         }
-        await session.endSession();
-
-        return res.status(200).json({
-            success: true,
-            movedToCustomer: true,
-            customer: responseCustomer
-        });
     }
 
     // Normal update without moving
