@@ -37,6 +37,7 @@ const OEMTable = ({ modalHandler, refresh, isOpen }) => {
   const [startDate, setStartDate] = useState(new Date('2022-08-01'));
   const [endDate, setEndDate] = useState(new Date());
   const [isLoading, setIsLoading] = useState(false);
+  const [salesPersonFilter, setSalesPersonFilter] = useState("");
   const { user, isAuthenticated } = useSelector((state) => state.user);
 
   const startDateHandler = (e) => {

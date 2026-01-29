@@ -38,6 +38,7 @@ const MistryTable = ({ modalHandler, refresh, isOpen }) => {
   const [originalData, setOriginalData] = useState([]);
   const [startDate, setStartDate] = useState(new Date('2022-08-01'));
   const [endDate, setEndDate] = useState(new Date());
+  const [salesPersonFilter, setSalesPersonFilter] = useState("");
 
   const { user, isAuthenticated } = useSelector((state) => state.user);
 
