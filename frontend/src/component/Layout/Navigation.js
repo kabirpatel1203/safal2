@@ -16,6 +16,7 @@ import ReceiptIcon from '@mui/icons-material/Receipt'; //salesman
 import TaskIcon from '@mui/icons-material/Task';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import PrecisionManufacturingIcon from '@mui/icons-material/PrecisionManufacturing'; //OEM
+import ConstructionIcon from '@mui/icons-material/Construction'; //Builder
 
 const Navigation = () => {
     const dispatch = useDispatch();
@@ -35,6 +36,7 @@ const Navigation = () => {
     const [taskpath, setTaskpath] = useState(false);
     const [graphspath, setGraphspath] = useState(false);
     const [oempath, setOEMpath] = useState(false);
+    const [builderpath, setBuilderpath] = useState(false);
 
     useEffect(() => {
         if (location.pathname === "/") {
@@ -109,6 +111,18 @@ const Navigation = () => {
             setGraphspath(false);
             setOEMpath(true)
         }
+        else if (location.pathname === "/builder") {
+            setHomepath(false);
+            setArchitectpath(false);
+            setMistrypath(false);
+            setDealerpath(false);
+            setPMCpath(false);
+            setInquirypath(false);
+            setTaskpath(false);
+            setGraphspath(false);
+            setOEMpath(false);
+            setBuilderpath(true)
+        }
         else {
             setHomepath(false);
             setArchitectpath(false);
@@ -157,6 +171,11 @@ const Navigation = () => {
                 <Link to="/oem" className={oempath ? ` ${Styles.item} ${Styles.selected}` : ` ${Styles.item}`}>
                     <PrecisionManufacturingIcon />
                     <p>OEM</p>
+                </Link>
+
+                <Link to="/builder" className={builderpath ? ` ${Styles.item} ${Styles.selected}` : ` ${Styles.item}`}>
+                    <ConstructionIcon />
+                    <p>Builder</p>
                 </Link>
 
                 <Link to="/inquiry" className={inquirypath ? ` ${Styles.item} ${Styles.selected}` : ` ${Styles.item}`}>

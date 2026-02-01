@@ -152,13 +152,13 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
     () => {
       const baseColumns = [
         { header: 'Date', accessorKey: 'date', type: "date", dateSetting: { locale: "en-GB" }, Cell: ({cell})=>(cell.getValue() ? new Date(cell.getValue()).toLocaleDateString('en-GB') : '') },
-        { header: 'Name', accessorKey: 'name' },
+        { header: 'Dealer name', accessorKey: 'name' },
         { header: 'Address', accessorKey: 'address' },
         { header: 'Area', accessorKey: 'area' },
         { header: 'Mobile Number', accessorKey: 'mobileno' },
         { header: 'Grade', accessorKey: 'grade' },
         { header: 'L', accessorKey: 'L', Cell: ({cell})=>(cell.getValue() !== null && cell.getValue() !== undefined ? cell.getValue() : '') },
-        { header: 'SS', accessorKey: 'SS' },
+        { header: 'Passing', accessorKey: 'SS' },
         {
           header: 'Sales Person',
           accessorKey: 'salesPerson',
@@ -178,22 +178,18 @@ const DealerTable = ({ modalHandler, refresh, isOpen }) => {
   );
   const ops = [
     { header: 'Date', accessorKey: 'date', type: "date", dateSetting: { locale: "en-GB" }, },
-    { header: 'Name', accessorKey: 'name' },
+    { header: 'Dealer name', accessorKey: 'name' },
     { header: 'Address', accessorKey: 'address' },
+    { header: 'Area', accessorKey: 'area' },
     { header: 'Mobile Number', accessorKey: 'mobileno' },
     { header: 'Grade', accessorKey: 'grade' },
     { header: 'L', accessorKey: 'L' },
-    { header: 'SS', accessorKey: 'SS' },
+    { header: 'Passing', accessorKey: 'SS' },
     { header: 'Email', accessorKey: 'email', },
-    { header: 'Company_Name', accessorKey: 'companyName', },
+    { header: 'Contact Person', accessorKey: 'companyName', },
     { header: 'Birth_Date', accessorKey: 'birthdate', },
     { header: 'Marriage_Date', accessorKey: 'marriagedate', },
     { header: 'Remarks', accessorKey: 'remarks', },
-    { header: 'Bank_Name', accessorKey: 'bankname', },
-    { header: 'IFS_Code', accessorKey: 'IFSCcode', },
-    { header: 'Branch_Name', accessorKey: 'branchname', },
-    { header: 'Adhar_Card', accessorKey: 'adharcard', },
-    { header: 'Pan_Card', accessorKey: 'pancard', columnVisibility: 'false' },
   ]
   const csvOptions = {
     fieldSeparator: ',',

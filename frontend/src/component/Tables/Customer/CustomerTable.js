@@ -127,6 +127,7 @@ const CustomerTable = ({ modalHandler, refresh, isOpen }) => {
         oem: item.oemName && item.oemNumber ? item.oemName + ' - ' + item.oemNumber : '',
         salesPerson: salesPersonValue,
         remarks: item.remarks,
+        adminRemarks: item.adminRemarks || "",
       };
     });
     // Removed broken salesPersonFilter logic (handled by filterFn in column definition)
@@ -164,6 +165,7 @@ const CustomerTable = ({ modalHandler, refresh, isOpen }) => {
         oem: item.oemName && item.oemNumber ? item.oemName + ' - ' + item.oemNumber : '',
         salesPerson: salesPersonValue,
         remarks:item.remarks,
+        adminRemarks: item.adminRemarks || "",
       }
     });
     setOriginalData(modifiedData);
@@ -240,6 +242,7 @@ const CustomerTable = ({ modalHandler, refresh, isOpen }) => {
           filterVariant: 'text',
         },
         { header: 'Remarks', accessorKey: 'remarks' },
+        { header: 'Admin remarks', accessorKey: 'adminRemarks' },
       ];
       
       return baseColumns;
@@ -259,6 +262,7 @@ const CustomerTable = ({ modalHandler, refresh, isOpen }) => {
     { header: 'Architect Name', accessorKey: 'architect' },
     { header: 'Sales Person', accessorKey: 'salesPerson' },
     { header: 'Remarks', accessorKey: 'remarks' },
+    { header: 'Admin remarks', accessorKey: 'adminRemarks' },
   ]
   const csvOptions = {
     fieldSeparator: ',',

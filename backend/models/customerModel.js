@@ -27,6 +27,10 @@ const customerSchema = new mongoose.Schema({
         {requirement:String}
     ],
     remarks:String,
+    adminRemarks: {
+        type: String,
+        default: ""
+    },
     revenue:Number,
     rewardPoints:Number,
     orderValue:Number,
@@ -66,6 +70,12 @@ const customerSchema = new mongoose.Schema({
     },
     oemName:String,
     oemNumber:Number,
+    builderTag:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"Builder"
+    },
+    builderName:String,
+    builderNumber:Number,
     branches:[
         {branchname:String}
     ],

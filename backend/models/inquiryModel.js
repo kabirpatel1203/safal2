@@ -46,6 +46,12 @@ const inquirySchema = new mongoose.Schema({
     email:String,
     pmcName: String,
     pmcNumber: Number,
+    builderTag: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Builder"
+    },
+    builderName: String,
+    builderNumber: Number,
     mistryTag: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "architect"
@@ -73,6 +79,10 @@ const inquirySchema = new mongoose.Schema({
         default: ""
     },
     remarks:String,
+    adminRemarks: {
+        type: String,
+        default: ""
+    },
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",

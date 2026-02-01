@@ -13,6 +13,7 @@ const CustomerCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
   const [Dealers, setDealers] = useState([]);
   const [PMCs, setPMCs] = useState([]);
   const [OEMs, setOEMs] = useState([]);
+  const [Builders, setBuilders] = useState([]);
   const [isDisabled, setIsDisabled] = useState(false);
   const [Salesmen, setSalesmen] = useState([]);
   const [selectedSalesmen, setselectedSalesmen] = useState([]);
@@ -42,12 +43,16 @@ const CustomerCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
     pmcTag: null,
     pmcName: "",
     pmcNumber: "",
+    builderTag: null,
+    builderName: "",
+    builderNumber: "",
     oemTag: null,
     oemName: "",
     oemNumber: "",
     date: "",
     followupdate: "",
     requirement: [],
+    adminRemarks: "",
     salesmen:[]
   }
   const scale = [
@@ -126,12 +131,19 @@ const CustomerCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
     setOEMs(oems);
   }
 
+  const getAllBuilder = async () => {
+    const { data } = await axios.get("/api/v1/builder/getall");
+    const builders = data.builders.map((b) => ({ value: b._id, label: `${b.name}-${b.mobileno}` }));
+    setBuilders(builders);
+  }
+
   useEffect(() => {
     getAllArchitects();
     getAllDealer();
     getAllMistry();
     getAllPMC();
     getAllOEM();
+    getAllBuilder();
     getAllsalesmen();
   }, []);
 
@@ -166,10 +178,15 @@ const CustomerCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
       pmcTag: formData.pmcTag,
       pmcName: formData.pmcName,
       pmcNumber: formData.pmcNumber,
+      builderTag: formData.builderTag,
+      builderName: formData.builderName,
+      builderNumber: formData.builderNumber,
       oemTag: formData.oemTag,
       oemName: formData.oemName,
       oemNumber: formData.oemNumber,
       salesmen:selectedSalesmen
+      ,
+      ...(user.role === "admin" ? { adminRemarks: formData.adminRemarks } : {})
     }
     try {
       const response = await axios.post("/api/v1/customer/create", data, { headers: { "Content-Type": "application/json" } });
@@ -204,6 +221,10 @@ const CustomerCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
   const PMCFormHandler = (e) => {
     console.log(e.value);
     setFormData({ ...formData, pmcTag: e.value, pmcName: e.label.split('-')[0], pmcNumber: e.label.split('-')[1] })
+  }
+
+  const BuilderFormHandler = (e) => {
+    setFormData({ ...formData, builderTag: e.value, builderName: e.label.split('-')[0], builderNumber: e.label.split('-')[1] })
   }
 
   const OEMFormHandler = (e) => {
@@ -260,6 +281,12 @@ const CustomerCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
 
           <label htmlFor='name'>Remarks</label>
           <input className={Styles.inputTag} name="remarks" value={formData.remarks} onChange={(e) => formHandler(e)} placeholder='Remarks' />
+          {user.role === "admin" && (
+            <>
+              <label htmlFor='name'>Admin remarks</label>
+              <input className={Styles.inputTag} name="adminRemarks" value={formData.adminRemarks} onChange={(e) => formHandler(e)} placeholder='Admin remarks' />
+            </>
+          )}
         </div>
 
         <div className={Styles.personalDetails2}>
@@ -320,6 +347,8 @@ const CustomerCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
 
           <label htmlFor='name'>OEM Tag</label>
           <Select selectedValue={formData.oemTag} onChange={(e) => OEMFormHandler(e)} options={OEMs} />
+          <label htmlFor='name'>Builder Tag</label>
+          <Select selectedValue={formData.builderTag} onChange={(e) => BuilderFormHandler(e)} options={Builders} />
         </div>
       </div>}
       <button disabled={isDisabled} className={isDisabled ? Styles.disable : Styles.submitButton} onClick={(e) => submitHandler(e)} type="submit">Submit</button>

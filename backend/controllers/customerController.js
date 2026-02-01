@@ -110,6 +110,10 @@ exports.updateCustomer = catchAsyncErrors(async (req, res, next) => {
             remarks: req.body.remarks
         };
     }
+    // Prevent non-admins from setting adminRemarks
+    if (req.user.role !== "admin") {
+        delete updateData.adminRemarks;
+    }
     
     // Remove salesmen from update data - we don't use it anymore
     delete updateData.salesmen;

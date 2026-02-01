@@ -50,6 +50,7 @@ const normalizeInquiryDoc = (doc) => {
     return plain;
 };
 
+
 const normalizeInquiriesArray = (inquiries) => {
     if (!Array.isArray(inquiries)) {
         return [];
@@ -133,13 +134,17 @@ exports.createInquiry = catchAsyncErrors(async (req, res, next) => {
                 dealerNumber: inquiryData.dealerNumber,
                 pmcTag: inquiryData.pmcTag,
                 pmcName: inquiryData.pmcName,
-                pmcNumber: inquiryData.pmcNumber,
-                oemTag: inquiryData.oemTag,
+                	pmcNumber: inquiryData.pmcNumber,
+                	builderTag: inquiryData.builderTag,
+                	builderName: inquiryData.builderName,
+                	builderNumber: inquiryData.builderNumber,
+                	oemTag: inquiryData.oemTag,
                 oemName: inquiryData.oemName,
                 oemNumber: inquiryData.oemNumber,
                 branches: inquiryData.branches,
                 salesmen: [],
                 salesPerson: inquiryData.salesPerson,
+                adminRemarks: inquiryData.adminRemarks || "",
                 // set the actor performing the move as the owner of the new customer
                 createdBy: req.user._id,
             });
@@ -158,6 +163,13 @@ exports.createInquiry = catchAsyncErrors(async (req, res, next) => {
     }
     
     // Normal inquiry creation (not qualified)
+    // Ensure only admins can set adminRemarks on create
+    if (req.user.role !== "admin") {
+        delete inquiryData.adminRemarks;
+    } else {
+        inquiryData.adminRemarks = req.body.adminRemarks || inquiryData.adminRemarks || "";
+    }
+
     const inquiry = await Inquiry.create(inquiryData);
     res.status(200).json({
         inquiry: normalizeInquiryDoc(inquiry),
@@ -225,6 +237,11 @@ exports.updateInquiry = catchAsyncErrors(async (req, res, next) => {
             remarks: req.body.remarks,
             followupdate: req.body.followupdate ? new Date(req.body.followupdate) : undefined
         };
+    }
+
+    // Ensure non-admins cannot set adminRemarks
+    if (req.user.role !== "admin") {
+        delete updateData.adminRemarks;
     }
     
     // Remove salesmen from update data - we don't use it anymore
@@ -299,12 +316,16 @@ exports.updateInquiry = catchAsyncErrors(async (req, res, next) => {
                     pmcTag: inquiry.pmcTag,
                     pmcName: inquiry.pmcName,
                     pmcNumber: inquiry.pmcNumber,
+                    builderTag: inquiry.builderTag,
+                    builderName: inquiry.builderName,
+                    builderNumber: inquiry.builderNumber,
                     oemTag: inquiry.oemTag,
                     oemName: inquiry.oemName,
                     oemNumber: inquiry.oemNumber,
                     branches: inquiry.branches,
                     salesmen: [],
                     salesPerson: salesPersonValue,
+                    adminRemarks: inquiry.adminRemarks || "",
                     // set the actor performing the move as the owner of the new customer
                     createdBy: req.user._id,
                 });

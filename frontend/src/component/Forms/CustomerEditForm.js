@@ -18,6 +18,8 @@ const CustomerEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => 
   const [Dealers, setDealers] = useState([]);
   const [PMCs, setPMCs] = useState([]);
   const [OEMs, setOEMs] = useState([]);
+  const [Builders, setBuilders] = useState([]);
+  const [defaultBuilder, setDefaultBuilder] = useState(() => data.builderTag ? { value: data.builderTag, label: `${data.builderName}-${data.builderNumber}` } : "");
   const [isDisabled, setIsDisabled] = useState(false);
   const { user, isAuthenticated } = useSelector((state) => state.user);
   let id = data._id
@@ -46,11 +48,15 @@ const CustomerEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => 
     oemTag: data.oemTag,
     oemName: data.oemName,
     oemNumber: data.oemNumber,
+    builderTag: data.builderTag,
+    builderName: data.builderName,
+    builderNumber: data.builderNumber,
     birthdate: data.birthdate ? data.birthdate.substr(0, 10) : null,
     marriagedate: data.marriagedate ? data.marriagedate.substr(0, 10) : null,
     date: data.date ? data.date.substr(0, 10) : null,
     followupdate: data.followupdate ? data.followupdate.substr(0, 10) : null,
     requirement: data.requirement ? data.requirement.map(r => typeof r === 'object' ? r.requirement : r) : [],
+    adminRemarks: data.adminRemarks || "",
 
 
   }
@@ -109,15 +115,19 @@ const CustomerEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => 
       pmcTag: formData.pmcTag,
       pmcName: formData.pmcName,
       pmcNumber: formData.pmcNumber,
+      builderTag: formData.builderTag,
+      builderName: formData.builderName,
+      builderNumber: formData.builderNumber,
       oemTag: formData.oemTag,
       oemName: formData.oemName,
       oemNumber: formData.oemNumber,
+      ...(user.role === "admin" ? { adminRemarks: formData.adminRemarks } : {}),
 
 
     }
 
     try {
-      const response = await axios.put(`/api/v1/customer/update/${id}`, data1, { headers: { "Content-Type": "application/json" } });
+      const response = await axios.put(`/api/v1/customer/update/${id}`, data1, { headers: { "Content-Type": "application/json" }, withCredentials: true });
       // toast.success("customer is edited");
       parentCallback();
       setIsOpen(false);
@@ -162,6 +172,12 @@ const CustomerEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => 
     setOEMs(oems);
   }
 
+  const getAllBuilder = async () => {
+    const { data } = await axios.get("/api/v1/builder/getall");
+    const builders = data.builders.map((b) => ({ value: b._id, label: `${b.name}-${b.mobileno}` }));
+    setBuilders(builders);
+  }
+
   useEffect(() => {
     console.log(`Default Architect: `, defalutArchitect);
     getAllArchitects();
@@ -169,6 +185,7 @@ const CustomerEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => 
     getAllMistry();
     getAllPMC();
     getAllOEM();
+    getAllBuilder();
   }, []);
 
 
@@ -191,6 +208,10 @@ const CustomerEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => 
 
   const OEMFormHandler = (e) => {
     setFormData({ ...formData, oemTag: e.value, oemName: e.label.split('-')[0], oemNumber: e.label.split('-')[1] })
+  }
+
+  const BuilderFormHandler = (e) => {
+    setFormData({ ...formData, builderTag: e.value, builderName: e.label.split('-')[0], builderNumber: e.label.split('-')[1] })
   }
 
   const requirementHandler = (e) => {
@@ -245,6 +266,8 @@ const CustomerEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => 
 
           <label htmlFor='name'>Remarks</label>
           <input className={Styles.inputTag} name="remarks" value={formData.remarks} onChange={(e) => formHandler(e)} placeholder='Remarks' />
+          <label htmlFor='name'>Admin remarks</label>
+          <input className={Styles.inputTag} name="adminRemarks" value={formData.adminRemarks} onChange={(e) => formHandler(e)} placeholder='Admin remarks' disabled={user.role !== "admin"} />
         </div>
 
         <div className={Styles.personalDetails2}>
@@ -286,6 +309,8 @@ const CustomerEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => 
 
           <label htmlFor='name'>OEM Tag</label>
           <Select defaultValue={defaultOEM} onChange={(e) => OEMFormHandler(e)} options={OEMs} />
+          <label htmlFor='name'>Builder Tag</label>
+          <Select defaultValue={defaultBuilder} onChange={(e) => BuilderFormHandler(e)} options={Builders} />
         </div>
       </div>}
       <button disabled={isDisabled} className={isDisabled ? Styles.disable : Styles.submitButton} onClick={(e) => submitHandler(e)} type="Submit">Submit</button>

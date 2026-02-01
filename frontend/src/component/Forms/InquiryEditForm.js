@@ -31,12 +31,16 @@ const InquiryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
         marriagedate: data.marriagedate ? data.marriagedate.substr(0, 10) : null,
         rewardPoints: data.rewardPoints,
         remarks: data.remarks,
+        adminRemarks: data.adminRemarks || "",
         architectTag: data.architectTag,
         architectName: data.architectName,
         architectNumber: data.architectNumber,
         pmcTag: data.pmcTag,
         pmcName: data.pmcName,
         pmcNumber: data.pmcNumber,
+        builderTag: data.builderTag,
+        builderName: data.builderName,
+        builderNumber: data.builderNumber,
         mistryTag: data.mistryTag,
         mistryNumber:data.mistryNumber,
         mistryName:data.mistryName,
@@ -188,6 +192,8 @@ const InquiryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
         getAllMistry();
         getAllPMC();
         getAllOEM();
+        // builders
+        if (typeof getAllBuilder === 'function') getAllBuilder();
     }, []);
     const submitHandler = async (e) => {
         e.preventDefault();
@@ -212,6 +218,9 @@ const InquiryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
             pmcTag: formData.pmcTag,
             pmcName: formData.pmcName,
             pmcNumber: formData.pmcNumber,
+            builderTag: formData.builderTag,
+            builderName: formData.builderName,
+            builderNumber: formData.builderNumber,
             dealerTag:formData.dealerTag,
             dealerNumber:formData.dealerNumber,
             dealerName:formData.dealerName,
@@ -219,8 +228,10 @@ const InquiryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
             oemNumber:formData.oemNumber,
             oemName:formData.oemName,
             requirement: selectedRequirement,
-            stage: formData.stage,            scale: formData.scale,
-            remarks:formData.remarks
+            stage: formData.stage,
+            scale: formData.scale,
+            remarks:formData.remarks,
+            ...(user.role === "admin" ? { adminRemarks: formData.adminRemarks } : {})
 
         }
         console.log(payload)
@@ -296,6 +307,10 @@ const InquiryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
         setFormData({ ...formData, oemTag: e.value, oemName: e.label.split('-')[0], oemNumber: e.label.split('-')[1] })
     }
 
+    const BuilderFormHandler = (e) => {
+        setFormData({ ...formData, builderTag: e.value, builderName: e.label.split('-')[0], builderNumber: e.label.split('-')[1] })
+    }
+
     // const Salesmenchangehandler = (selecteds) => {
 
     //     setselectedSalesmen(selecteds);
@@ -320,6 +335,7 @@ const InquiryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
     const [Dealers, setDealers] = useState([]);
     const [PMCs, setPMCs] = useState([]);
     const [OEMs, setOEMs] = useState([]);
+    const [Builders, setBuilders] = useState([]);
     
     const getAllArchitects = async () => {
 
@@ -365,6 +381,12 @@ const InquiryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
 
     }
 
+    const getAllBuilder = async () => {
+        const { data } = await axios.get('/api/v1/builder/getall');
+        const builders = data.builders.map(b => ({ value: b._id, label: `${b.name}-${b.mobileno}` }));
+        setBuilders(builders);
+    }
+
     return (
         <div className={Styles.container}>
 
@@ -398,6 +420,8 @@ const InquiryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
   
                     <label htmlFor='name'>Remarks</label>
                     <input className={Styles.inputTag} name="remarks" value={formData.remarks} onChange={(e) => formHandler(e)} placeholder='Remarks' /> 
+                    <label htmlFor='name'>Admin remarks</label>
+                    <input className={Styles.inputTag} name="adminRemarks" value={formData.adminRemarks} onChange={(e) => formHandler(e)} placeholder='Admin remarks' disabled={user.role !== "admin"} /> 
                 </div>
 
                 <div className={Styles.personalDetails2}>
@@ -472,6 +496,8 @@ const InquiryEditForm = ({ modalHandler, data, setIsOpen, parentCallback }) => {
 
                     <label htmlFor='name'>OEM Tag</label>
                     <Select defaultValue={defaultOEM} selectedValue={formData.oemTag} onChange={(e) => OEMFormHandler(e)} options={OEMs} />
+                    <label htmlFor='name'>Builder Tag</label>
+                    <Select selectedValue={formData.builderTag} onChange={(e) => BuilderFormHandler(e)} options={Builders} />
                 </div>
             </div>
             <button disabled={isDisabled} className={isDisabled ? Styles.disable : Styles.submitButton} onClick={(e) => submitHandler(e)} type="Submit">Submit</button>

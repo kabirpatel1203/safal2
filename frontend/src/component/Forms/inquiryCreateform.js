@@ -13,6 +13,7 @@ const InquiryCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
   const [Dealers, setDealers] = useState([]);
   const [PMCs, setPMCs] = useState([]);
   const [OEMs, setOEMs] = useState([]);
+  const [Builders, setBuilders] = useState([]);
   const [selectedRequirement, setSelectedRequirement] = useState([]);
   const [isDisabled, setIsDisabled] = useState(false);
   let initialState = {
@@ -33,12 +34,17 @@ const InquiryCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
     pmcTag: null,
     pmcName: "",
     pmcNumber: "",
+    builderTag: null,
+    builderName: "",
+    builderNumber: "",
     oemTag: null,
     oemName: "",
     oemNumber: "",
     date: "",
     followupdate: "",
     remarks:""
+    ,
+    adminRemarks: ""
   }
   // ["Plywood", "Laminate","Veneer","Other","Hardware"]
   const requirement = [
@@ -189,6 +195,12 @@ const InquiryCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
 
   }
 
+
+  const getAllBuilder = async () => {
+    const { data } = await axios.get('/api/v1/builder/getall');
+    const builders = data.builders.map(b => ({ value: b._id, label: `${b.name}-${b.mobileno}` }));
+    setBuilders(builders);
+  }
   const getAllOEM = async () => {
 
     const { data } = await axios.get("/api/v1/oem/getall");
@@ -216,6 +228,7 @@ const InquiryCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
     getAllMistry();
     getAllPMC();
     getAllOEM();
+    getAllBuilder();
   }, []);
 
   const submitHandler = async (e) => {
@@ -258,6 +271,9 @@ const InquiryCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
       pmcTag: formData.pmcTag,
       pmcName: formData.pmcName,
       pmcNumber: formData.pmcNumber,
+      builderTag: formData.builderTag,
+      builderName: formData.builderName,
+      builderNumber: formData.builderNumber,
       oemTag: formData.oemTag,
       oemName: formData.oemName,
       oemNumber: formData.oemNumber,
@@ -265,6 +281,8 @@ const InquiryCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
       stage:formData.stage,
       scale:formData.scale,
       remarks:formData.remarks
+      ,
+      ...(isAdmin ? { adminRemarks: formData.adminRemarks } : {})
     }
     console.log(data);
     try {
@@ -329,6 +347,10 @@ const InquiryCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
     setFormData({ ...formData, oemTag: e.value, oemName: e.label.split('-')[0], oemNumber: e.label.split('-')[1] })
   }
 
+  const BuilderFormHandler = (e) => {
+    setFormData({ ...formData, builderTag: e.value, builderName: e.label.split('-')[0], builderNumber: e.label.split('-')[1] })
+  }
+
   return (
     <div className={Styles.container}>
 
@@ -362,6 +384,8 @@ const InquiryCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
 
           <label htmlFor='name'>Remarks</label>
           <input className={Styles.inputTag} name="remarks" value={formData.remarks} onChange={(e) => formHandler(e)} placeholder='Remarks' /> 
+          <label htmlFor='name'>Admin remarks</label>
+          <input className={Styles.inputTag} name="adminRemarks" value={formData.adminRemarks} onChange={(e) => formHandler(e)} placeholder='Admin remarks' disabled={!isAdmin} /> 
         </div>
 
         <div className={Styles.personalDetails2}>
@@ -420,6 +444,8 @@ const InquiryCreateForm = ({ modalHandler, setIsOpen, parentCallback }) => {
 
           <label htmlFor='name'>OEM Tag</label>
           <Select selectedValue={formData.oemTag} onChange={(e) => OEMFormHandler(e)} options={OEMs} />
+          <label htmlFor='name'>Builder Tag</label>
+          <Select selectedValue={formData.builderTag} onChange={(e) => BuilderFormHandler(e)} options={Builders} />
         </div>
       </div>
       <button disabled={isDisabled} className={isDisabled ? Styles.disable : Styles.submitButton} onClick={(e) => submitHandler(e)} type="Submit">Submit</button>

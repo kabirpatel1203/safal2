@@ -131,6 +131,7 @@ const InquiryTable = ({ modalHandler ,modalHandler2,refresh,isOpen}) => {
         requirement:item.requirement.map((req)=>req.requirement).join('-'),
         salesPerson: salesPersonValue,
         remarks:item.remarks,
+        adminRemarks: item.adminRemarks || "",
       }
     })
 
@@ -159,6 +160,7 @@ const InquiryTable = ({ modalHandler ,modalHandler2,refresh,isOpen}) => {
           salesPerson: salesPersonValue,
           mobileno:item.mobileno,
           remarks:item.remarks,
+          adminRemarks: item.adminRemarks || "",
         }
       })
       const modifiedInquiries = modifyData(inquires);
@@ -207,6 +209,7 @@ const InquiryTable = ({ modalHandler ,modalHandler2,refresh,isOpen}) => {
           salesPerson: salesPersonValue,
           mobileno:item.mobileno,
           remarks:item.remarks,
+          adminRemarks: item.adminRemarks || "",
         }
       })
     setInquiries(modifyData(data));
@@ -256,6 +259,7 @@ const columns = useMemo(
       },
       { header: 'Mobile Number', accessorKey: 'mobileno' },
       { header: 'Remarks', accessorKey: 'remarks' },
+      { header: 'Admin remarks', accessorKey: 'adminRemarks' },
     ];
     return baseColumns;
   },
@@ -271,6 +275,7 @@ const ops = [
   {header: 'Sales Person', accessorKey:'salesPerson'},
   { header: 'Mobile Number', accessorKey: 'mobileno' },
   { header: 'Remarks', accessorKey: 'remarks' },
+  { header: 'Admin remarks', accessorKey: 'adminRemarks' },
 ]
 const csvOptions = {
   fieldSeparator: ',',
